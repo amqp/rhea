@@ -1,0 +1,14 @@
+{
+    "name" : "rhea",
+    "version": "0.1",
+    "description": "reactive AMQP 1.0 library",
+    "homepage": "http://github.com/grs/rhea",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/grs/rhea"
+    },
+    "dependencies": {"debug": "^2.0.0"},
+    "keywords": ["amqp","messaging"],
+    "main" : "./lib/container.js"
+}
