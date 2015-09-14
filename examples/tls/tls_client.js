@@ -25,6 +25,7 @@ container.on('connection_open', function (context) {
     context.connection.close();
 });
 container.connect({port:5671, transport:'tls',
+                   //enable_sasl_external:true,
                    // These are necessary only if using the client certificate authentication
                    key: fs.readFileSync('client-key.pem'),
                    cert: fs.readFileSync('client-cert.pem'),

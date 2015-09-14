@@ -27,6 +27,7 @@ container.on('connection_open', function (context) {
     console.log('Connected: ' + cn);
 });
 container.listen({port:5671, transport:'tls',
+                  //enable_sasl_external:true,
                   key: fs.readFileSync('server-key.pem'),
                   cert: fs.readFileSync('server-cert.pem'),
 
