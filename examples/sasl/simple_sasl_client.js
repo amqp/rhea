@@ -22,7 +22,7 @@ var container = require('rhea');
 /**
  * Default SASL behaviour is as follows. If the username and password
  * are both specified, PLAIN will be used. If only a username is
- * specified, ANONYMOUS will be used. If neother is specified, no SASl
+ * specified, ANONYMOUS will be used. If neither is specified, no SASl
  * layer will be used.
  */
 if (process.argv.length > 2) {
