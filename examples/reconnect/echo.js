@@ -21,25 +21,47 @@ var container = require('rhea');
 
 var args = require('yargs').options({
       'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
-      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) from which messages are received'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+      'p': { alias: 'port', default: 8888, describe: 'port to connect to'}
     }).help('help').argv;
 
 var received = 0;
 var expected = args.messages;
+var listeners = {};
+
+var server = container.listen({'port':args.port});
+
+function subscribe(name, sender) {
+    listeners[name] = sender;
+}
+
+function unsubscribe(name) {
+    delete listeners[name];
+    if (Object.getOwnPropertyNames(listeners).length === 0) {
+        server.close();
+    }
+}
+
+container.on('sender_open', function (context) {
+    subscribe(context.connection.remote.open.container_id, context.sender);
+});
+container.on('sender_close', function (context) {
+    unsubscribe(context.connection.remote.open.container_id);
+});
+container.on('connection_close', function (context) {
+    unsubscribe(context.connection.remote.open.container_id);
+});
+container.on('disconnected', function (context) {
+    unsubscribe(context.connection.remote.open.container_id);
+});
 
 container.on('message', function (context) {
-    if (context.message.properties && context.message.properties.id && context.message.properties.id < received) {
-        // ignore duplicate message
-        return;
-    }
     if (expected === 0 || received < expected) {
-        console.log(JSON.stringify(context.message.body))
+        var name = context.connection.remote.open.container_id;
+        console.log('echoed ' + context.message.body + ' to ' + name);
+        listeners[name].send(context.message);
         if (++received === expected) {
             context.receiver.detach();
             context.connection.close();
         }
     }
 });
-
-container.connect({'port':args.port}).attach_receiver(args.node);

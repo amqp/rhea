@@ -28,9 +28,6 @@ var args = require('yargs').options({
 var confirmed = 0, sent = 0;
 var total = args.messages;
 
-container.on('connection_open', function (context) {
-    context.connection.attach_sender(args.node);
-});
 container.on('sendable', function (context) {
     while (context.sender.sendable() && sent < total) {
         sent++;
@@ -44,5 +41,8 @@ container.on('accepted', function (context) {
         context.connection.close()
     }
 });
+container.on('disconnected', function (context) {
+    sent = confirmed;
+});
 
-container.connect({'port':args.port});
+container.connect({'port':args.port}).attach_sender(args.node);
