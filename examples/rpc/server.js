@@ -19,16 +19,29 @@
  */
 var container = require('rhea');
 
-var server = container.rpc_server('amqp://localhost:5672/examples');
-
 var cache = [0, 1];
-function fib(args) {
-    if (args.n >= cache.length) {
-        for(var i = 2; i <= args.n; i++) {
+function fib(n) {
+    if (n >= cache.length) {
+        for(var i = 2; i <= n; i++) {
             cache[i] = cache[i-2] + cache[i-1];
         }
     }
-    return cache[args.n];
+    return cache[n];
 }
 
+var server = container.rpc_server('amqp://localhost:5672/examples');
+
 server.bind_sync(fib);
+
+var map = {};
+function put(args, callback) {
+    map[args.key] = args.value;
+    callback();
+}
+
+function get(key, callback) {
+    callback(map[key]);
+}
+
+server.bind(put);
+server.bind(get);
