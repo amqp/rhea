@@ -9,6 +9,9 @@
         "url": "http://github.com/grs/rhea"
     },
     "dependencies": {"debug": "^2.0.0"},
+    "scripts": {
+        "test": "mocha"
+    },
     "keywords": ["amqp","messaging"],
     "main" : "./lib/container.js"
 }
