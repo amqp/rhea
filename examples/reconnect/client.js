@@ -20,11 +20,13 @@
 var container = require('rhea');
 
 var args = require('yargs').options({
+      'request_interval': {describe: 'interval between requests', default:1000},
       'fixed_delay': {describe: 'fixed reconnect delay'},
       'initial_delay': {describe: 'initial reconnect delay'},
       'max_delay': {describe: 'max reconnect delay'},
       'reconnect_limit': {describe: 'maximum number of reconnect attempts'},
       'disable_reconnect': {type:'boolean', describe: 'disable reconnect'},
+      'idle_time_out': {describe: 'maximum idle timeout; if nothing is received from peer for this interval, consider connection dead'},
       'm': { alias: 'messages', default: 100, describe: 'number of messages to send'},
       'p': { alias: 'ports', default: [8888], type: 'array', describe: 'port to connect to'}
     }).help('help').argv;
@@ -68,6 +70,10 @@ if (args.disable_reconnect) {
     if (args.reconnect_limit) connect_options.reconnect_limit = args.reconnect_limit;
 }
 
+if (args.idle_time_out) {
+    connect_options.idle_time_out=args.idle_time_out;
+}
+
 function next_request() {
     var msg = 'request-' + current;
     sender.send({body:msg})
@@ -81,7 +87,7 @@ container.on('connection_open', function (context) {
 container.on('message', function (context) {
     console.log('received ' + context.message.body);
     if (current++ < requests) {
-        timer_task = setTimeout(next_request, 1000);
+        timer_task = setTimeout(next_request, args.request_interval);
     } else {
         sender = undefined;
         if (timer_task) clearTimeout(timer_task);
