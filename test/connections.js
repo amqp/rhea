@@ -92,6 +92,9 @@ describe('connection fields', function() {
     it('channel max', open_test({channel_max:10}, function(connection) {
         assert.equal(connection.remote.open.channel_max, 10);
     }));
+    it('idle time out', open_test({idle_time_out:1000}, function(connection) {
+        assert.equal(connection.remote.open.idle_time_out, 1000);
+    }));
     it('properties', open_test({properties:{flavour:'vanilla', scoops:2, cone:true}}, function(connection) {
         assert.equal(connection.remote.open.properties.flavour, 'vanilla');
         assert.equal(connection.remote.open.properties.scoops, 2);
