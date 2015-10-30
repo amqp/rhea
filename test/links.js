@@ -21,6 +21,8 @@
 
 var assert = require('assert');
 var rhea = require('rhea');
+var amqp_messaging = require('rhea/lib/message.js');
+var amqp_types = require('rhea/lib/types.js');
 
 describe('link fields', function() {
     var container, listener;
@@ -114,6 +116,95 @@ describe('link fields', function() {
             assert.equal(error.description, 'testing error on close');
         }));
     }
+    it('source address as simple string', open_receiver_test('my-source', function (link) {
+        assert.equal(link.remote.attach.source.address, 'my-source');
+    }));
+    it('source address as single nested value', open_receiver_test({source:'my-source'}, function (link) {
+        assert.equal(link.remote.attach.source.address, 'my-source');
+    }));
+    it('source as nested object', open_receiver_test(
+        {source:{
+            address:'my-source',
+            durable:1,
+            expiry_policy:'session-end',
+            timeout:33,
+            distribution_mode:'copy',
+            filter: {'jms-selector':amqp_types.wrap_described("colour = 'green'", 0x468C00000004)},
+            default_outcome: amqp_messaging.modified().described(),
+            outcomes: ['amqp:list:accepted', 'amqp:list:rejected', 'amqp:list:released', 'amqp:list:modified'],
+            capabilities: ['a', 'b', 'c']
+        }},
+        function (link) {
+            assert.equal(link.remote.attach.source.address, 'my-source');
+            assert.equal(link.remote.attach.source.durable, 1);
+            assert.equal(link.remote.attach.source.expiry_policy, 'session-end');
+            assert.equal(link.remote.attach.source.timeout, 33);
+            assert.equal(link.remote.attach.source.distribution_mode, 'copy');
+            assert.equal(amqp_types.unwrap(link.remote.attach.source.filter)['jms-selector'], "colour = 'green'");
+            assert.ok(amqp_messaging.is_modified(link.remote.attach.source.default_outcome));
+            assert.equal(link.remote.attach.source.outcomes.length, 4);
+            assert.equal(link.remote.attach.source.outcomes[0], 'amqp:list:accepted');
+            assert.equal(link.remote.attach.source.outcomes[1], 'amqp:list:rejected');
+            assert.equal(link.remote.attach.source.outcomes[2], 'amqp:list:released');
+            assert.equal(link.remote.attach.source.outcomes[3], 'amqp:list:modified');
+            assert.equal(link.remote.attach.source.capabilities.length, 3);
+            assert.equal(link.remote.attach.source.capabilities[0], 'a');
+            assert.equal(link.remote.attach.source.capabilities[1], 'b');
+            assert.equal(link.remote.attach.source.capabilities[2], 'c');
+    }));
+    it('source with single capability', open_receiver_test(
+        {source:{
+            address:'my-source',
+            capabilities: 'sourceable'
+        }},
+        function (link) {
+            assert.equal(link.remote.attach.source.address, 'my-source');
+            assert.equal(link.remote.attach.source.capabilities, 'sourceable');
+        }
+    ));
+    it('dynamic source', open_receiver_test({source:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link) {
+        assert.equal(link.remote.attach.source.dynamic, true);
+        assert.equal(link.remote.attach.source.dynamic_node_properties.foo, 'bar');
+    }));
+    it('target address as simple string', open_sender_test('my-target', function (link) {
+        assert.equal(link.remote.attach.target.address, 'my-target');
+    }));
+    it('target address as single nested value', open_sender_test({target:'my-target'}, function (link) {
+        assert.equal(link.remote.attach.target.address, 'my-target');
+    }));
+    it('target as nested object', open_receiver_test(
+        {target:{
+            address:'my-target',
+            durable:2,
+            expiry_policy:'connection-close',
+            timeout:33,
+            distribution_mode:'copy',
+            capabilities: ['d', 'e', 'f']
+        }},
+        function (link) {
+            assert.equal(link.remote.attach.target.address, 'my-target');
+            assert.equal(link.remote.attach.target.durable, 2);
+            assert.equal(link.remote.attach.target.expiry_policy, 'connection-close');
+            assert.equal(link.remote.attach.target.timeout, 33);
+            assert.equal(link.remote.attach.target.capabilities.length, 3);
+            assert.equal(link.remote.attach.target.capabilities[0], 'd');
+            assert.equal(link.remote.attach.target.capabilities[1], 'e');
+            assert.equal(link.remote.attach.target.capabilities[2], 'f');
+    }));
+    it('target with single capability', open_receiver_test(
+        {target:{
+            address:'my-target',
+            capabilities: 'targetable'
+        }},
+        function (link) {
+            assert.equal(link.remote.attach.target.address, 'my-target');
+            assert.equal(link.remote.attach.target.capabilities, 'targetable');
+        }
+    ));
+    it('dynamic target', open_receiver_test({target:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link) {
+        assert.equal(link.remote.attach.target.dynamic, true);
+        assert.equal(link.remote.attach.target.dynamic_node_properties.foo, 'bar');
+    }));
 });
 
 var roles = {'sender':'receiver', 'receiver':'sender'};
