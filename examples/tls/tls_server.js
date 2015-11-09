@@ -22,7 +22,7 @@ container.on('connection_open', function (context) {
     if (cert && cert.subject) cn = cert.subject.CN;
     console.log('Connected: ' + cn);
 });
-container.listen({port:5671, transport:'tls',
+var listener = container.listen({port:5671, transport:'tls',
                   //enable_sasl_external:true,
                   key: fs.readFileSync('server-key.pem'),
                   cert: fs.readFileSync('server-cert.pem'),
@@ -32,3 +32,7 @@ container.listen({port:5671, transport:'tls',
                   rejectUnauthorized: true,
                   ca: [ fs.readFileSync('ca-cert.pem') ]
                  });
+listener.on('clientError', function (error, socket) {
+    console.log(error);
+});
+
