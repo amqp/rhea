@@ -14,8 +14,8 @@ broker/server listening on port 5672:
 ```js
 var container = require('rhea');
 container.on('connection_open', function (context) {
-    context.connection.attach_receiver('examples');
-    context.connection.attach_sender('examples');
+    context.connection.open_receiver('examples');
+    context.connection.open_sender('examples');
 });
 container.on('message', function (context) {
     console.log(context.message.body);
@@ -40,38 +40,70 @@ Hello World!
 There are some examples of using the library under the examples
 folder. These include:
 
-* helloworld.js - essentially the code above, which sends and receives
+* [helloworld.js](examples/helloworld.js) - essentially the code above, which sends and receives
   a single message through a broker
 
-* direct_helloworld.js - an example showing the sending of a single
-  message without the use of a broker, by listening on a port and then
-  openning a connection to itself over which the message is
-  transfered.
+* [direct_helloworld.js](examples/direct_helloworld.js) - an example
+  showing the sending of a single message without the use of a broker,
+  by listening on a port and then openning a connection to itself over
+  which the message is transfered.
 
-* simple_send.js - connects to a specified port then sends a number of
-  messages to a given address
+* [simple_send.js](examples/simple_send.js) - connects to a specified
+  port then sends a number of messages to a given address
 
-* simple_recv.js - connects to a specified port thensubscribes to
-  receive a number of messages from a given address
+* [simple_recv.js](examples/simple_recv.js) - connects to a specified
+  port then subscribes to receive a number of messages from a given
+  address
 
 These last two can be used together to demsontrate sending messages
 from one process to another, using a broker or similar intermediary to
 which they both connect.
 
-* direct_recv.js - listens on a given port for incoming connections
-  over which it will then receive a number of messages
+* [direct_recv.js](examples/direct_recv.js) - listens on a given port
+  for incoming connections over which it will then receive a number of
+  messages
 
 The direct_recv.js example can be used in conjunction with the
 simple_send.js example to demonstrate sending messages between
 processes without the use of any intermediary. Note however the the
-dfeualt port of one or ther other will need to be changed through the
+default port of one or ther other will need to be changed through the
 -p command line option.
 
-* client.js and server.js - A request-response example where the
-  'client' sends messages to a 'server' (or service) which converts
-  them to upper case and sends them back. This demonstrates the use of
-  temporary addresses among other things. Using these two together
-  requires a broker or similar intermediary.
+* [client.js](examples/client.js) and [server.js](examples/server.js)
+  - A request-response example where the 'client' sends messages to a
+  'server' (or service) which converts them to upper case and sends
+  them back. This demonstrates the use of temporary addresses among
+  other things. Using these two together requires a broker or similar
+  intermediary.
+
+* In durable_subscription, a
+  [subscriber](examples/durable_subscription/subscriber.js) and a
+  [publisher]( examples/durable_subscription/publisher.js)which
+  demonstrate the notion of a durable subscription when used in
+  conjunction with a broker such as ActiveMQ
+
+* In selector a [receiver](examples/selector/recv.js) that uses a
+  selector - a SQL like query string that restricts the set of
+  messages delivered - and an accompanying
+  [sender](examples/selector/send.js)
+
+* In sasl a [sasl client](examples/sasl/simple_sasl_client.js) showing
+  how to authenticate to the service you connect to. This can be used
+  against any broker as well as either of two example servers showing
+  [anonymous](examples/sasl/sasl_anonymous_server.js) and
+  [plain](examples/sasl/sasl_plain_server.js) mechanisms.
+
+* A tls [client](examples/tls/tls_client) and
+  [server](examples/tls/tls_server.js) demonstrating connecting (and
+  possibly authenticating) over a tls secured socket.
+
+* A [client](examples/reconnect/client.js) to demonstrate the built in
+  automatic reconnection functionality along with a simple [echo
+  server](examples/reconnect/echo.js) against which it can be run. It
+  can of course also be run against a broker instead (or as well!).
+
+* A rpc [client](examples/rpc/client.js) and
+  [server](example/rpc/server.js) (requires a broker).
 
 To run the examples you will need the dependencies installed: the
 library itself depends on the 'debug' module, and some of the examples
@@ -82,6 +114,9 @@ this either by checking out the code from git and setting NODE_PATH to
 include the directory to which you do so (i.e. the directory in which
 'a directory named 'rhea' can be found, or you can install the module
 using npm.
+
+Some of the examples assume an AMQP compatible broker, such as those
+offered by the ActiveMQ or Qpid Apache projects, is running.
 
 ## API
 
@@ -126,8 +161,21 @@ following fields:
   * user
   * password
   * id (overrides the container identifier)
-  * reconnect - if true, library will automatically reconnect if
-    disconnected
+  * reconnect
+    * if true (the default), the library will automatically attempt to
+      reconnect if disconnected
+    * if false, automatic reconnect will be disabled
+    * if it is a numeric value, it is interpreted as the delay between
+      reconnect attempts
+    When enabled, reconnect can be further controlled via the
+    following options:
+    * initial_reconnect_delay
+    * max_reconnect_delay
+    * reconnect_limit
+  * connection_details - a function which is specified will be invoked
+    to get the options to use (e.g. this can be used to alternate
+    between a set of different host/port combinations)
+
 
 ##### listen(options)
 
@@ -159,7 +207,7 @@ to specify distinct container ids for different connections.
 
 #### methods:
 
-##### attach_receiver(address|options)
+##### open_receiver(address|options)
 
 Establishes a link over which messages can be received and returns a
 <a href="#receiver">Receiver</a> representing that link. A receiving
@@ -193,7 +241,7 @@ autoaccept options, the connection options are consulted followed by
 the container options. The default is used only if an option is not
 specified at any level.
 
-##### attach_sender(address|options)
+##### open_sender(address|options)
 
 Establishes a link over which messages can be sent and returns a <a
 href="#sender">Sender</a> representing that link. A sending link is an
@@ -313,6 +361,7 @@ Sends a message. A message is an object that may contain the following fields:
     * group_id
     * id
     * correlation_id
+  * application properties, an object/map which can take arbitrary, application defined named values
   * body, which can be either a string, an object or a buffer
 
 ##### close()
@@ -322,19 +371,6 @@ Closes a sending link.
 ##### detach()
 
 Detaches a link without closing it.
-
-##### credit()
-
-Returns the amount of outstanding credit that has been issued by the
-peer. This is the number of messages that can be transferred over the
-link. If messages are sent for which there is no credit, they are not
-transmitted, but are buffered locally until sufficent credit has been
-allocated by the peer.
-
-##### queued()
-
-Returns the number of messages that have been sent but not yet
-transmitted.
 
 #### events:
 
@@ -355,11 +391,11 @@ Raised when a sent message is released by the peer.
 
 Raised when a sent message is rejected by the peer.
 
-##### receiver_open
+##### sender_open
 
 Raised when the remote peer indicates the link is open (i.e. attached
 in AMQP parlance).
 
-##### receiver_close
+##### sender_close
 
 Raised when the remote peer indicates the link is closed.

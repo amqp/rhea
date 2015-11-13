@@ -34,9 +34,9 @@ var timer_task;
 
 var attempt = 0;
 var connect_options = {
-    //A function can be sepcified as the value for a
+    //A function can be specified as the value for a
     //connection_details property on the options passed to
-    //connect(). This should return an object definingthe connection
+    //connect(). This should return an object defining the connection
     //options to use. Here we use it to alternate between the
     //different ports supplied via command line arguments.
     connection_details: function() {
