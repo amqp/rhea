@@ -152,3 +152,35 @@ describe('connection events', function() {
         });
     });
 });
+
+describe('container id', function() {
+    var listener;
+    var client_container_name;
+
+    beforeEach(function(done) {
+        var container = rhea.create_container({id:'my-server-container'});
+        container.on('connection_open', function(context) {
+            client_container_name = context.connection.remote.open.container_id;
+        });
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('correctly sets desired container id', function(done) {
+        var container = rhea.create_container({id:'my-client-container'});
+
+        var c1 = container.connect(listener.address());
+        c1.on('connection_open', function (context) {
+            assert.equal(context.connection.remote.open.container_id, 'my-server-container');
+            assert.equal(client_container_name, 'my-client-container');
+            context.connection.close();
+            done();
+        });
+    });
+});
