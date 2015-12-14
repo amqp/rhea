@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AMQP websockets example</title>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <!-- This example was adapted from a chat example included in the
+  excellent 'JavaScript: The Definitive Guide', by David Flanagan and
+  published by O'Reilly. -->
+<script src="../../rhea.js"></script>
+</head>
+
+<body>
+<input type="text" id="request" style="width:100%"/>
+<script>
+var server = prompt("Enter details of server to use", "ws://localhost:5673");
+var input = document.getElementById("request");
+input.focus();
+
+function append(txt) {
+    var node = document.createTextNode(txt);
+    var div = document.createElement("div");
+    div.appendChild(node);
+    document.body.insertBefore(div, input);
+    input.scrollIntoView();
+}
+input.onchange = function() {
+    sender.send({"body":input.value});
+    input.value = "";
+};
+
+var client = require("rhea");
+client.on("message", function (context) {
+    append(context.message.body);
+});
+var ws = client.websocket_connect(WebSocket);
+var connection = client.connect({"connection_details":ws(server), "reconnect":false});
+connection.open_receiver("examples");
+var sender = connection.open_sender("examples");
+
+</script>
+</body>
+</html>
