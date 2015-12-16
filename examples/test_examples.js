@@ -40,8 +40,9 @@ Expectations.prototype.next = function() {
     };
 }
 
-function Program(name) {
+function Program(name, args) {
     this.name = name;
+    this.args = args || [];
     this.expected_output = undefined;
     this.actual_output = "";
 };
@@ -53,7 +54,7 @@ Program.prototype.produces = function(text) {
 
 Program.prototype.run = function(done) {
     var name = this.name;
-    var p = child_process.fork(path.resolve(__dirname, this.name), [], {silent:true});
+    var p = child_process.fork(path.resolve(__dirname, this.name), this.args, {silent:true});
     p.stdout.on('data', function (data) {
         this.actual_output += data;
     });
@@ -72,8 +73,8 @@ Program.prototype.run = function(done) {
     return p;
 };
 
-function example(example) {
-    return new Program(example);
+function example(example, args) {
+    return new Program(example, args);
 }
 
 function verify(done, programs) {
@@ -147,5 +148,25 @@ describe('brokered examples', function() {
         var client_output = lines(requests.map(function (r) { return r + ' => ' + r.toUpperCase(); }));
         var server_output = lines(requests.map(function (r) { return 'Received: ' + r; }));
         while_running(done, [example('server.js').produces(server_output)]).verify([example('client.js').produces(client_output)]);
+    });
+});
+
+describe('direct examples', function() {
+    this.slow(500);
+    /**
+    beforeEach(function(done) {
+        done();
+    });
+
+    afterEach(function() {
+    });
+    **/
+
+    it('helloworld', function(done) {
+        verify(done, [example('direct_helloworld.js').produces('Hello World!\n')]);
+    });
+    it('direct send and receive', function(done) {
+        verify(done, [example('direct_recv.js').produces(times(100, function(i) { return '{sequence:' + (i+1) + '}'})),
+                      example('simple_send.js', ['-p', '8888']).produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
     });
 });
