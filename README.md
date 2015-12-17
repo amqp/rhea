@@ -105,6 +105,16 @@ default port of one or ther other will need to be changed through the
 * A rpc [client](examples/rpc/client.js) and
   [server](example/rpc/server.js) (requires a broker).
 
+* Both [node based](examples/websocket/client.js) and [web
+  based](examples/websocket/client.html) websocket clients along with
+  a [server](example/websocket/echo.js) which will echo back any
+  requests received. The clients can also be used against a websocket
+  enabled AMQP broker with a queue or topic called 'examples'. The
+  node based scritps require the 'ws' node module to be installed. The
+  browser based example requires a browserified version of the rhea
+  library (this can be created e.g. by calling npm run-script
+  browserify).
+
 To run the examples you will need the dependencies installed: the
 library itself depends on the 'debug' module, and some of the examples
 depend on the 'yargs' module for command line option parsing.
@@ -201,6 +211,22 @@ If no id is specified a new uuid will be generated.
 
 Simple utility for generating a stringified uuid, useful if you wish
 to specify distinct container ids for different connections.
+
+##### websocket_connect()
+
+Returns a function that can be used to create another function
+suitable for use as the value of 'connection_details' in a connect
+call in order to connect over websockets. The function returned here
+takes a websocket url and optional arguments. The websocket_connect
+method itself take the constructor of the WebSocket implementation to
+use. It has been tested with the implementation in firefox and also
+that in the node module 'ws'.
+
+##### websocket_accept()
+
+Used to start handling an incoming websocket connection as an AMQP
+connection. See the [websocket echo server
+example](example/websocket/echo.js) for how to use it.
 
 ---------------------------------------------------------------------
 ### Connection
