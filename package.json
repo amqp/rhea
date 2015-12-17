@@ -10,7 +10,10 @@
     },
     "dependencies": {"debug": "^2.0.0"},
     "scripts": {
-        "test": "mocha"
+        "test": "mocha",
+        "coverage": "istanbul cover _mocha",
+        "browserify": "browserify -r rhea -o rhea.js",
+        "run-examples": "mocha examples/test_examples.js"
     },
     "keywords": ["amqp","messaging"],
     "main" : "./lib/container.js"

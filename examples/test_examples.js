@@ -45,6 +45,9 @@ function Program(name, args) {
     this.args = args || [];
     this.expected_output = undefined;
     this.actual_output = "";
+    this.stopped = false;
+    this.restart = false;
+    this.verifier = undefined;
 };
 
 Program.prototype.produces = function(text) {
@@ -53,24 +56,41 @@ Program.prototype.produces = function(text) {
 };
 
 Program.prototype.run = function(done) {
+    var prog = this;
     var name = this.name;
     var p = child_process.fork(path.resolve(__dirname, this.name), this.args, {silent:true});
     p.stdout.on('data', function (data) {
-        this.actual_output += data;
+        prog.actual_output += data;
     });
     p.stderr.on('data', function (data) {
-            console.log('stderr: ' + data);
-    });
-    p.on('close', function (code, signal) {
-        if (this.expected_output) {
-            assert.equal(this.actual_output, this.expected_output);
-        }
+        console.log('stderr[' + name + ']: ' + data);
     });
     p.on('exit', function (code, signal) {
-        if (signal === null) assert.equal(code, 0);
-        done();
+        prog.process = undefined;
+        if (prog.restart && !prog.stopped) {
+            prog.run(done);
+        } else {
+            if (signal === null) assert.equal(code, 0);
+            if (prog.verifier) {
+                prog.verifier(prog.actual_output);
+            } else if (prog.expected_output) {
+                assert.equal(prog.actual_output, prog.expected_output);
+            }
+            done();
+        }
     });
-    return p;
+    this.process = p;
+};
+
+Program.prototype.stop = function() {
+    this.stopped = true;
+    this.kill();
+}
+
+Program.prototype.kill = function() {
+    if (this.process) {
+        this.process.kill();
+    }
 };
 
 function example(example, args) {
@@ -93,10 +113,10 @@ function while_running(done, background) {
         var fn = expectations.next();
         return {
             start: function () {
-                this.process = p.run(fn);
+                p.run(fn);
             },
             stop: function () {
-                this.process.kill('SIGTERM');
+                p.stop();
             }
         }
     } );
@@ -137,7 +157,7 @@ describe('brokered examples', function() {
         verify(done, [example('helloworld.js').produces('Hello World!\n')]);
     });
     it('send and receive', function(done) {
-        verify(done, [example('simple_recv.js').produces(times(100, function(i) { return '{sequence:' + (i+1) + '}'})),
+        verify(done, [example('simple_recv.js').produces(times(100, function(i) { return '{"sequence":' + (i+1) + '}'})),
                       example('simple_send.js').produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
     });
     it('client/server', function(done) {
@@ -212,7 +232,7 @@ describe('direct examples', function() {
         verify(done, [example('direct_helloworld.js').produces('Hello World!\n')]);
     });
     it('send and receive', function(done) {
-        verify(done, [example('direct_recv.js').produces(times(100, function(i) { return '{sequence:' + (i+1) + '}'})),
+        verify(done, [example('direct_recv.js').produces(times(100, function(i) { return '{ sequence: ' + (i+1) + ' }'})),
                       example('simple_send.js', ['-p', '8888']).produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
     });
     it('tls connection', function(done) {
@@ -223,12 +243,28 @@ describe('direct examples', function() {
                      ).verify([example('sasl/simple_sasl_client.js', ['-p', '8888', '--username', 'anonymous']).produces('Connected!\n')]);
     });
     it('sasl plain', function(done) {
-        while_running(done, [example('sasl/sasl_plain_server.js', ['-p', '8888']).produces('Connected!\n')]
+        while_running(done, [example('sasl/sasl_plain_server.js', ['-p', '8888']).produces(lines(['Authenticating as bob', 'Connected!']))]
                      ).verify([example('sasl/simple_sasl_client.js', ['-p', '8888', '--username', 'bob', '--password', 'bob']).produces('Connected!\n')]);
     });
     it('websockets', function(done) {
-        this.slow(1200);
+        this.slow(1000);
         var output = times(100, function(i) { return 'sent request-' + (i+1) + '\nreceived request-' + (i+1)});
         while_running(done, [example('websockets/echo.js')]).verify([example('websockets/client.js', ['-u', 'ws:localhost:8888']).produces(output)]);
+    });
+    it('reconnect', function(done) {
+        this.slow(1500);
+        var server = example('reconnect/echo.js');
+        server.restart = true;
+        var client = example('reconnect/client.js', ['--request_interval', '5', '-m', '10']);
+        client.verifier = function (output) {
+            for (var i = 0; i < 10; i++) {
+                var req = 'request-' + (i+1);
+                assert.notEqual(output.indexOf('sent ' + req), -1);
+                assert.notEqual(output.indexOf('received ' + req), -1);
+            }
+            assert.notEqual(output.indexOf('disconnected'), -1);
+        };
+        setTimeout(server.kill.bind(server), 400);
+        while_running(done, [server]).verify([client]);
     });
 });

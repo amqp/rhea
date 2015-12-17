@@ -16,7 +16,7 @@
 var container = require('rhea');
 
 var args = require('yargs').options({
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
+      'm': { alias: 'messages', default: 0, describe: 'number of messages to expect'},
       'p': { alias: 'port', default: 8888, describe: 'port to connect to'}
     }).help('help').argv;
 
