@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 var container = require('rhea');
+var args = require('yargs').options({
+      'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
+    }).help('help').argv;
+
 container.sasl_server_mechanisms.enable_anonymous();
-var server = container.listen({'port':5672});
+var server = container.listen({'port':args.port});
 container.on('connection_open', function (context) {
     console.log('Connected!');
 });

@@ -15,17 +15,22 @@
  */
 var container = require('rhea');
 var fs = require('fs');
+var path = require('path');
+var args = require('yargs').options({
+      'p': { alias: 'port', default: 5671, describe: 'port to connect to'}
+    }).help('help').argv;
+
 
 container.on('connection_open', function (context) {
     console.log('Connected!');
     context.connection.close();
 });
-container.connect({port:5671, transport:'tls',
+container.connect({port:args.port, transport:'tls',
                    //enable_sasl_external:true,
                    // These are necessary only if using the client certificate authentication
-                   key: fs.readFileSync('client-key.pem'),
-                   cert: fs.readFileSync('client-cert.pem'),
+                   key: fs.readFileSync(path.resolve(__dirname,'client-key.pem')),
+                   cert: fs.readFileSync(path.resolve(__dirname,'client-cert.pem')),
 
                    // This is necessary only if the server uses the self-signed certificate
-                   ca: [ fs.readFileSync('ca-cert.pem') ]
+                   ca: [ fs.readFileSync(path.resolve(__dirname,'ca-cert.pem')) ]
                   });

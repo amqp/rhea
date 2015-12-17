@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 var container = require('rhea');
+var args = require('yargs').options({
+      'username': { describe: 'username to connect with'},
+      'password': { describe: 'password to connect with (will use PLAIN)'},
+      'p': { alias: 'port', default: 5671, describe: 'port to connect to'}
+    }).help('help').argv;
 
 /**
  * Default SASL behaviour is as follows. If the username and password
@@ -21,14 +26,14 @@ var container = require('rhea');
  * specified, ANONYMOUS will be used. If neither is specified, no SASl
  * layer will be used.
  */
-if (process.argv.length > 2) {
-    container.options.username = process.argv[2];
+if (args.username) {
+    container.options.username = args.username;
 }
-if (process.argv.length > 3) {
-    container.options.password = process.argv[3];
+if (args.password) {
+    container.options.password = args.password;
 }
 container.on('connection_open', function (context) {
     console.log('Connected!');
     context.connection.close();
 });
-container.connect({'port':5672});
+container.connect({'port':args.port});

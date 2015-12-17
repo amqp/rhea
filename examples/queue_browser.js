@@ -16,12 +16,22 @@
 var container = require('rhea');
 
 var args = require('yargs').options({
+      'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
       'n': { alias: 'node', default: 'examples', describe: 'name of queue to browse'},
       'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
     }).help('help').argv;
 
+var received = 0;
+var expected = args.messages;
+
 container.on('message', function (context) {
-    console.log(JSON.stringify(context.message.body))
+    if (expected === 0 || received < expected) {
+        console.log(JSON.stringify(context.message.body))
+        if (++received === expected) {
+            context.receiver.detach();
+            context.connection.close();
+        }
+    }
 });
 
 container.connect({'port':args.port}).attach_receiver({source:{address:args.node,distribution_mode:'copy'}});

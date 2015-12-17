@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 var container = require('rhea');
+var args = require('yargs').options({
+      'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
+    }).help('help').argv;
+
 /**
  * To authenticate using PLAIN and a simple username and password
  * combination, the application provides a callback function for
@@ -27,7 +31,7 @@ function authenticate(username, password) {
     return username.split("").reverse().join("") === password;
 }
 container.sasl_server_mechanisms.enable_plain(authenticate);
-var server = container.listen({'port':5672});
+var server = container.listen({'port':args.port});
 container.on('connection_open', function (context) {
     console.log('Connected!');
 });

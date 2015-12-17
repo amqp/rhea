@@ -33,7 +33,7 @@ if (args._.length > 0) {
 sender.on('sendable', function(context) {
     for (var i = 0; i < messages.length; i++) {
         var m = messages[i];
-        console.log('sent ' + JSON.stringify(m));
+        console.log('sent ' + m.application_properties.colour + '-' + m.body);
         sender.send(m);
     }
     connection.close();

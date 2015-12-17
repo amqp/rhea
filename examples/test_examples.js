@@ -106,7 +106,10 @@ function while_running(done, background) {
     }
     return {
         'verify' : function (programs) {
-            verify(foreground_done, programs);
+            var f = function () {
+                verify(foreground_done, programs);
+            };
+            setTimeout(f, 50);
         }
     };
 }
@@ -122,21 +125,18 @@ function times(count, f) {
     return lines(a);
 }
 
+function chain() {
+    var args = Array.prototype.slice.apply(arguments);
+    return args.reduceRight(function(a, b) { return b.bind(null, a); });
+}
+
 describe('brokered examples', function() {
     this.slow(500);
-    /**
-    beforeEach(function(done) {
-        done();
-    });
-
-    afterEach(function() {
-    });
-    **/
 
     it('helloworld', function(done) {
         verify(done, [example('helloworld.js').produces('Hello World!\n')]);
     });
-    it('simple send and receive', function(done) {
+    it('send and receive', function(done) {
         verify(done, [example('simple_recv.js').produces(times(100, function(i) { return '{sequence:' + (i+1) + '}'})),
                       example('simple_send.js').produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
     });
@@ -149,24 +149,86 @@ describe('brokered examples', function() {
         var server_output = lines(requests.map(function (r) { return 'Received: ' + r; }));
         while_running(done, [example('server.js').produces(server_output)]).verify([example('client.js').produces(client_output)]);
     });
+    it('selector', function(done) {
+        var red = lines(['panda', 'squirrel']);
+        var blue = lines(['whale']);
+        var green = lines(['grasshopper']);
+        var send_output = lines(['sent red-panda',
+                                 'sent green-grasshopper',
+                                 'sent red-squirrel',
+                                 'sent blue-whale']);
+        verify(done, [example('selector/recv.js', ['-m', '2']).produces(red),
+                      example('selector/recv.js', ['-m', '1', '-s', "colour = 'blue'"]).produces(blue),
+                      example('selector/recv.js', ['-m', '1', '-s', "colour = 'green'"]).produces(green),
+                      example('selector/send.js').produces(send_output)]);
+    });
+    it('rpc', function(done) {
+        var client_output = lines(['fib(5) => 5',
+                                   'fib(10) => 55',
+                                   'Put item in remote map',
+                                   'Retrieved bar from remote map']);
+        while_running(done, [example('rpc/server.js')]).verify([example('rpc/client.js').produces(client_output)]);
+    });
+
+    it('pub-sub', function(done) {
+        var messages = ['one', 'two', 'three', 'close'];
+        var pub_output = lines(messages.map(function (m) { return 'sent ' + m; }));
+        var sub_output = lines(messages.slice(0,3));
+        verify(done, [example('durable_subscription/subscriber.js', ['-t', 'topic://PRICE.STOCK.NYSE.RHT']).produces(sub_output),
+                      example('durable_subscription/publisher.js', messages).produces(pub_output)]);
+    });
+
+    it('queue browser', function(done) {
+        this.slow(1000);
+        var red = lines(['panda', 'squirrel']);
+        var blue = lines(['whale']);
+        var green = lines(['grasshopper']);
+
+        var recv_output = lines(['"panda"',
+                                 '"grasshopper"',
+                                 '"squirrel"',
+                                 '"whale"']);
+        var send_output = lines(['sent red-panda',
+                                 'sent green-grasshopper',
+                                 'sent red-squirrel',
+                                 'sent blue-whale']);
+        function browse(f) {
+            verify(f, [example('queue_browser.js', ['-m', '4']).produces(recv_output)]);
+        }
+        function consume(f) {
+            verify(f, [example('simple_recv.js', ['-m', '4']).produces(recv_output)]);
+        }
+        function send(f) {
+            verify(f, [example('selector/send.js').produces(send_output)]);
+        }
+        chain(send, browse, browse, consume, done)();
+    });
 });
 
 describe('direct examples', function() {
     this.slow(500);
-    /**
-    beforeEach(function(done) {
-        done();
-    });
-
-    afterEach(function() {
-    });
-    **/
 
     it('helloworld', function(done) {
         verify(done, [example('direct_helloworld.js').produces('Hello World!\n')]);
     });
-    it('direct send and receive', function(done) {
+    it('send and receive', function(done) {
         verify(done, [example('direct_recv.js').produces(times(100, function(i) { return '{sequence:' + (i+1) + '}'})),
                       example('simple_send.js', ['-p', '8888']).produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
+    });
+    it('tls connection', function(done) {
+        while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient\n')]).verify([example('tls/tls_client.js', ['-p', '8888']).produces('Connected!\n')]);
+    });
+    it('sasl anonymous', function(done) {
+        while_running(done, [example('sasl/sasl_anonymous_server.js', ['-p', '8888']).produces('Connected!\n')]
+                     ).verify([example('sasl/simple_sasl_client.js', ['-p', '8888', '--username', 'anonymous']).produces('Connected!\n')]);
+    });
+    it('sasl plain', function(done) {
+        while_running(done, [example('sasl/sasl_plain_server.js', ['-p', '8888']).produces('Connected!\n')]
+                     ).verify([example('sasl/simple_sasl_client.js', ['-p', '8888', '--username', 'bob', '--password', 'bob']).produces('Connected!\n')]);
+    });
+    it('websockets', function(done) {
+        this.slow(1200);
+        var output = times(100, function(i) { return 'sent request-' + (i+1) + '\nreceived request-' + (i+1)});
+        while_running(done, [example('websockets/echo.js')]).verify([example('websockets/client.js', ['-u', 'ws:localhost:8888']).produces(output)]);
     });
 });
