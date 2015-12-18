@@ -93,7 +93,7 @@ default port of one or ther other will need to be changed through the
   [anonymous](examples/sasl/sasl_anonymous_server.js) and
   [plain](examples/sasl/sasl_plain_server.js) mechanisms.
 
-* A tls [client](examples/tls/tls_client) and
+* A tls [client](examples/tls/tls_client.js) and
   [server](examples/tls/tls_server.js) demonstrating connecting (and
   possibly authenticating) over a tls secured socket.
 
@@ -105,9 +105,9 @@ default port of one or ther other will need to be changed through the
 * A rpc [client](examples/rpc/client.js) and
   [server](example/rpc/server.js) (requires a broker).
 
-* Both [node based](examples/websocket/client.js) and [web
-  based](examples/websocket/client.html) websocket clients along with
-  a [server](example/websocket/echo.js) which will echo back any
+* Both [node based](examples/websockets/client.js) and [web
+  based](examples/websockets/client.html) websocket clients along with
+  a [server](examples/websockets/echo.js) which will echo back any
   requests received. The clients can also be used against a websocket
   enabled AMQP broker with a queue or topic called 'examples'. The
   node based scritps require the 'ws' node module to be installed. The
