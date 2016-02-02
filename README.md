@@ -176,12 +176,12 @@ following fields:
       reconnect if disconnected
     * if false, automatic reconnect will be disabled
     * if it is a numeric value, it is interpreted as the delay between
-      reconnect attempts
+      reconnect attempts (in milliseconds)
     When enabled, reconnect can be further controlled via the
     following options:
-    * initial_reconnect_delay
-    * max_reconnect_delay
-    * reconnect_limit
+    * initial_reconnect_delay (in milliseconds)
+    * max_reconnect_delay (in milliseconds)
+    * reconnect_limit (maximum number of reconnect attempts)
   * connection_details - a function which is specified will be invoked
     to get the options to use (e.g. this can be used to alternate
     between a set of different host/port combinations)
