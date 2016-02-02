@@ -17,6 +17,7 @@
 
 var assert = require('assert');
 var rhea = require('rhea');
+var amqp_types = require('rhea/lib/types.js');
 
 describe('message content', function() {
     var container, sender, listener;
@@ -79,4 +80,45 @@ describe('message content', function() {
         assert.equal(message.body.colour, 'green');
         assert.equal(message.body.age, 8);
     }));
+    it('sends and receives map with ulongs', transfer_test({body:{age:amqp_types.wrap_ulong(888), max:amqp_types.wrap_ulong(9007199254740992),
+                                                                     }}, function(message) {
+        assert.equal(message.body.max, 9007199254740992);
+        assert.equal(message.body.age, 888);
+    }));
+    it('sends and receives map with longs', transfer_test({body:{one:amqp_types.wrap_long(1),
+                                                                     negative_one:amqp_types.wrap_long(-1),
+                                                                     positive:amqp_types.wrap_long(1000),
+                                                                     negative:amqp_types.wrap_long(-1000),
+                                                                     large:amqp_types.wrap_long(1000000000),
+                                                                     large_negative:amqp_types.wrap_long(-1000000000),
+                                                                     max:amqp_types.wrap_long(9007199254740992),
+                                                                     min:amqp_types.wrap_long(-9007199254740992)
+                                                                    }}, function(message) {
+        assert.equal(message.body.one, 1);
+        assert.equal(message.body.negative_one, -1);
+        assert.equal(message.body.positive, 1000);
+        assert.equal(message.body.negative, -1000);
+        assert.equal(message.body.large, 1000000000);
+        assert.equal(message.body.large_negative, -1000000000);
+        assert.equal(message.body.max, 9007199254740992);
+        assert.equal(message.body.min, -9007199254740992);
+    }));
+    it('sends and receives map with ulongs/longs as buffers', transfer_test({body:{too_big:new amqp_types.Ulong(new Buffer([0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF])),
+                                                                                   too_small:new amqp_types.Long(new Buffer([0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00]))
+                                                                     }}, function(message) {
+        assert.equal(message.body.too_big.length, 8);
+        for (var i = 0; i < 8; i++) {
+            assert.equal(message.body.too_big[i], 0xFF);
+        }
+        assert.equal(message.body.too_small.length, 8);
+        for (var i = 0; i < 8; i++) {
+            if (i === 0) {
+                assert.equal(message.body.too_small[i], 0xFF);
+            } else {
+                assert.equal(message.body.too_small[i], 0x00);
+            }
+        }
+
+    }));
+
 });

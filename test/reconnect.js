@@ -43,11 +43,16 @@ describe('reconnect', function() {
         listener.close();
     });
 
+    function add(map, key, value) {
+        map[key] = value;
+        return map;
+    }
+
     it('reconnects successfully', function(done) {
         var container = rhea.create_container();
         var count = 0;
         var disconnects = 0;
-        var c = container.connect(listener.address());
+        var c = container.connect(add(listener.address(), 'reconnect_limit', 10));
         c.on('disconnected', function (context) {
             disconnects++;
         });

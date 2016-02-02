@@ -137,8 +137,7 @@ describe('link fields', function() {
             assert.equal(link.remote.attach.source.timeout, 33);
             assert.equal(link.remote.attach.source.distribution_mode, 'copy');
             var descriptor = amqp_types.unwrap(link.remote.attach.source.filter['jms-selector'].descriptor);
-            assert.equal(descriptor.readUInt32BE(0), 0x0000468C);
-            assert.equal(descriptor.readUInt32BE(4), 0x00000004);
+            assert.equal(descriptor, 0x0000468C00000004);
             assert.equal(link.remote.attach.source.filter['jms-selector'], "colour = 'green'");
             assert.ok(amqp_messaging.is_modified(link.remote.attach.source.default_outcome));
             assert.equal(link.remote.attach.source.outcomes.length, 4);
