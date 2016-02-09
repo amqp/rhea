@@ -297,6 +297,14 @@ the connection options are consulted followed by the container
 options. The default is used only if an option is not specified at any
 level.
 
+##### send(message)
+
+Sends the specified message over the default sender, which is a
+sending link whose target address is null. The use of this method
+depends on the peer supporting so-called 'anonymous relay' semantics,
+which most AMQP 1.0 brokers do. The message should contain a
+properties map with a 'to' field set to the intended destination.
+
 ##### close()
 
 Closes a connection.

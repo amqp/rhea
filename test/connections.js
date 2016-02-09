@@ -184,3 +184,42 @@ describe('container id', function() {
         });
     });
 });
+
+describe('connection send', function() {
+    var listener;
+    var received = {};
+
+    beforeEach(function(done) {
+        var container = rhea.create_container();
+        container.on('message', function(context) {
+            received[context.message.properties.to] = context.message.body;
+        });
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+        received = {};
+    });
+
+    it('sends message via default sender', function(done) {
+        var container = rhea.create_container();
+
+        var c = container.connect(listener.address());
+        var count = 0;
+        c.on('accepted', function (context) {
+            if (++count === 2) {
+                assert.equal(received['a'], 'A');
+                assert.equal(received['b'], 'B');
+                context.sender.close();
+                context.connection.close();
+                done();
+            }
+        });
+        c.send({properties:{to:'a'},body:'A'});
+        c.send({properties:{to:'b'},body:'B'});
+    });
+});
