@@ -19,26 +19,18 @@ var relay;
 var senders = {};
 
 container.on('connection_open', function (context) {
-        context.connection.attach_receiver('examples');
-        if (context.connection.remote.open.offered_capabilities && context.connection.remote.open.offered_capabilities['ANONYMOUS-RELAY']) {
-            relay = context.connection.attach_sender();
-        }
+    context.connection.attach_receiver('examples');
 });
 
 container.on('message', function (context) {
     var request = context.message;
     var reply = request.properties.reply_to;
     console.log("Received: " + request.body);
-    var response = {to: reply, body: request.body.toString().toUpperCase()};
+    var response = {properties:{to: reply}, body: request.body.toString().toUpperCase()};
     if (request.properties.correlation_id) {
         response.correlation_id = request.properties.correlation_id;
     }
-    var sender = relay ? relay : senders[reply];
-    if (!sender) {
-        sender = context.connection.attach_sender(reply);
-        senders[reply] = sender;
-    }
-    sender.send(response);
+    context.connection.send(response);
 });
 
 container.connect({'port':5672});
