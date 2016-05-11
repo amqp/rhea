@@ -70,7 +70,9 @@ Program.prototype.run = function(done) {
         if (prog.restart && !prog.stopped) {
             prog.run(done);
         } else {
-            if (signal === null) assert.equal(code, 0);
+            if (signal === null && !process.version.match(/v0\.10\.\d+/)) {
+                assert.equal(code, 0);
+            }
             if (prog.verifier) {
                 prog.verifier(prog.actual_output);
             } else if (prog.expected_output) {
