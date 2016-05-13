@@ -67,6 +67,21 @@ describe('link fields', function() {
             c['open_' + local_role]();
         };
     }
+    function close_test_simple(local_role, error, verification) {
+        var remote_role = local_role === 'sender' ? 'receiver' : 'sender';
+        return function(done) {
+            container.on(remote_role + '_close', function(context) {
+                verification(context[remote_role]);
+                done();
+            });
+            var c = container.connect(listener.address());
+            c.on(local_role + '_open', function(context) {
+                context[local_role].close(error);
+            });
+            c.on(local_role + '_close', function(context) {});
+            c['open_' + local_role]();
+        };
+    }
     function close_sender_test(error, verification) {
         return close_test('sender', error, verification);
     }
@@ -107,6 +122,11 @@ describe('link fields', function() {
             assert.equal(link.remote.attach.properties.cone, true);
         }));
         it('error on ' + t + ' close', close_test(t, {condition:'amqp:link:detach-forced', description:'testing error on close'}, function(link) {
+            var error = link.remote.detach.error;
+            assert.equal(error.condition, 'amqp:link:detach-forced');
+            assert.equal(error.description, 'testing error on close');
+        }));
+        it('pass error to ' + t + ' close', close_test_simple(t, {condition:'amqp:link:detach-forced', description:'testing error on close'}, function(link) {
             var error = link.remote.detach.error;
             assert.equal(error.condition, 'amqp:link:detach-forced');
             assert.equal(error.description, 'testing error on close');

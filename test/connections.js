@@ -54,6 +54,19 @@ describe('connection fields', function() {
             c.on('connection_close', function(context) {});
         };
     }
+    function close_test_simple(error, verification) {
+        return function(done) {
+            container.on('connection_close', function(context) {
+                verification(context.connection);
+                done();
+            });
+            var c = container.connect(listener.address());
+            c.on('connection_open', function(context) {
+                context.connection.close(error);
+            });
+            c.on('connection_close', function(context) {});
+        };
+    }
 
     afterEach(function() {
         listener.close();
@@ -97,6 +110,11 @@ describe('connection fields', function() {
         assert.equal(connection.remote.open.properties.cone, true);
     }));
     it('error on close', close_test({condition:'amqp:connection:forced', description:'testing error on close'}, function(connection) {
+        var error = connection.remote.close.error;
+        assert.equal(error.condition, 'amqp:connection:forced');
+        assert.equal(error.description, 'testing error on close');
+    }));
+    it('pass error to close', close_test_simple({condition:'amqp:connection:forced', description:'testing error on close'}, function(connection) {
         var error = connection.remote.close.error;
         assert.equal(error.condition, 'amqp:connection:forced');
         assert.equal(error.description, 'testing error on close');
