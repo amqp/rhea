@@ -41,4 +41,4 @@ container.on('disconnected', function (context) {
     sent = confirmed;
 });
 
-container.connect({'port':args.port}).attach_sender(args.node);
+container.connect({'port':args.port}).open_sender(args.node);

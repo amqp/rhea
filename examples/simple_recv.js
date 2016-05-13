@@ -38,4 +38,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({'port':args.port}).attach_receiver(args.node);
+container.connect({'port':args.port}).open_receiver(args.node);

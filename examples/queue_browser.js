@@ -34,4 +34,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({'port':args.port}).attach_receiver({source:{address:args.node,distribution_mode:'copy'}});
+container.connect({'port':args.port}).open_receiver({source:{address:args.node,distribution_mode:'copy'}});

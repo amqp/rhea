@@ -93,5 +93,5 @@ container.on('message', function (context) {
 });
 
 var connection = container.connect(connect_options);
-sender = connection.attach_sender('examples');
-connection.attach_receiver('examples');
+sender = connection.open_sender('examples');
+connection.open_receiver('examples');

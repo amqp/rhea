@@ -19,7 +19,7 @@ var relay;
 var senders = {};
 
 container.on('connection_open', function (context) {
-    context.connection.attach_receiver('examples');
+    context.connection.open_receiver('examples');
 });
 
 container.on('message', function (context) {

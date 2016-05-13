@@ -28,8 +28,8 @@ function next_request(context) {
 }
 
 container.on('connection_open', function (context) {
-    sender = context.connection.attach_sender('examples');
-    context.connection.attach_receiver({source:{dynamic:true}});
+    sender = context.connection.open_sender('examples');
+    context.connection.open_receiver({source:{dynamic:true}});
 });
 container.on('receiver_open', function (context) {
     next_request(context);

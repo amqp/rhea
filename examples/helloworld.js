@@ -15,8 +15,8 @@
  */
 var container = require('rhea');
 container.on('connection_open', function (context) {
-    context.connection.attach_receiver('examples');
-    context.connection.attach_sender('examples');
+    context.connection.open_receiver('examples');
+    context.connection.open_sender('examples');
 });
 container.on('message', function (context) {
     console.log(context.message.body);

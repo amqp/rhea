@@ -25,7 +25,7 @@ container.once('sendable', function (context) {
 });
 var server = container.listen({'port':8888});
 server.once('listening', function () {
-    container.connect({'port':8888}).attach_sender('examples');
+    container.connect({'port':8888}).open_sender('examples');
 });
 server.once('connection', function () {
     server.close();
