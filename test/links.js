@@ -99,8 +99,11 @@ describe('link fields', function() {
         it(t + ' name', open_test(t, {name:'my-link'}, function(link) {
             assert.equal(link.remote.attach.name, 'my-link');
         }));
-        it('single offered ' + t + ' capability', open_test(t, {offered_capabilities:'foo'}, function(link) {
+        it('single offered ' + t + ' capability explicit', open_test(t, {offered_capabilities:'foo'}, function(link) {
             assert.equal(link.remote.attach.offered_capabilities, 'foo');
+        }));
+        it('single offered ' + t + ' capability aliased', open_test(t, {offered_capabilities:'foo'}, function(link) {
+            assert.equal(link.offered_capabilities, 'foo');
         }));
         it('multiple offered ' + t + ' capabilities', open_test(t, {offered_capabilities:['foo', 'bar']}, function(link) {
             assert.equal(link.remote.attach.offered_capabilities.length, 2);
@@ -134,6 +137,9 @@ describe('link fields', function() {
     }
     it('source address as simple string', open_receiver_test('my-source', function (link) {
         assert.equal(link.remote.attach.source.address, 'my-source');
+    }));
+    it('source address aliased', open_receiver_test('my-source', function (link) {
+        assert.equal(link.source.address, 'my-source');
     }));
     it('source address as single nested value', open_receiver_test({source:'my-source'}, function (link) {
         assert.equal(link.remote.attach.source.address, 'my-source');
@@ -184,8 +190,15 @@ describe('link fields', function() {
         assert.equal(link.remote.attach.source.dynamic, true);
         assert.equal(link.remote.attach.source.dynamic_node_properties.foo, 'bar');
     }));
+    it('dynamic source aliased', open_receiver_test({source:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link) {
+        assert.equal(link.source.dynamic, true);
+        assert.equal(link.source.dynamic_node_properties.foo, 'bar');
+    }));
     it('target address as simple string', open_sender_test('my-target', function (link) {
         assert.equal(link.remote.attach.target.address, 'my-target');
+    }));
+    it('target address aliased', open_sender_test('my-target', function (link) {
+        assert.equal(link.target.address, 'my-target');
     }));
     it('target address as single nested value', open_sender_test({target:'my-target'}, function (link) {
         assert.equal(link.remote.attach.target.address, 'my-target');

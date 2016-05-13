@@ -89,25 +89,45 @@ describe('connection fields', function() {
         assert.equal(connection.remote.open.desired_capabilities[1], 'b');
         assert.equal(connection.remote.open.desired_capabilities[2], 'c');
     }));
-    it('hostname', open_test({hostname:'my-virtual-host'}, function(connection) {
+    it('hostname explicit', open_test({hostname:'my-virtual-host'}, function(connection) {
         assert.equal(connection.remote.open.hostname, 'my-virtual-host');
     }));
-    it('container_id', open_test({container_id:'this-is-me'}, function(connection) {
+    it('hostname aliased', open_test({hostname:'my-virtual-host'}, function(connection) {
+        assert.equal(connection.hostname, 'my-virtual-host');
+    }));
+    it('container_id explicit', open_test({container_id:'this-is-me'}, function(connection) {
         assert.equal(connection.remote.open.container_id, 'this-is-me');
     }));
-    it('max frame size', open_test({max_frame_size:5432}, function(connection) {
+    it('container_id aliased', open_test({container_id:'this-is-me'}, function(connection) {
+        assert.equal(connection.container_id, 'this-is-me');
+    }));
+    it('max frame size explicit', open_test({max_frame_size:5432}, function(connection) {
         assert.equal(connection.remote.open.max_frame_size, 5432);
     }));
-    it('channel max', open_test({channel_max:10}, function(connection) {
+    it('max frame size aliased', open_test({max_frame_size:5432}, function(connection) {
+        assert.equal(connection.max_frame_size, 5432);
+    }));
+    it('channel max explicit', open_test({channel_max:10}, function(connection) {
         assert.equal(connection.remote.open.channel_max, 10);
     }));
-    it('idle time out', open_test({idle_time_out:1000}, function(connection) {
+    it('channel max aliased', open_test({channel_max:10}, function(connection) {
+        assert.equal(connection.channel_max, 10);
+    }));
+    it('idle time out explicit', open_test({idle_time_out:1000}, function(connection) {
         assert.equal(connection.remote.open.idle_time_out, 1000);
     }));
-    it('properties', open_test({properties:{flavour:'vanilla', scoops:2, cone:true}}, function(connection) {
+    it('idle time out aliased', open_test({idle_time_out:1000}, function(connection) {
+        assert.equal(connection.idle_time_out, 1000);
+    }));
+    it('properties explicit', open_test({properties:{flavour:'vanilla', scoops:2, cone:true}}, function(connection) {
         assert.equal(connection.remote.open.properties.flavour, 'vanilla');
         assert.equal(connection.remote.open.properties.scoops, 2);
         assert.equal(connection.remote.open.properties.cone, true);
+    }));
+    it('properties aliased', open_test({properties:{flavour:'vanilla', scoops:2, cone:true}}, function(connection) {
+        assert.equal(connection.properties.flavour, 'vanilla');
+        assert.equal(connection.properties.scoops, 2);
+        assert.equal(connection.properties.cone, true);
     }));
     it('error on close', close_test({condition:'amqp:connection:forced', description:'testing error on close'}, function(connection) {
         var error = connection.remote.close.error;

@@ -22,8 +22,8 @@ var requests = ["Twas brillig, and the slithy toves",
 var sender;
 
 function next_request(context) {
-    if (context.receiver.remote.attach.source.address) {
-        sender.send({properties:{reply_to:context.receiver.remote.attach.source.address}, body:requests[0]})
+    if (context.receiver.source.address) {
+        sender.send({properties:{reply_to:context.receiver.source.address}, body:requests[0]})
     }
 }
 

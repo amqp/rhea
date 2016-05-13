@@ -38,21 +38,21 @@ function unsubscribe(name) {
 }
 
 container.on('sender_open', function (context) {
-    subscribe(context.connection.remote.open.container_id, context.sender);
+    subscribe(context.connection.container_id, context.sender);
 });
 container.on('sender_close', function (context) {
-    unsubscribe(context.connection.remote.open.container_id);
+    unsubscribe(context.connection.container_id);
 });
 container.on('connection_close', function (context) {
-    unsubscribe(context.connection.remote.open.container_id);
+    unsubscribe(context.connection.container_id);
 });
 container.on('disconnected', function (context) {
-    unsubscribe(context.connection.remote.open.container_id);
+    unsubscribe(context.connection.container_id);
 });
 
 container.on('message', function (context) {
     if (expected === 0 || received < expected) {
-        var name = context.connection.remote.open.container_id;
+        var name = context.connection.container_id;
         console.log('echoed ' + context.message.body + ' to ' + name);
         listeners[name].send(context.message);
         if (++received === expected) {
