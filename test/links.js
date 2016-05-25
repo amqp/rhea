@@ -290,4 +290,85 @@ for (var local_role in roles) {
             });
         });
     });
+    describe(local_role + ' error handling', function() {
+        var container, listener;
+        var remote_role;
+
+        beforeEach(function(done) {
+            remote_role = roles[local_role];
+            container = rhea.create_container();
+            listener = container.listen({port:0});
+            listener.on('listening', function() {
+                done();
+            });
+        });
+
+        afterEach(function() {
+            listener.close();
+        });
+
+        it('error and close handled', function (done) {
+            var error_handler_called;
+            var close_handler_called;
+            container.on(remote_role + '_open', function(context) {
+                context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
+            });
+            container.on('connection_close', function(context) {
+                assert.equal(error_handler_called, true);
+                assert.equal(close_handler_called, true);
+                done();
+            });
+            var c = rhea.create_container().connect(listener.address());
+            c.on(local_role + '_error', function(context) {
+                error_handler_called = true;
+                var error = context[local_role].error;
+                assert.equal(error.condition, 'amqp:link:detach-forced');
+                assert.equal(error.description, 'testing error on close');
+            });
+            c.on(local_role + '_close', function(context) {
+                close_handler_called = true;
+                var error = context[local_role].error;
+                assert.equal(error.condition, 'amqp:link:detach-forced');
+                assert.equal(error.description, 'testing error on close');
+                c.close();
+            });
+            c['open_' + local_role]('foo');
+        });
+        it('error handled', function (done) {
+            var error_handler_called;
+            container.on(remote_role + '_open', function(context) {
+                context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
+            });
+            container.on('connection_close', function(context) {
+                assert.equal(error_handler_called, true);
+                done();
+            });
+            var c = rhea.create_container().connect(listener.address());
+            c.on(local_role + '_error', function(context) {
+                error_handler_called = true;
+                var error = context[local_role].error;
+                assert.equal(error.condition, 'amqp:link:detach-forced');
+                assert.equal(error.description, 'testing error on close');
+                c.close();
+            });
+            c['open_' + local_role]();
+        });
+        it('unhandled error', function (done) {
+            var error_handler_called;
+            container.on(remote_role + '_open', function(context) {
+                context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
+            });
+            container.on('connection_close', function(context) {
+                done();
+            });
+            var container2 = rhea.create_container();
+            var c = container2.connect(listener.address());
+            container2.on('error', function (error) {
+                assert.equal(error.condition, 'amqp:link:detach-forced');
+                assert.equal(error.description, 'testing error on close');
+                c.close();
+            });
+            c['open_' + local_role]();
+        });
+    });
 }
