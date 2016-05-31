@@ -76,9 +76,12 @@ describe('message content', function() {
     it('sends and receives body of 50k', transfer_test({body:new Array(1024*50+1).join('z')}, function(message) {
         assert.equal(message.body, new Array(1024*50+1).join('z'));
     }));
-    it('sends and receives map body', transfer_test({body:{colour:'green',age:8}}, function(message) {
+    it('sends and receives map body', transfer_test({body:{colour:'green',age:8,happy:true, sad:false}}, function(message) {
         assert.equal(message.body.colour, 'green');
         assert.equal(message.body.age, 8);
+        assert.equal(message.body.happy, true);
+        assert.equal(message.body.sad, false);
+        assert.equal(message.body.indifferent, undefined);
     }));
     it('sends and receives map with ulongs', transfer_test({body:{age:amqp_types.wrap_ulong(888), max:amqp_types.wrap_ulong(9007199254740992),
                                                                      }}, function(message) {
@@ -227,4 +230,138 @@ describe('message content', function() {
         assert.equal(message.delivery_count, undefined);
     }));
 
+});
+
+describe('acknowledgement', function() {
+    var server, client, listener;
+    var outcome;
+
+    beforeEach(function(done) {
+        outcome = {};
+        server = rhea.create_container();
+        server.on('accepted', function (context) {
+            outcome.state = 'accepted';
+        });
+        server.on('released', function (context) {
+            outcome.state = 'released';
+            outcome.delivery_failed = context.delivery.remote_state.delivery_failed;
+            outcome.undeliverable_here = context.delivery.remote_state.undeliverable_here;
+        });
+        server.on('rejected', function (context) {
+            outcome.state = 'rejected';
+            outcome.error = context.delivery.remote_state.error;
+        });
+        server.on('settled', function (context) {
+            context.connection.close();
+        });
+        client = rhea.create_container();
+        listener = server.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('auto-accept', function(done) {
+        server.once('sendable', function (context) {
+            context.sender.send({body:'accept-me'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'accept-me');
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(outcome.state, 'accepted');
+            done();
+        });
+        client.connect(listener.address()).attach_receiver();
+    });
+    it('explicit accept', function(done) {
+        server.once('sendable', function (context) {
+            context.sender.send({body:'accept-me'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'accept-me');
+            context.delivery.accept();
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(outcome.state, 'accepted');
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({autoaccept: false});
+    });
+    it('explicit release', function(done) {
+        server.once('sendable', function (context) {
+            context.sender.send({body:'release-me'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'release-me');
+            context.delivery.release();
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(outcome.state, 'released');
+            assert.equal(outcome.delivery_failed, undefined);
+            assert.equal(outcome.undeliverable_here, undefined);
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({autoaccept: false});
+    });
+    it('explicit reject', function(done) {
+        server.once('sendable', function (context) {
+            context.sender.send({body:'reject-me'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'reject-me');
+            context.delivery.reject({condition:'rhea:oops:string',description:'something bad occurred'});
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(outcome.state, 'rejected');
+            assert.equal(outcome.error.condition, 'rhea:oops:string');
+            assert.equal(outcome.modified, undefined);
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({autoaccept: false});
+    });
+    it('explicit modify', function(done) {
+        server.options.treat_modified_as_released = false;
+        server.on('modified', function (context) {
+            assert.equal(outcome.state, undefined);
+            outcome.state = 'modified';
+            outcome.delivery_failed = context.delivery.remote_state.delivery_failed;
+            outcome.undeliverable_here = context.delivery.remote_state.undeliverable_here;
+        });
+        server.once('sendable', function (context) {
+            context.sender.send({body:'modify-me'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'modify-me');
+            context.delivery.modified({delivery_failed:true, undeliverable_here: true});
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(outcome.state, 'modified');
+            assert.equal(outcome.delivery_failed, true);
+            assert.equal(outcome.undeliverable_here, true);
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({autoaccept: false});
+    });
+    it('modified as released', function(done) {
+        server.once('sendable', function (context) {
+            context.sender.send({body:'try-again'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'try-again');
+            context.delivery.release({delivery_failed:true, undeliverable_here: true});
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(outcome.state, 'released');
+            assert.equal(outcome.delivery_failed, true);
+            assert.equal(outcome.undeliverable_here, true);
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({autoaccept: false});
+    });
 });
