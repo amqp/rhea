@@ -372,3 +372,140 @@ for (var local_role in roles) {
         });
     });
 }
+
+describe('settlement modes', function() {
+    var server, client, listener;
+
+    beforeEach(function(done) {
+        server = rhea.create_container();
+        client = rhea.create_container();
+        listener = server.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('sender sends unsettled', function(done) {
+        server.on('receiver_open', function(context) {
+            assert.equal(context.receiver.snd_settle_mode, 0);
+        });
+        server.on('message', function(context) {
+            assert.equal(context.message.body, 'settle-me');
+            assert.equal(context.delivery.remote_settled, false);
+        });
+        client.on('settled', function (context) {
+            context.connection.close();
+        });
+        client.once('sendable', function (context) {
+            context.sender.send({body:'settle-me'});
+        });
+        client.on('connection_close', function (context) {
+            done();
+        });
+        client.connect(listener.address()).attach_sender({snd_settle_mode:0});
+    });
+    it('sender sends settled', function(done) {
+        server.on('receiver_open', function(context) {
+            assert.equal(context.receiver.snd_settle_mode, 1);
+        });
+        server.on('message', function(context) {
+            assert.equal(context.message.body, 'already-settled');
+            assert.equal(context.delivery.remote_settled, true);
+            context.connection.close();
+        });
+        client.once('sendable', function (context) {
+            context.sender.send({body:'already-settled'});
+        });
+        client.on('connection_close', function (context) {
+            done();
+        });
+        client.connect(listener.address()).attach_sender({snd_settle_mode:1});
+    });
+    it('receiver requests send unsettled', function(done) {
+        server.on('sender_open', function(context) {
+            assert.equal(context.sender.snd_settle_mode, 0);
+            context.sender.local.attach.snd_settle_mode = context.sender.snd_settle_mode;
+        });
+        server.on('settled', function (context) {
+            context.connection.close();
+        });
+        server.once('sendable', function (context) {
+            context.sender.send({body:'settle-me'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'settle-me');
+            assert.equal(context.delivery.remote_settled, false);
+        });
+        client.on('connection_close', function (context) {
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({snd_settle_mode:0});
+    });
+    it('receiver requests send settled', function(done) {
+        server.on('sender_open', function(context) {
+            assert.equal(context.sender.snd_settle_mode, 1);
+            context.sender.local.attach.snd_settle_mode = context.sender.snd_settle_mode;
+        });
+        server.once('sendable', function (context) {
+            context.sender.send({body:'already-settled'});
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'already-settled');
+            assert.equal(context.delivery.remote_settled, true);
+            context.connection.close();
+        });
+        client.on('connection_close', function (context) {
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({snd_settle_mode:1});
+    });
+    it('receiver settles first', function(done) {
+        server.on('sender_open', function(context) {
+            assert.equal(context.sender.rcv_settle_mode, 0);
+        });
+        server.once('sendable', function (context) {
+            context.sender.send({body:'settle-me'});
+        });
+        server.once('accepted', function (context) {
+            assert.equal(context.delivery.remote_settled, true);
+            context.connection.close();
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'settle-me');
+            assert.equal(context.delivery.remote_settled, false);
+        });
+        client.on('connection_close', function (context) {
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({rcv_settle_mode:0});
+    });
+    it('receiver settles second', function(done) {
+        server.on('sender_open', function(context) {
+            assert.equal(context.sender.rcv_settle_mode, 1);
+        });
+        server.once('sendable', function (context) {
+            context.sender.send({body:'settle-me'});
+        });
+        server.once('accepted', function (context) {
+            assert.equal(context.delivery.remote_settled, false);
+            context.delivery.update(true);
+        });
+        client.on('message', function(context) {
+            assert.equal(context.message.body, 'settle-me');
+            assert.equal(context.delivery.remote_settled, false);
+        });
+        client.on('settled', function (context) {
+            assert.equal(context.delivery.remote_settled, true);
+            context.connection.close();
+        });
+        client.on('connection_close', function (context) {
+            done();
+        });
+        client.connect(listener.address()).attach_receiver({rcv_settle_mode:1});
+    });
+});
