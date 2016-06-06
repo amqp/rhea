@@ -61,6 +61,9 @@ describe('message content', function() {
     it('sends and receives int property', transfer_test({application_properties:{age:101}}, function(message) {
         assert.equal(message.application_properties.age, 101);
     }));
+    it('sends and receives float property', transfer_test({application_properties:{pi:3.14}}, function(message) {
+        assert.equal(message.application_properties.pi, 3.14);
+    }));
     it('sends and receives string message annotation', transfer_test({message_annotations:{colour:'blue'}}, function(message) {
         assert.equal(message.message_annotations.colour, 'blue');
     }));
@@ -82,6 +85,18 @@ describe('message content', function() {
         assert.equal(message.body.happy, true);
         assert.equal(message.body.sad, false);
         assert.equal(message.body.indifferent, undefined);
+    }));
+    it('sends and receives map with doubles', transfer_test({body:{west:amqp_types.wrap_double(4.734), north:amqp_types.wrap_double(56.0023),
+                                                                     }}, function(message) {
+
+        assert.equal(message.body.north, 56.0023);
+        assert.equal(message.body.west, 4.734);
+    }));
+    it('sends and receives map with floats', transfer_test({body:{half:amqp_types.wrap_float(0.5), quarter:amqp_types.wrap_double(0.25),
+                                                                     }}, function(message) {
+
+        assert.equal(message.body.half, 0.5);
+        assert.equal(message.body.quarter, 0.25);
     }));
     it('sends and receives map with ulongs', transfer_test({body:{age:amqp_types.wrap_ulong(888), max:amqp_types.wrap_ulong(9007199254740992),
                                                                      }}, function(message) {
