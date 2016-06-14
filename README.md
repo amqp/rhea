@@ -186,6 +186,10 @@ following fields:
     to get the options to use (e.g. this can be used to alternate
     between a set of different host/port combinations)
 
+If the transport is TLS, the options may additionally specify a
+'servername' property. This allows the SNI to be controlled separately
+from the host option. If servername is not specified, the SNI will
+default to the host.
 
 ##### listen(options)
 

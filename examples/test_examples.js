@@ -238,7 +238,10 @@ describe('direct examples', function() {
                       example('simple_send.js', ['-p', '8888']).produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
     });
     it('tls connection', function(done) {
-        while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient\n')]).verify([example('tls/tls_client.js', ['-p', '8888']).produces('Connected!\n')]);
+        while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient [localhost]\n')]).verify([example('tls/tls_client.js', ['-p', '8888']).produces('Connected!\n')]);
+    });
+    it('tls connection with SNI', function(done) {
+        while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient [localhost]\n')]).verify([example('tls/tls_client.js', ['-p', '8888', '-h', '127.0.0.1', '-s', 'localhost']).produces('Connected!\n')]);
     });
     it('sasl anonymous', function(done) {
         while_running(done, [example('sasl/sasl_anonymous_server.js', ['-p', '8888']).produces('Connected!\n')]

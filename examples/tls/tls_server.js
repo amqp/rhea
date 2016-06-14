@@ -24,7 +24,10 @@ container.on('connection_open', function (context) {
     var cert = context.connection.get_peer_certificate();
     var cn;
     if (cert && cert.subject) cn = cert.subject.CN;
-    console.log('Connected: ' + cn);
+    var tls = context.connection.get_tls_socket();
+    var servername;
+    if (tls && tls.servername) servername = tls.servername;
+    console.log('Connected: ' + cn + ((tls && tls.servername) ? ' [' + tls.servername + ']' : ''));
 });
 var listener = container.listen({port:args.port, transport:'tls',
                   //enable_sasl_external:true,
