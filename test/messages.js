@@ -64,6 +64,12 @@ describe('message content', function() {
     it('sends and receives float property', transfer_test({application_properties:{pi:3.14}}, function(message) {
         assert.equal(message.application_properties.pi, 3.14);
     }));
+    it('sends and receives long property', transfer_test({application_properties:{big:1467407965596}}, function(message) {
+        assert.equal(message.application_properties.big, 1467407965596);
+    }));
+    it('sends and receives ulong property', transfer_test({application_properties:{bigneg:-1234567898765}}, function(message) {
+        assert.equal(message.application_properties.bigneg, -1234567898765);
+    }));
     it('sends and receives string message annotation', transfer_test({message_annotations:{colour:'blue'}}, function(message) {
         assert.equal(message.message_annotations.colour, 'blue');
     }));
@@ -109,6 +115,7 @@ describe('message content', function() {
                                                                      negative:amqp_types.wrap_long(-1000),
                                                                      large:amqp_types.wrap_long(1000000000),
                                                                      large_negative:amqp_types.wrap_long(-1000000000),
+                                                                     awkward:amqp_types.wrap_long(1467407965596),
                                                                      max:amqp_types.wrap_long(9007199254740992),
                                                                      min:amqp_types.wrap_long(-9007199254740992)
                                                                     }}, function(message) {
@@ -118,6 +125,7 @@ describe('message content', function() {
         assert.equal(message.body.negative, -1000);
         assert.equal(message.body.large, 1000000000);
         assert.equal(message.body.large_negative, -1000000000);
+        assert.equal(message.body.awkward, 1467407965596);
         assert.equal(message.body.max, 9007199254740992);
         assert.equal(message.body.min, -9007199254740992);
     }));
