@@ -170,7 +170,7 @@ following fields:
   * port
   * user
   * password
-  * id (overrides the container identifier)
+  * container_id (overrides the container identifier)
   * reconnect
     * if true (the default), the library will automatically attempt to
       reconnect if disconnected
@@ -313,6 +313,10 @@ properties map with a 'to' field set to the intended destination.
 
 Closes a connection (may take an error object which is an object
 that consists of condition and description fields).
+
+##### is_open()/is_closed()
+
+Provide information about the connection status. If it's opened or closed.
 
 #### events:
 
