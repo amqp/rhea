@@ -16,7 +16,7 @@
 'use strict';
 
 var assert = require('assert');
-var rhea = require('rhea');
+var rhea = require('../lib/container.js');
 var amqp_messaging = require('rhea/lib/message.js');
 var amqp_types = require('rhea/lib/types.js');
 

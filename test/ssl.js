@@ -16,7 +16,7 @@
 'use strict';
 
 var assert = require('assert');
-var rhea = require('rhea');
+var rhea = require('../lib/container.js');
 var fs = require('fs');
 var path = require('path');
 
