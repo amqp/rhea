@@ -17,8 +17,8 @@
 
 var assert = require('assert');
 var rhea = require('../lib/container.js');
-var amqp_messaging = require('rhea/lib/message.js');
-var amqp_types = require('rhea/lib/types.js');
+var amqp_messaging = require('../lib/message.js');
+var amqp_types = require('../lib/types.js');
 
 describe('link fields', function() {
     var container, listener;
