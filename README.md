@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/grs/rhea.svg?branch=master)](https://travis-ci.org/grs/rhea)
+
 # rhea
 
 A reactive library for the [AMQP](http://amqp.org/) protocol, for easy
