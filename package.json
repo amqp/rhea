@@ -9,6 +9,11 @@
         "url": "http://github.com/grs/rhea"
     },
     "dependencies": {"debug": ">=0.8.0"},
+    "devDependencies": {
+        "mocha":"",
+        "browserify":"",
+        "istanbul": ""
+    },
     "scripts": {
         "test": "mocha",
         "coverage": "istanbul cover _mocha",
