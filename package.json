@@ -10,11 +10,13 @@
     },
     "dependencies": {"debug": ">=0.8.0"},
     "devDependencies": {
+        "eslint":"",
         "mocha":"",
         "browserify":"",
         "istanbul": ""
     },
     "scripts": {
+        "lint": "eslint lib/*.js",
         "test": "mocha",
         "coverage": "istanbul cover _mocha",
         "browserify": "browserify -r rhea -o rhea.js",
