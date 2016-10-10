@@ -419,6 +419,10 @@ that consists of condition and description fields).
 
 Detaches a link without closing it.
 
+##### sendable()
+
+Returns true if the sender has available credits for sending a message. Otherwise it returns false.
+
 #### events:
 
 ##### sendable
