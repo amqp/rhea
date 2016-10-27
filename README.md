@@ -170,7 +170,7 @@ following fields:
 
   * host
   * port
-  * user
+  * username
   * password
   * container_id (overrides the container identifier)
   * reconnect
