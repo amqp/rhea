@@ -35,7 +35,9 @@ Hello World!
 ```
 ## Dependencies
 
-* debug (for simple debug logging - may be replaced in the near term)
+* debug (For simple debug logging - may be replaced in the near
+  term. To enable set e.g. DEBUG=rhea* or DEBUG=rhea:events for more
+  qualified debugging)
 
 ## Examples
 
