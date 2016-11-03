@@ -49,6 +49,9 @@ describe('message content', function() {
     it('sends and receives string body', transfer_test({body:'hello world!'}, function(message) {
         assert.equal(message.body, 'hello world!');
     }));
+    it('sends and receives binary body', transfer_test({body:amqp_types.wrap_binary(new Buffer('hello world!'))}, function(message) {
+        assert.equal(message.body.toString(), 'hello world!');
+    }));
     it('sends and receives subject', transfer_test({properties:{subject:'my-subject'}}, function(message) {
         assert.equal(message.properties.subject, 'my-subject');
     }));
