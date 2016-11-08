@@ -237,6 +237,15 @@ describe('direct examples', function() {
         verify(done, [example('direct_recv.js').produces(times(100, function(i) { return '{ sequence: ' + (i+1) + ' }'})),
                       example('simple_send.js', ['-p', '8888']).produces(times(100, function(i) { return 'sent ' + (i+1)}) + 'all messages confirmed\n')]);
     });
+    it('client/server', function(done) {
+        var requests = ["Twas brillig, and the slithy toves",
+                        "Did gire and gymble in the wabe.",
+                        "All mimsy were the borogroves,",
+                        "And the mome raths outgrabe."];
+        var client_output = lines(requests.map(function (r) { return r + ' => ' + r.toUpperCase(); }));
+        var server_output = lines(requests.map(function (r) { return 'Received: ' + r; }));
+        while_running(done, [example('direct_server.js', ['-p', '8888']).produces(server_output)]).verify([example('client.js', ['-p', '8888']).produces(client_output)]);
+    });
     it('tls connection', function(done) {
         while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient [localhost]\n')]).verify([example('tls/tls_client.js', ['-p', '8888']).produces('Connected!\n')]);
     });

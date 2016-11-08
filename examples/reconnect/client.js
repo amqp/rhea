@@ -80,6 +80,10 @@ container.on('connection_open', function (context) {
     next_request();
 });
 
+container.on('disconnected', function (context) {
+    console.log('disconnected');
+});
+
 container.on('message', function (context) {
     console.log('received ' + context.message.body);
     if (current++ < requests) {

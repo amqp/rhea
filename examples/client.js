@@ -15,6 +15,11 @@
  */
 var container = require('rhea');
 
+var args = require('yargs').options({
+      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) to which messages are sent'},
+      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+    }).help('help').argv;
+
 var requests = ["Twas brillig, and the slithy toves",
                 "Did gire and gymble in the wabe.",
                 "All mimsy were the borogroves,",
@@ -28,7 +33,7 @@ function next_request(context) {
 }
 
 container.on('connection_open', function (context) {
-    sender = context.connection.open_sender('examples');
+    sender = context.connection.open_sender(args.node);
     context.connection.open_receiver({source:{dynamic:true}});
 });
 container.on('receiver_open', function (context) {
@@ -44,4 +49,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({'port':5672});
+container.connect({'port':args.port});
