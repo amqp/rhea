@@ -18,6 +18,7 @@
 var assert = require('assert');
 var rhea = require('../lib/container.js');
 var amqp_types = require('../lib/types.js');
+var amqp_message = require('../lib/message.js');
 
 describe('message content', function() {
     var container, sender, listener;
@@ -51,6 +52,16 @@ describe('message content', function() {
     }));
     it('sends and receives binary body', transfer_test({body:amqp_types.wrap_binary(new Buffer('hello world!'))}, function(message) {
         assert.equal(message.body.toString(), 'hello world!');
+    }));
+    it('sends and receives body as data section', transfer_test({body:amqp_message.data_section(new Buffer('hello world!'))}, function(message) {
+        assert.equal(message.body.typecode, 0x75);
+        assert.equal(message.body.content.toString(), 'hello world!');
+    }));
+    it('sends and receives body as sequence section', transfer_test({body:amqp_message.sequence_section(['hello', 1, 'world!'])}, function(message) {
+        assert.equal(message.body.typecode, 0x76);
+        assert.equal(message.body.content[0], 'hello');
+        assert.equal(message.body.content[1], 1);
+        assert.equal(message.body.content[2], 'world!');
     }));
     it('sends and receives subject', transfer_test({properties:{subject:'my-subject'}}, function(message) {
         assert.equal(message.properties.subject, 'my-subject');
