@@ -247,7 +247,7 @@ describe('direct examples', function() {
         while_running(done, [example('direct_server.js', ['-p', '8888']).produces(server_output)]).verify([example('client.js', ['-p', '8888']).produces(client_output)]);
     });
     it('tls connection', function(done) {
-        while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient [localhost]\n')]).verify([example('tls/tls_client.js', ['-p', '8888']).produces('Connected!\n')]);
+        while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient [localhost]\n')]).verify([example('tls/tls_client.js', ['-p', '8888', '-s', 'localhost']).produces('Connected!\n')]);
     });
     it('tls connection with SNI', function(done) {
         while_running(done, [example('tls/tls_server.js', ['-p', '8888']).produces('Connected: TestClient [localhost]\n')]).verify([example('tls/tls_client.js', ['-p', '8888', '-h', '127.0.0.1', '-s', 'localhost']).produces('Connected!\n')]);
@@ -278,7 +278,7 @@ describe('direct examples', function() {
             }
             assert.notEqual(output.indexOf('disconnected'), -1);
         };
-        setTimeout(server.kill.bind(server), 400);
+        setTimeout(server.kill.bind(server), 200);
         while_running(done, [server]).verify([client]);
     });
 });
