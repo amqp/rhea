@@ -19,6 +19,7 @@ var assert = require('assert');
 var rhea = require('../lib/container.js');
 var amqp_types = require('../lib/types.js');
 var amqp_message = require('../lib/message.js');
+var rhea_util = require('../lib/util.js');
 
 describe('message content', function() {
     var container, sender, listener;
@@ -83,6 +84,13 @@ describe('message content', function() {
     }));
     it('sends and receives ulong property', transfer_test({application_properties:{bigneg:-1234567898765}}, function(message) {
         assert.equal(message.application_properties.bigneg, -1234567898765);
+    }));
+    it('sends and receives char property', transfer_test({application_properties:{'x':amqp_types.wrap_char(0x2603)}}, function(message) {
+        assert.equal(message.application_properties.x, 0x2603);
+    }));
+    var test_uuid = rhea_util.uuid4();
+    it('sends and receives a uuid property', transfer_test({application_properties:{'x':amqp_types.wrap_uuid(test_uuid)}}, function(message) {
+        assert.equal(rhea_util.uuid_to_string(message.application_properties.x), rhea_util.uuid_to_string(test_uuid));
     }));
     it('sends and receives string message annotation', transfer_test({message_annotations:{colour:'blue'}}, function(message) {
         assert.equal(message.message_annotations.colour, 'blue');
