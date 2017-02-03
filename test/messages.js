@@ -274,7 +274,9 @@ describe('message content', function() {
         assert.equal(message.first_acquirer, undefined);
         assert.equal(message.delivery_count, undefined);
     }));
-
+    it('message has a toString', transfer_test({message_id:'my-id', body:'hello world!'}, function(message) {
+        assert.equal(message.toString(), '{"message_id":"my-id","body":"hello world!"}');
+    }));
 });
 
 describe('acknowledgement', function() {
