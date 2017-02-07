@@ -59,7 +59,7 @@ function dummy_broker(capabilities) {
         }
     });
     container.on('message', function (context) {
-        var address = context.receiver.remote.attach.target.address || context.message.properties.to;
+        var address = context.receiver.remote.attach.target.address || context.message.to;
         broker.publish(address, context.message);
     });
 

@@ -310,8 +310,8 @@ level.
 Sends the specified message over the default sender, which is a
 sending link whose target address is null. The use of this method
 depends on the peer supporting so-called 'anonymous relay' semantics,
-which most AMQP 1.0 brokers do. The message should contain a
-properties map with a 'to' field set to the intended destination.
+which most AMQP 1.0 brokers do. The message should have the 'to' field
+set to the intended destination.
 
 ##### close()
 
@@ -388,29 +388,21 @@ Raised when the remote peer indicates the link is closed.
 
 Sends a message. A message is an object that may contain the following fields:
 
-  * header, an object which has the following fields:
-    * durable
-    * first_acquirer
-    * priority
-    * ttl
-    * delivery_count
-  * properties, an object which has the following fields:
-    * reply_to
-    * to
-    * subject
-    * content_type
-    * content_encoding
-    * group_id
-    * id
-    * correlation_id
+  * durable
+  * first_acquirer
+  * priority
+  * ttl
+  * delivery_count
+  * reply_to
+  * to
+  * subject
+  * content_type
+  * content_encoding
+  * group_id
+  * id
+  * correlation_id
   * application properties, an object/map which can take arbitrary, application defined named values
   * body, which can be either a string, an object or a buffer
-
-The header, properties and application_properties can be set on the
-message itself, i.e. the nesting is not necessary (it reflects the
-AMQP specification however). So
-e.g. {subject:'abc',colour:'green',body:'foo'} is equivalent to
-{properties:{subject:'abc'},application_properties:{colour:'green'},body:'foo'}
 
 ##### close()
 

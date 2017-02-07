@@ -28,7 +28,7 @@ var sender;
 
 function next_request(context) {
     if (context.receiver.source.address) {
-        sender.send({properties:{reply_to:context.receiver.source.address}, body:requests[0]})
+        sender.send({reply_to:context.receiver.source.address, body:requests[0]})
     }
 }
 

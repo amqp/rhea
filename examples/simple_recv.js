@@ -25,7 +25,7 @@ var received = 0;
 var expected = args.messages;
 
 container.on('message', function (context) {
-    if (context.message.properties && context.message.properties.id && context.message.properties.id < received) {
+    if (context.message.id && context.message.id < received) {
         // ignore duplicate message
         return;
     }

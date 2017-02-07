@@ -26,7 +26,7 @@ var expected = args.messages;
 var server = container.listen({'port':args.port});
 
 container.on('message', function (context) {
-    if (context.message.properties && context.message.properties.id && context.message.properties.id < received) {
+    if (context.message.id && context.message.id < received) {
         // ignore duplicate message
         return;
     }

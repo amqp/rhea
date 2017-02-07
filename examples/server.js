@@ -24,11 +24,11 @@ container.on('connection_open', function (context) {
 
 container.on('message', function (context) {
     var request = context.message;
-    var reply_to = request.properties.reply_to;
+    var reply_to = request.reply_to;
     console.log("Received: " + request.body);
-    var response = {properties:{to: reply_to}, body: request.body.toString().toUpperCase()};
-    if (request.properties.correlation_id) {
-        response.correlation_id = request.properties.correlation_id;
+    var response = {to: reply_to, body: request.body.toString().toUpperCase()};
+    if (request.correlation_id) {
+        response.correlation_id = request.correlation_id;
     }
     context.connection.send(response);
 });

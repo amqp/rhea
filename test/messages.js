@@ -64,11 +64,11 @@ describe('message content', function() {
         assert.equal(message.body.content[1], 1);
         assert.equal(message.body.content[2], 'world!');
     }));
-    it('sends and receives subject', transfer_test({properties:{subject:'my-subject'}}, function(message) {
-        assert.equal(message.properties.subject, 'my-subject');
+    it('sends and receives subject', transfer_test({subject:'my-subject'}, function(message) {
+        assert.equal(message.subject, 'my-subject');
     }));
-    it('sends and receives message-id', transfer_test({properties:{message_id:'my-id'}}, function(message) {
-        assert.equal(message.properties.message_id, 'my-id');
+    it('sends and receives message-id', transfer_test({message_id:'my-id'}, function(message) {
+        assert.equal(message.message_id, 'my-id');
     }));
     it('sends and receives string property', transfer_test({application_properties:{colour:'red'}}, function(message) {
         assert.equal(message.application_properties.colour, 'red');
@@ -168,7 +168,7 @@ describe('message content', function() {
         }
 
     }));
-    it('get header and properties directly', transfer_test({properties:{
+    it('get header and properties directly', transfer_test({
         message_id:'my-id',
         user_id:'my-user',
         to:'my-to',
@@ -181,14 +181,13 @@ describe('message content', function() {
         creation_time:987654321,
         group_id:'my-group',
         group_sequence:77,
-        reply_to_group_id:'still-my-group'
-    }, header:{
+        reply_to_group_id:'still-my-group',
         durable:true,
         priority:3,
         ttl:123456789,
         first_acquirer:false,
         delivery_count:8
-    }}, function(message) {
+    }, function(message) {
         assert.equal(message.message_id, 'my-id');
         assert.equal(message.user_id, 'my-user');
         assert.equal(message.to, 'my-to');
@@ -228,30 +227,24 @@ describe('message content', function() {
         first_acquirer:false,
         delivery_count:8
     }, function(message) {
-        assert.equal(message.properties.message_id, 'my-id');
-        assert.equal(message.properties.user_id, 'my-user');
-        assert.equal(message.properties.to, 'my-to');
-        assert.equal(message.properties.subject, 'my-subject');
-        assert.equal(message.properties.reply_to, 'my-reply-to');
-        assert.equal(message.properties.correlation_id, 'correlate-me');
-        assert.equal(message.properties.content_type, 'text');
-        assert.equal(message.properties.content_encoding, 'ascii');
-        assert.equal(message.properties.absolute_expiry_time, 123456789);
-        assert.equal(message.properties.creation_time, 987654321);
-        assert.equal(message.properties.group_id, 'my-group');
-        assert.equal(message.properties.group_sequence, 77);
-        assert.equal(message.properties.reply_to_group_id, 'still-my-group');
-        assert.equal(message.header.durable, true);
-        assert.equal(message.header.priority, 3);
-        assert.equal(message.header.ttl, 123456789);
-        assert.equal(message.header.first_acquirer, false);
-        assert.equal(message.header.delivery_count, 8);
-    }));
-    it('get application property directly', transfer_test({application_properties:{colour:'red'}}, function(message) {
-        assert.equal(message.colour, 'red');
-    }));
-    it('set application property directly', transfer_test({colour:'red'}, function(message) {
-        assert.equal(message.application_properties.colour, 'red');
+        assert.equal(message.message_id, 'my-id');
+        assert.equal(message.user_id, 'my-user');
+        assert.equal(message.to, 'my-to');
+        assert.equal(message.subject, 'my-subject');
+        assert.equal(message.reply_to, 'my-reply-to');
+        assert.equal(message.correlation_id, 'correlate-me');
+        assert.equal(message.content_type, 'text');
+        assert.equal(message.content_encoding, 'ascii');
+        assert.equal(message.absolute_expiry_time, 123456789);
+        assert.equal(message.creation_time, 987654321);
+        assert.equal(message.group_id, 'my-group');
+        assert.equal(message.group_sequence, 77);
+        assert.equal(message.reply_to_group_id, 'still-my-group');
+        assert.equal(message.durable, true);
+        assert.equal(message.priority, 3);
+        assert.equal(message.ttl, 123456789);
+        assert.equal(message.first_acquirer, false);
+        assert.equal(message.delivery_count, 8);
     }));
     it('test undefined properties and headers directly', transfer_test({body:'hello world!'}, function(message) {
         assert.equal(message.body, 'hello world!');

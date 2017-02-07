@@ -303,7 +303,7 @@ describe('connection send', function() {
     beforeEach(function(done) {
         var container = rhea.create_container();
         container.on('message', function(context) {
-            received[context.message.properties.to] = context.message.body;
+            received[context.message.to] = context.message.body;
         });
         listener = container.listen({port:0});
         listener.on('listening', function() {
@@ -330,7 +330,7 @@ describe('connection send', function() {
                 done();
             }
         });
-        c.send({properties:{to:'a'},body:'A'});
-        c.send({properties:{to:'b'},body:'B'});
+        c.send({to:'a',body:'A'});
+        c.send({to:'b',body:'B'});
     });
 });

@@ -40,11 +40,11 @@ function match_source_address(link, address) {
 
 container.on('message', function (context) {
     var request = context.message;
-    var reply_to = request.properties.reply_to;
+    var reply_to = request.reply_to;
     var response = {to: reply_to};
     console.log("Received: " + request.body);
-    if (request.properties.correlation_id) {
-        response.correlation_id = request.properties.correlation_id;
+    if (request.correlation_id) {
+        response.correlation_id = request.correlation_id;
     }
     var upper = request.body.toString().toUpperCase();
     response.body = upper;

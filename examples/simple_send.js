@@ -28,7 +28,7 @@ container.on('sendable', function (context) {
     while (context.sender.sendable() && sent < total) {
         sent++;
         console.log('sent ' + sent);
-        context.sender.send({properties:{id:sent}, body:{'sequence':sent}})
+        context.sender.send({id:sent, body:{'sequence':sent}})
     }
 });
 container.on('accepted', function (context) {
