@@ -189,6 +189,9 @@ following fields:
   * connection_details - a function which is specified will be invoked
     to get the options to use (e.g. this can be used to alternate
     between a set of different host/port combinations)
+  * non_fatal_errors - an array of error conditions which if received
+    on connection close from peer should not prevent reconnect (by
+    default this only includes amqp:connection:forced)
 
 If the transport is TLS, the options may additionally specify a
 'servername' property. This allows the SNI to be controlled separately
