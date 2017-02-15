@@ -184,13 +184,6 @@ describe('brokered examples', function() {
                       example('selector/recv.js', ['-m', '1', '-s', "colour = 'green'"]).produces(green),
                       example('selector/send.js').produces(send_output)]);
     });
-    it('rpc', function(done) {
-        var client_output = lines(['fib(5) => 5',
-                                   'fib(10) => 55',
-                                   'Put item in remote map',
-                                   'Retrieved bar from remote map']);
-        while_running(done, [example('rpc/server.js')]).verify([example('rpc/client.js').produces(client_output)]);
-    });
 
     it('pub-sub', function(done) {
         var messages = ['one', 'two', 'three', 'close'];

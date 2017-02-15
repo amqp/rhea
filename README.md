@@ -106,9 +106,6 @@ default port of one or ther other will need to be changed through the
   server](examples/reconnect/echo.js) against which it can be run. It
   can of course also be run against a broker instead (or as well!).
 
-* A rpc [client](examples/rpc/client.js) and
-  [server](example/rpc/server.js) (requires a broker).
-
 * Both [node based](examples/websockets/client.js) and [web
   based](examples/websockets/client.html) websocket clients along with
   a [server](examples/websockets/echo.js) which will echo back any
