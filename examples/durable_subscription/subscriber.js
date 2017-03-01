@@ -22,7 +22,7 @@ var args = require('yargs').options({
       'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
     }).help('help').argv;
 
-var connection = require("rhea").connect({port:args.port, container_id:args.client});
+var connection = require('rhea').connect({port:args.port, container_id:args.client});
 connection.on('message', function (context) {
     if (context.message.body === 'detach') {
         // detaching leaves the subscription active, so messages sent
