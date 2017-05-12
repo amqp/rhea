@@ -17,10 +17,14 @@ var client = require('rhea');
 var WebSocket = require('ws');
 var ws = client.websocket_connect(WebSocket);
 
-var args = require('yargs').options({
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to send'},
-      'u': { alias: 'url', default: 'ws://localhost:5673', describe: 'url to connect to'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        string: ['url'],
+        number: ['messages'],
+        alias: { m: 'messages', u: 'url' },
+        default: { url: "ws://localhost:5673", messages: 100 },
+    }
+);
 
 var requests = args.messages;
 var current = 1;

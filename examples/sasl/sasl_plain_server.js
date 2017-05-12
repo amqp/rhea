@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 var container = require('rhea');
-var args = require('yargs').options({
-      'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        number: ['port'],
+        alias: { p: 'port' },
+        default: { port: 5672 },
+    }
+);
 
 /**
  * To authenticate using PLAIN and a simple username and password

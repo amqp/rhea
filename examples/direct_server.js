@@ -15,9 +15,13 @@
  */
 var container = require('rhea');
 
-var args = require('yargs').options({
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        number: ['port'],
+        alias: { p: 'port' },
+        default: { port: 5672 },
+    }
+);
 
 //container.sasl_server_mechanisms.enable_anonymous();
 var server = container.listen({'port':args.port});

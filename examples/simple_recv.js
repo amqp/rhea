@@ -15,11 +15,14 @@
  */
 var container = require('rhea');
 
-var args = require('yargs').options({
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
-      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) from which messages are received'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        string: ['node'],
+        number: ['messages', 'port'],
+        alias: { m: 'messages', n: 'node', p: 'port' },
+        default: { node: "examples", port: 5672, messages: 100 },
+    }
+);
 
 var received = 0;
 var expected = args.messages;

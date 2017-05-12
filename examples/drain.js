@@ -15,10 +15,14 @@
  */
 var container = require('rhea');
 
-var args = require('yargs').options({
-      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) from which messages are received'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        string: ['node'],
+        number: ['port'],
+        alias: { n: 'node', p: 'port' },
+        default: { node: "examples", port: 5672 },
+    }
+);
 
 var batch = 10;
 var received = 0;
