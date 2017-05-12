@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-var args = require('yargs').options({
-      'client': { default: 'my-client', describe: 'name of identifier for client container'},
-      'subscription': { default: 'my-subscription', describe: 'name of identifier for subscription'},
-      't': { alias: 'topic', default: 'topic://PRICE.STOCK.NYSE.*', describe: 'name of topic to subscribe to'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        string: ['client', 'subscription', 'topic'],
+        number: ['port'],
+        alias: { t: 'topic', p: 'port' },
+        default: { port: 5672, topic: 'topic://PRICE.STOCK.NYSE.*', client: 'my-client', subscription: 'my-subscription' },
+    }
+);
 
 var connection = require('rhea').connect({port:args.port, container_id:args.client});
 connection.on('message', function (context) {

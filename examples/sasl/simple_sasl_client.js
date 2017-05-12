@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 var container = require('rhea');
-var args = require('yargs').options({
-      'username': { describe: 'username to connect with'},
-      'password': { describe: 'password to connect with (will use PLAIN)'},
-      'p': { alias: 'port', default: 5671, describe: 'port to connect to'}
-    }).help('help').argv;
+var args = require('minimist')(process.argv.slice(2),
+    {
+        string: ['username', 'password'],
+        number: ['port'],
+        alias: { p: 'port' },
+        default: { port: 5672 },
+    }
+);
 
 /**
  * Default SASL behaviour is as follows. If the username and password
