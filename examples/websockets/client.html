@@ -33,7 +33,7 @@ client.on("message", function (context) {
     append(context.message.body);
 });
 var ws = client.websocket_connect(WebSocket);
-var connection = client.connect({"connection_details":ws(server, ["binary", "AMQPWSB10"]), "reconnect":false});
+var connection = client.connect({"connection_details":ws(server, ["binary", "AMQPWSB10", "amqp"]), "reconnect":false});
 connection.open_receiver("examples");
 var sender = connection.open_sender("examples");
 
