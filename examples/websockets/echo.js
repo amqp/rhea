@@ -28,7 +28,7 @@ var expected = args.messages;
 var listeners = {};
 
 var WebSocketServer = require('ws').Server;
-var server = WebSocketServer({'port':args.port});
+var server = new WebSocketServer({'port':args.port});
 server.on('connection', function (ws) {
     console.log('Accepted incoming websocket connection');
     container.websocket_accept(ws);
