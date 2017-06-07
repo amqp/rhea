@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var args = require('minimist')(process.argv.slice(2),
-    {
-        string: ['topic'],
-        number: ['port'],
-        alias: { t: 'topic', p: 'port' },
-        default: { topic: "topic://PRICE.STOCK.NYSE.RHT", port: 5672 },
-    }
-);
+
+var args = require('../options.js').options({
+      't': { alias: 'topic', default: 'topic://PRICE.STOCK.NYSE.RHT', describe: 'name of topic to which messages are sent'},
+      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+    }).usage('Usage: $0 [options] <messages>').help('help').argv;
 
 var connection = require('rhea').connect({'port':args.port});
 var sender = connection.open_sender(args.topic);

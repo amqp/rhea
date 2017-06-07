@@ -15,13 +15,10 @@
  */
 var container = require('rhea');
 
-var args = require('minimist')(process.argv.slice(2),
-    {
-        number: ['messages', 'port'],
-        alias: { m: 'messages', p: 'port' },
-        default: { messages: 0, port: 8888 },
-    }
-);
+var args = require('../options.js').options({
+      'm': { alias: 'messages', default: 0, describe: 'number of messages to expect'},
+      'p': { alias: 'port', default: 8888, describe: 'port to listen on'}
+    }).help('help').argv;
 
 var received = 0;
 var expected = args.messages;

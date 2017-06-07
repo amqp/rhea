@@ -16,14 +16,11 @@
 var container = require('rhea');
 var fs = require('fs');
 var path = require('path');
-var args = require('minimist')(process.argv.slice(2),
-    {
-        string: ['servername', 'host'],
-        number: ['port'],
-        alias: { s: 'servername', h: 'host', p: 'port' },
-        default: { host: "localhost", port: 5671, servername: undefined },
-    }
-);
+var args = require('../options.js').options({
+    's': {alias: 'servername', default: undefined, describe: 'name to use for SNI'},
+    'h': {alias: 'host', default: 'localhost', describe: 'host to connect to'},
+    'p': { alias: 'port', default: 5671, describe: 'port to connect to'}
+}).help('help').argv;
 
 
 container.on('connection_open', function (context) {

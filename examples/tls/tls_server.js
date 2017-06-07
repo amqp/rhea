@@ -16,13 +16,9 @@
 var container = require('rhea');
 var fs = require('fs');
 var path = require('path');
-var args = require('minimist')(process.argv.slice(2),
-    {
-        number: ['port'],
-        alias: { p: 'port' },
-        default: { port: 5671 },
-    }
-);
+var args = require('../options.js').options({
+      'p': { alias: 'port', default: 5671, describe: 'port to listen on'}
+    }).help('help').argv;
 
 container.on('connection_open', function (context) {
     var cert = context.connection.get_peer_certificate();

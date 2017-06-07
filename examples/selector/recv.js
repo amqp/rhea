@@ -16,14 +16,12 @@
 var container = require('rhea');
 var filters = require('rhea/lib/filter.js');
 
-var args = require('minimist')(process.argv.slice(2),
-    {
-        string: ['node', 'selector'],
-        number: ['messages', 'port'],
-        alias: { m: 'messages', n: 'node', p: 'port', s: 'selector' },
-        default: { node: "examples", port: 5672, messages: 100, selector: "colour = 'red'" },
-    }
-);
+var args = require('../options.js').options({
+      's': { alias: 'selector', default: "colour = 'red'", describe: 'the selector string to use'},
+      'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
+      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue or topic) from which messages are received'},
+      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+    }).help('help').argv;
 
 var received = 0;
 var expected = args.messages;

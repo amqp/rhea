@@ -15,14 +15,10 @@
  */
 var container = require('rhea');
 
-var args = require('minimist')(process.argv.slice(2),
-    {
-        string: ['node'],
-        number: ['port'],
-        alias: { n: 'node', p: 'port' },
-        default: { node: "examples", port: 5672 },
-    }
-);
+var args = require('./options.js').options({
+      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) to which messages are sent'},
+      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+    }).help('help').argv;
 
 var requests = ["Twas brillig, and the slithy toves",
                 "Did gire and gymble in the wabe.",
