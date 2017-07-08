@@ -401,7 +401,7 @@ Sends a message. A message is an object that may contain the following fields:
   * group_id
   * id
   * correlation_id
-  * application properties, an object/map which can take arbitrary, application defined named values
+  * application_properties, an object/map which can take arbitrary, application defined named values
   * body, which can be either a string, an object or a buffer
 
 ##### close()
