@@ -33,5 +33,6 @@ function authenticate(username, password) {
 container.sasl_server_mechanisms.enable_plain(authenticate);
 var server = container.listen({'port':args.port});
 container.on('connection_open', function (context) {
+    context.connection.local.open.properties = {'foo':'abc'};
     console.log('Connected!');
 });

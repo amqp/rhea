@@ -26,4 +26,6 @@ container.on('sendable', function (context) {
     context.sender.send({body:'Hello World!'});
     context.sender.detach();
 });
-container.connect({'port':5672});
+//container.connect({'port':5672});
+container.connect({'host':'messaging-enmasse.34.210.100.115.nip.io','port':443, transport:'tls',
+                   servername:'messaging-enmasse.34.210.100.115.nip.io',rejectUnauthorized:false});

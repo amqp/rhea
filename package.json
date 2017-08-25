@@ -1,6 +1,6 @@
 {
     "name" : "rhea",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "reactive AMQP 1.0 library",
     "homepage": "http://github.com/grs/rhea",
     "license": "Apache-2.0",
