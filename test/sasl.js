@@ -19,7 +19,7 @@ var assert = require('assert');
 var rhea = require('../lib/container.js');
 
 describe('sasl plain', function() {
-    this.slow(100);
+    this.slow(200);
     var container, listener;
 
     function authenticate(username, password) {
@@ -52,9 +52,58 @@ describe('sasl plain', function() {
     });
 });
 
+describe('sasl init hostname', function() {
+    this.slow(200);
+    var container, listener, hostname;
+
+    function authenticate(username, password, __hostname) {
+        hostname = __hostname;
+        return true;
+    }
+
+    beforeEach(function(done) {
+        hostname = undefined;
+        container = rhea.create_container();
+        container.sasl_server_mechanisms.enable_plain(authenticate);
+        container.on('disconnected', function () {});
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('uses host by default', function(done) {
+        container.connect({username:'a',password:'a', host:'localhost', port:listener.address().port}).on('connection_open', function(context) {
+            context.connection.close();
+            assert.equal(hostname, 'localhost');
+            done();
+        });
+    });
+
+    it('prefers servername to host', function(done) {
+        container.connect({username:'a',password:'b', servername:'somethingelse', host:'localhost', port:listener.address().port}).on('connection_open', function(context) {
+            context.connection.close();
+            assert.equal(hostname, 'somethingelse');
+            done();
+        });
+    });
+
+    it('prefers sasl_init_hostname to servername or host', function(done) {
+        container.connect({username:'a',password:'b', sasl_init_hostname:'yetanother', servername:'somethingelse', host:'localhost', port:listener.address().port}).on('connection_open', function(context) {
+            context.connection.close();
+            assert.equal(hostname, 'yetanother');
+            done();
+        });
+    });
+});
+
 
 describe('sasl anonymous', function() {
-    this.slow(100);
+    this.slow(200);
 
     var container, listener;
 
