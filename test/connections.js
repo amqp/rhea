@@ -22,7 +22,7 @@ describe('connection fields', function() {
     var container, listener;
 
     beforeEach(function(done) {
-        container = rhea.create_container();
+        container = rhea.create_container({non_fatal_errors:[]});
         listener = container.listen({port:0});
         listener.on('listening', function() {
             done();
@@ -145,6 +145,7 @@ describe('connection error handling', function() {
 
     beforeEach(function(done) {
         container = rhea.create_container();
+        container.options.non_fatal_errors = [];
         listener = container.listen({port:0});
         listener.on('listening', function() {
             done();
@@ -189,7 +190,7 @@ describe('connection error handling', function() {
             assert.equal(error_handler_called, true);
             done();
         });
-        var c = rhea.create_container().connect(listener.address());
+        var c = rhea.create_container({non_fatal_errors:[]}).connect(listener.address());
         c.on('connection_error', function(context) {
             error_handler_called = true;
             var error = context.connection.error;
@@ -205,7 +206,7 @@ describe('connection error handling', function() {
         container.on('connection_close', function(context) {
             done();
         });
-        var container2 = rhea.create_container();
+        var container2 = rhea.create_container({non_fatal_errors:[]});
         container2.on('error', function (error) {
             assert.equal(error.condition, 'amqp:connection:forced');
             assert.equal(error.description, 'testing error on close');
