@@ -15,7 +15,8 @@
         "eslint":"",
         "mocha":"",
         "browserify":"",
-        "istanbul": ""
+        "istanbul": "",
+        "minimist":""
     },
     "scripts": {
         "lint": "eslint lib/*.js",
