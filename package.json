@@ -13,7 +13,7 @@
     },
     "devDependencies": {
         "eslint":"",
-        "mocha":"",
+        "mocha":"^3.0.0",
         "browserify":"",
         "istanbul": "",
         "minimist":""
