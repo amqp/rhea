@@ -114,7 +114,8 @@ default port of one or ther other will need to be changed through the
   node based scritps require the 'ws' node module to be installed. The
   browser based example requires a browserified version of the rhea
   library (this can be created e.g. by calling npm run-script
-  browserify).
+  browserify or make browserify). The browserified and minimized javascript
+  library is stored under the dest/ directory.
 
 To run the examples you will need the dependencies installed: the
 library itself depends on the 'debug' module, and some of the examples

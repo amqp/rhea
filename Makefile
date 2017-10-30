@@ -25,4 +25,6 @@ test_examples: test
 	mocha examples/test_examples.js
 
 browserify:
+	mkdir -p dest
 	npm run browserify
+	npm run uglify
