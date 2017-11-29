@@ -19,6 +19,7 @@ var assert = require('assert');
 var rhea = require('../lib/container.js');
 var amqp_messaging = require('../lib/message.js');
 var amqp_types = require('../lib/types.js');
+var filter = require('../lib/filter.js');
 
 describe('link fields', function() {
     var container, listener;
@@ -151,7 +152,7 @@ describe('link fields', function() {
             expiry_policy:'session-end',
             timeout:33,
             distribution_mode:'copy',
-            filter: {'jms-selector':amqp_types.wrap_described("colour = 'green'", 0x468C00000004)},
+            filter: filter.selector("colour = 'green'"),
             default_outcome: amqp_messaging.modified().described(),
             outcomes: ['amqp:list:accepted', 'amqp:list:rejected', 'amqp:list:released', 'amqp:list:modified'],
             capabilities: ['a', 'b', 'c']

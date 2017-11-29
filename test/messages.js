@@ -405,3 +405,54 @@ describe('acknowledgement', function() {
         client.connect(listener.address()).attach_receiver({autoaccept: false});
     });
 });
+
+describe('fragmentation', function() {
+    this.timeout(5000);
+    var container, sender, listener;
+
+    beforeEach(function(done) {
+        container = rhea.create_container();
+        listener = container.listen({port:0, max_frame_size:16384});
+        listener.on('listening', function() {
+            sender = container.connect({port:listener.address().port, max_frame_size:16384}).attach_sender();
+            done();
+        });
+
+    });
+
+    function get_data(n, c) {
+        var buffer = new Buffer(n);
+        if (c) buffer.fill(c);
+        return amqp_types.wrap_binary(buffer);
+    }
+
+    function transfer_test(size, count) {
+        var message = {body:get_data(size, 'x')};
+        var received = 0;
+        var n = count || 1;
+        return function(done) {
+            container.on('message', function(context) {
+                assert.equal(context.message.body.length, size);
+                assert.equal(context.message.body.toString(), message.body.toString());
+                if (++received === n) {
+                    done();
+                }
+            });
+            for (var i = 0; i < n; i++) {
+                sender.send(message);
+            }
+        };
+    }
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('handles single 16k message', transfer_test(16384));
+    it('handles single 32k message', transfer_test(32768));
+    it('handles single 64k message', transfer_test(65536));
+    it('handles single 1M message', transfer_test(1048576));
+    it('handles 100 16k messages', transfer_test(16384, 100));
+    it('handles 50 32k messages', transfer_test(32768, 50));
+    it('handles 10 64k messages', transfer_test(65536, 10));
+});

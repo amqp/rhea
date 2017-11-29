@@ -335,3 +335,66 @@ describe('connection send', function() {
         c.send({to:'b',body:'B'});
     });
 });
+
+describe('link lookup and iteration', function() {
+    var listener;
+
+    beforeEach(function(done) {
+        var container = rhea.create_container();
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('finds sender or receiver', function(done) {
+        var container = rhea.create_container();
+        var conn = container.connect(listener.address());
+        var r1 = conn.open_receiver({name:'foo'});
+        var r2 = conn.open_receiver({name:'bar'});
+        var s1 = conn.open_sender({name:'oof'});
+        var s2 = conn.open_sender({name:'rab'});
+        conn.on('connection_open', function (context) {
+            assert.equal(conn.find_receiver(function (r) { return r.name === 'foo'; }), r1);
+            assert.equal(conn.find_receiver(function (r) { return r.name === 'bar'; }), r2);
+            assert(conn.find_receiver(function (r) { return false; }) === undefined);
+            assert.equal(conn.find_sender(function (s) { return s.name === 'oof'; }), s1);
+            assert.equal(conn.find_sender(function (s) { return s.name === 'rab'; }), s2);
+            assert(conn.find_sender(function (s) { return false; }) === undefined);
+            conn.close();
+        });
+        conn.on('connection_close', function () {
+            done();
+        });
+    });
+    it('iterates over senders or receivers', function(done) {
+        var container = rhea.create_container();
+        var conn = container.connect(listener.address());
+        var r1 = conn.open_receiver({name:'foo'});
+        var r2 = conn.open_receiver({name:'bar'});
+        var s1 = conn.open_sender({name:'oof'});
+        var s2 = conn.open_sender({name:'rab'});
+        conn.on('connection_open', function (context) {
+            var results = [];
+            function collect (o) {
+                results.push(o.name);
+            }
+            conn.each_receiver(collect);
+            assert.deepEqual(results, ['foo', 'bar']);
+            results = [];
+            conn.each_sender(collect);
+            assert.deepEqual(results, ['oof', 'rab']);
+            results = [];
+            conn.each_link(collect);
+            assert.deepEqual(results, ['foo', 'bar', 'oof', 'rab']);
+            conn.close();
+        });
+        conn.on('connection_close', function () {
+            done();
+        });
+    });
+});
