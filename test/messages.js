@@ -276,6 +276,15 @@ describe('message content', function() {
     it('message has a toString', transfer_test({message_id:'my-id', body:'hello world!'}, function(message) {
         assert.equal(message.toString(), '{"message_id":"my-id","body":"hello world!"}');
     }));
+    it('sends and receives message in custom format', function (done) {
+        var message = new Buffer('hello world!');
+        container.on('message', function(context) {
+            assert.equal(context.format, 1111);
+            assert.equal(context.message.toString(), message.toString());
+            done();
+        });
+        sender.send(message, undefined, 1111);
+    });
 });
 
 describe('acknowledgement', function() {
