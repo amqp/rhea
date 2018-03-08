@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/grs/rhea.svg?branch=master)](https://travis-ci.org/grs/rhea)
+[![Build Status](https://travis-ci.org/amqp/rhea.svg?branch=master)](https://travis-ci.org/grs/amqp)
 
 # rhea
 
