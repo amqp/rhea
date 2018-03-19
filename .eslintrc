@@ -1,7 +1,7 @@
-module.exports = {
+{
     "env": {
         "node": true,
-        "es6": true /*for ArrayBuffer and UInt8Array globals*/
+        "es6": true
     },
     "extends": "eslint:recommended",
     "rules": {
@@ -142,6 +142,7 @@ module.exports = {
         "no-process-exit": "error",
         "no-proto": "error",
         "no-restricted-globals": "error",
+        "no-redeclare": "off",
         "no-restricted-imports": "error",
         "no-restricted-modules": "error",
         "no-restricted-syntax": "error",
@@ -228,4 +229,4 @@ module.exports = {
         "yield-star-spacing": "error",
         "yoda": "off"
     }
-};
+}

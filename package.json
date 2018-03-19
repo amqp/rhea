@@ -1,23 +1,23 @@
 {
-    "name" : "rhea",
+    "name": "rhea",
     "version": "0.2.10",
     "description": "reactive AMQP 1.0 library",
-    "homepage": "http://github.com/grs/rhea",
+    "homepage": "http://github.com/amqp/rhea",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "http://github.com/grs/rhea"
+        "url": "http://github.com/amqp/rhea"
     },
     "dependencies": {
         "debug": ">=0.8.0"
     },
     "devDependencies": {
-        "eslint":"",
-        "mocha":"^3.0.0",
-        "browserify":"",
+        "browserify": "",
+        "eslint": "",
         "istanbul": "",
-        "minimist":"",
-        "uglify-js":""
+        "minimist": "",
+        "mocha": "^3.0.0",
+        "uglify-js": ""
     },
     "scripts": {
         "lint": "eslint lib/*.js",
@@ -25,8 +25,13 @@
         "coverage": "istanbul cover _mocha",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
         "run-examples": "mocha examples/test_examples.js",
-        "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js"
+        "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
+        "prepublish": "npm run test",
+        "pretest": "npm run lint"
     },
-    "keywords": ["amqp","messaging"],
-    "main" : "./lib/container.js"
+    "keywords": [
+        "amqp",
+        "messaging"
+    ],
+    "main": "./lib/container.js"
 }
