@@ -264,14 +264,14 @@ object that may contain any of the following fields:
     identifier. It is often not needed, but can be set if it is,
   * name - The name of the link. This should be unique for the
     container. If not specified a unqiue name is generated.
-  * prefetch - A 'prefetch' window controlling the flow of messages
-    over this receiver. Defaults to 500 if not specified. A value of 0
-    can be used to turn of automatic flow control and manage it
-    directly.
+  * credit_window - A 'prefetch' window controlling the flow of
+    messages over this receiver. Defaults to 500 if not specified. A
+    value of 0 can be used to turn of automatic flow control and
+    manage it directly.
   * autoaccept - Whether received messages should be automatically
     accepted. Defaults to true.
 
-Note: If the link doesn't specify a value for the prefetch and
+Note: If the link doesn't specify a value for the credit_window and
 autoaccept options, the connection options are consulted followed by
 the container options. The default is used only if an option is not
 specified at any level.
