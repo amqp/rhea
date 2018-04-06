@@ -510,3 +510,105 @@ describe('settlement modes', function() {
         client.connect(listener.address()).attach_receiver({rcv_settle_mode:1});
     });
 });
+
+describe('preset sender options', function() {
+    var container, listener;
+
+    beforeEach(function(done) {
+        container = rhea.create_container();
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    function connection_options_test(default_options, verification, open_options) {
+        return function(done) {
+            container.on('receiver_open', function(context) {
+                verification(context.receiver);
+                done();
+            });
+            var c = container.connect(listener.address());
+            c.options.sender_options = default_options;
+            c.on('sender_open', function(context) {});
+            c.open_sender(open_options);
+        };
+    }
+
+    it('properties', connection_options_test({properties:{'foo':'bar'}}, function(receiver) {
+        assert.equal(receiver.properties.foo, 'bar');
+    }));
+
+    it('merged properties', connection_options_test({properties:{'foo':'bar'}}, function(receiver) {
+        assert.equal(receiver.properties.foo, 'bar');
+        assert.equal(receiver.properties.fursty, 'ferret');
+    }, {properties:{'fursty':'ferret'}}));
+
+    it('offered capabilities', connection_options_test({offered_capabilities:['xyz']}, function(receiver) {
+        assert.equal(receiver.offered_capabilities.length, 1);
+        assert.equal(receiver.offered_capabilities[0], 'xyz');
+    }));
+
+    it('desired capabilities', connection_options_test({desired_capabilities:['penguin']}, function(receiver) {
+        assert.equal(receiver.desired_capabilities.length, 1);
+        assert.equal(receiver.desired_capabilities[0], 'penguin');
+    }));
+
+});
+
+describe('preset receiver options', function() {
+    var container, listener;
+
+    beforeEach(function(done) {
+        container = rhea.create_container();
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    function connection_options_test(default_options, verification, open_options) {
+        return function(done) {
+            container.on('sender_open', function(context) {
+                verification(context.sender);
+                done();
+            });
+            var c = container.connect(listener.address());
+            c.options.receiver_options = default_options;
+            c.on('receiver_open', function(context) {});
+            c.open_receiver(open_options);
+        };
+    }
+
+    it('properties', connection_options_test({properties:{'foo':'bar'}}, function(sender) {
+        assert.equal(sender.properties.foo, 'bar');
+    }));
+
+    it('merged properties', connection_options_test({properties:{'bing':'bong'}}, function(sender) {
+        assert.equal(sender.properties.bing, 'bong');
+        assert.equal(sender.properties.black, 'sheep');
+    }, {properties:{'black':'sheep'}}));
+
+    it('offered capabilities', connection_options_test({offered_capabilities:['xyz']}, function(sender) {
+        assert.equal(sender.offered_capabilities.length, 1);
+        assert.equal(sender.offered_capabilities[0], 'xyz');
+    }));
+
+    it('desired capabilities', connection_options_test({desired_capabilities:['penguin']}, function(sender) {
+        assert.equal(sender.desired_capabilities.length, 1);
+        assert.equal(sender.desired_capabilities[0], 'penguin');
+    }));
+
+    it('max-message-size', connection_options_test({max_message_size:2048}, function(sender) {
+        assert.equal(sender.max_message_size, 2048);
+    }));
+
+});
