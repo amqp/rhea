@@ -17,8 +17,8 @@ var container = require('rhea');
 var fs = require('fs');
 var path = require('path');
 var args = require('../options.js').options({
-      'p': { alias: 'port', default: 5671, describe: 'port to listen on'}
-    }).help('help').argv;
+    'p': { alias: 'port', default: 5671, describe: 'port to listen on'}
+}).help('help').argv;
 
 container.on('connection_open', function (context) {
     var cert = context.connection.get_peer_certificate();
@@ -30,15 +30,15 @@ container.on('connection_open', function (context) {
     console.log('Connected: ' + cn + ((tls && tls.servername) ? ' [' + tls.servername + ']' : ''));
 });
 var listener = container.listen({port:args.port, transport:'tls',
-                  //enable_sasl_external:true,
-                  key: fs.readFileSync(path.resolve(__dirname, 'server-key.pem')),
-                  cert: fs.readFileSync(path.resolve(__dirname,'server-cert.pem')),
+    //enable_sasl_external:true,
+    key: fs.readFileSync(path.resolve(__dirname, 'server-key.pem')),
+    cert: fs.readFileSync(path.resolve(__dirname,'server-cert.pem')),
 
-                  // to require client authentication:
-                  requestCert: true,
-                  rejectUnauthorized: true,
-                  ca: [ fs.readFileSync(path.resolve(__dirname,'ca-cert.pem')) ]
-                 });
+    // to require client authentication:
+    requestCert: true,
+    rejectUnauthorized: true,
+    ca: [ fs.readFileSync(path.resolve(__dirname,'ca-cert.pem')) ]
+});
 listener.on('clientError', function (error, socket) {
     console.log(error);
 });

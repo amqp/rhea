@@ -16,8 +16,8 @@
 var container = require('rhea');
 
 var args = require('./options.js').options({
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
 
 //container.sasl_server_mechanisms.enable_anonymous();
 var server = container.listen({'port':args.port});
@@ -42,7 +42,7 @@ container.on('message', function (context) {
     var request = context.message;
     var reply_to = request.reply_to;
     var response = {to: reply_to};
-    console.log("Received: " + request.body);
+    console.log('Received: ' + request.body);
     if (request.correlation_id) {
         response.correlation_id = request.correlation_id;
     }

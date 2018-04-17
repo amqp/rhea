@@ -18,9 +18,9 @@ var WebSocket = require('ws');
 var ws = client.websocket_connect(WebSocket);
 
 var args = require('../options.js').options({
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to send'},
-      'u': { alias: 'url', default: 'ws://localhost:5673', describe: 'url to connect to'}
-    }).help('help').argv;
+    'm': { alias: 'messages', default: 100, describe: 'number of messages to send'},
+    'u': { alias: 'url', default: 'ws://localhost:5673', describe: 'url to connect to'}
+}).help('help').argv;
 
 var requests = args.messages;
 var current = 1;

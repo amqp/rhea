@@ -15,10 +15,11 @@
  */
 var container = require('rhea');
 var args = require('../options.js').options({
-      'username': { describe: 'username to connect with'},
-      'password': { describe: 'password to connect with (will use PLAIN)'},
-      'p': { alias: 'port', default: 5671, describe: 'port to connect to'}
-    }).help('help').argv;
+    'username': { describe: 'username to connect with'},
+    'password': { describe: 'password to connect with (will use PLAIN)'},
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5671, describe: 'port to connect to'}
+}).help('help').argv;
 
 /**
  * Default SASL behaviour is as follows. If the username and password
@@ -36,4 +37,4 @@ container.on('connection_open', function (context) {
     console.log('Connected!');
     context.connection.close();
 });
-container.connect({'port':args.port});
+container.connect({ port: args.port, host: args.host });

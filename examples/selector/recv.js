@@ -17,11 +17,12 @@ var container = require('rhea');
 var filters = require('rhea/lib/filter.js');
 
 var args = require('../options.js').options({
-      's': { alias: 'selector', default: "colour = 'red'", describe: 'the selector string to use'},
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
-      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue or topic) from which messages are received'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+    's': { alias: 'selector', default: "colour = 'red'", describe: 'the selector string to use'},
+    'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
+    'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue or topic) from which messages are received'},
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
 
 var received = 0;
 var expected = args.messages;
@@ -32,7 +33,7 @@ container.on('message', function (context) {
         return;
     }
     if (expected === 0 || received < expected) {
-        console.log(context.message.body)
+        console.log(context.message.body);
         if (++received === expected) {
             context.receiver.detach();
             context.connection.close();
@@ -40,4 +41,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({'port':args.port}).open_receiver({source:{address:args.node, filter:filters.selector(args.selector)}});
+container.connect({ port: args.port, host: args.host }).open_receiver({source:{address:args.node, filter:filters.selector(args.selector)}});

@@ -15,8 +15,9 @@
  */
 var container = require('rhea');
 var args = require('../options.js').options({
-      'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
-    }).help('help').argv;
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
+}).help('help').argv;
 
 /**
  * To authenticate using PLAIN and a simple username and password
@@ -28,10 +29,10 @@ var args = require('../options.js').options({
  */
 function authenticate(username, password) {
     console.log('Authenticating as ' + username);
-    return username.split("").reverse().join("") === password;
+    return username.split('').reverse().join('') === password;
 }
 container.sasl_server_mechanisms.enable_plain(authenticate);
-var server = container.listen({'port':args.port});
+var server = container.listen({ port: args.port, host: args.host });
 container.on('connection_open', function (context) {
     console.log('Connected!');
 });
