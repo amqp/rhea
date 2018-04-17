@@ -16,9 +16,9 @@
 var container = require('rhea');
 
 var args = require('../options.js').options({
-      'm': { alias: 'messages', default: 0, describe: 'number of messages to expect'},
-      'p': { alias: 'port', default: 8888, describe: 'port to listen on'}
-    }).help('help').argv;
+    'm': { alias: 'messages', default: 0, describe: 'number of messages to expect'},
+    'p': { alias: 'port', default: 8888, describe: 'port to listen on'}
+}).help('help').argv;
 
 var received = 0;
 var expected = args.messages;

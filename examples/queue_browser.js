@@ -16,10 +16,11 @@
 var container = require('rhea');
 
 var args = require('./options.js').options({
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
-      'n': { alias: 'node', default: 'examples', describe: 'name of queue to browse'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+    'm': { alias: 'messages', default: 100, describe: 'number of messages to expect'},
+    'n': { alias: 'node', default: 'examples', describe: 'name of queue to browse'},
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
 
 var received = 0;
 var expected = args.messages;
@@ -34,4 +35,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({'port':args.port}).open_receiver({source:{address:args.node,distribution_mode:'copy'}});
+container.connect({port: args.port, host: args.host}).open_receiver({source:{address:args.node,distribution_mode:'copy'}});

@@ -15,11 +15,12 @@
  */
 var container = require('rhea');
 var args = require('../options.js').options({
-      'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
-    }).help('help').argv;
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to listen on'}
+}).help('help').argv;
 
 container.sasl_server_mechanisms.enable_anonymous();
-var server = container.listen({'port':args.port});
+var server = container.listen({ port: args.port, host: args.host });
 container.on('connection_open', function (context) {
     console.log('Connected!');
 });

@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+var args = require('./options.js').options({
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
+
 var container = require('rhea');
 container.on('connection_open', function (context) {
     context.connection.open_receiver('examples');
@@ -26,4 +32,4 @@ container.on('sendable', function (context) {
     context.sender.send({body:'Hello World!'});
     context.sender.detach();
 });
-container.connect({'port':5672});
+container.connect({port: args.port, host: args.host});

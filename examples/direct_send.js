@@ -16,9 +16,9 @@
 var container = require('rhea');
 
 var args = require('./options.js').options({
-      'm': { alias: 'messages', default: 100, describe: 'number of messages to send'},
-      'p': { alias: 'port', default: 8888, describe: 'port to connect to'}
-    }).help('help').argv;
+    'm': { alias: 'messages', default: 100, describe: 'number of messages to send'},
+    'p': { alias: 'port', default: 8888, describe: 'port to connect to'}
+}).help('help').argv;
 
 var server = container.listen({'port':args.port});
 
@@ -29,7 +29,7 @@ container.on('sendable', function (context) {
     while (context.sender.sendable() && sent < total) {
         sent++;
         console.log('sent ' + sent);
-        context.sender.send({id:sent, body:{'sequence':sent}})
+        context.sender.send({id:sent, body:{'sequence':sent}});
     }
     if (sent === total) {
         context.sender.set_drained(sent === total);
@@ -37,7 +37,7 @@ container.on('sendable', function (context) {
 });
 container.on('accepted', function (context) {
     if (++confirmed === total) {
-        console.log("all messages confirmed")
+        console.log('all messages confirmed');
     }
 });
 container.on('disconnected', function (context) {

@@ -16,14 +16,17 @@
 var container = require('rhea');
 
 var args = require('./options.js').options({
-      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) to which messages are sent'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+    'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) to which messages are sent'},
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
 
-var requests = ["Twas brillig, and the slithy toves",
-                "Did gire and gymble in the wabe.",
-                "All mimsy were the borogroves,",
-                "And the mome raths outgrabe."];
+var requests = [
+    'Twas brillig, and the slithy toves',
+    'Did gire and gymble in the wabe.',
+    'All mimsy were the borogroves,',
+    'And the mome raths outgrabe.'
+];
 var sender;
 
 function next_request(context) {
@@ -41,7 +44,7 @@ container.on('receiver_open', function (context) {
 });
 
 container.on('message', function (context) {
-    console.log(requests.shift() + " => " + context.message.body);
+    console.log(requests.shift() + ' => ' + context.message.body);
     if (requests.length) {
         next_request(context);
     } else {
@@ -49,4 +52,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({'port':args.port});
+container.connect({port: args.port, host: args.host});

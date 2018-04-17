@@ -27,13 +27,16 @@ container.on('connection_open', function (context) {
     console.log('Connected!');
     context.connection.close();
 });
-container.connect({host:args.host, port:args.port, transport:'tls',
-                   servername:args.servername,
-                   //enable_sasl_external:true,
-                   // These are necessary only if using the client certificate authentication
-                   key: fs.readFileSync(path.resolve(__dirname,'client-key.pem')),
-                   cert: fs.readFileSync(path.resolve(__dirname,'client-cert.pem')),
+container.connect({
+    host:args.host,
+    port:args.port,
+    transport:'tls',
+    servername:args.servername,
+    //enable_sasl_external:true,
+    // These are necessary only if using the client certificate authentication
+    key: fs.readFileSync(path.resolve(__dirname,'client-key.pem')),
+    cert: fs.readFileSync(path.resolve(__dirname,'client-cert.pem')),
 
-                   // This is necessary only if the server uses the self-signed certificate
-                   ca: [ fs.readFileSync(path.resolve(__dirname,'ca-cert.pem')) ]
-                  });
+    // This is necessary only if the server uses the self-signed certificate
+    ca: [ fs.readFileSync(path.resolve(__dirname,'ca-cert.pem')) ]
+});

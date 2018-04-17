@@ -16,9 +16,10 @@
 var container = require('rhea');
 
 var args = require('./options.js').options({
-      'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) from which messages are received'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+    'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) from which messages are received'},
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
 
 var batch = 10;
 var received = 0;
@@ -41,4 +42,4 @@ container.on('receiver_drained', function (context) {
     context.connection.close();
 });
 
-container.connect({'port':args.port}).open_receiver({source:{address:args.node},credit_window:0/*disable automatic credit*/});
+container.connect({port: args.port, host: args.host}).open_receiver({source:{address:args.node},credit_window:0/*disable automatic credit*/});

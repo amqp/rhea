@@ -16,13 +16,14 @@
  */
 
 var args = require('../options.js').options({
-      'client': { default: 'my-client', describe: 'name of identifier for client container'},
-      'subscription': { default: 'my-subscription', describe: 'name of identifier for subscription'},
-      't': { alias: 'topic', default: 'topic://PRICE.STOCK.NYSE.*', describe: 'name of topic to subscribe to'},
-      'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
-    }).help('help').argv;
+    'client': { default: 'my-client', describe: 'name of identifier for client container'},
+    'subscription': { default: 'my-subscription', describe: 'name of identifier for subscription'},
+    't': { alias: 'topic', default: 'topic://PRICE.STOCK.NYSE.*', describe: 'name of topic to subscribe to'},
+    'h': { alias: 'host', default: 'localhost', describe: 'dns or ip name of server where you want to connect'},
+    'p': { alias: 'port', default: 5672, describe: 'port to connect to'}
+}).help('help').argv;
 
-var connection = require('rhea').connect({port:args.port, container_id:args.client});
+var connection = require('rhea').connect({ port:args.port, host: args.host, container_id:args.client });
 connection.on('message', function (context) {
     if (context.message.body === 'detach') {
         // detaching leaves the subscription active, so messages sent
