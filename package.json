@@ -17,14 +17,16 @@
         "istanbul": "",
         "minimist": "",
         "mocha": "^3.0.0",
-        "uglify-js": ""
+        "uglify-js": "",
+        "require-self": "^0.2.1",
+        "ws": "^5.1.1"
     },
     "scripts": {
         "lint": "eslint lib/*.js",
         "test": "mocha",
         "coverage": "istanbul cover _mocha",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
-        "run-examples": "mocha examples/test_examples.js",
+        "run-examples": "require-self && mocha examples/test_examples.js",
         "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
         "prepublish": "npm run test",
         "pretest": "npm run lint"
