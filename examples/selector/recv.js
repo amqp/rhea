@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var container = require('rhea');
-var filters = require('rhea/lib/filter.js');
+var filters = require('rhea').filter;
 
 var args = require('../options.js').options({
     's': { alias: 'selector', default: "colour = 'red'", describe: 'the selector string to use'},
