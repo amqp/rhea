@@ -558,6 +558,27 @@ describe('preset sender options', function() {
         assert.equal(receiver.desired_capabilities[0], 'penguin');
     }));
 
+    it('does not modify default options', function(done) {
+        var count = 0;
+        var name;
+        container.on('receiver_open', function(context) {
+            if (++count === 1) {
+                assert.equal(context.receiver.offered_capabilities.length, 1);
+                assert.equal(context.receiver.offered_capabilities[0], 'xyz');
+                name = context.receiver.name;
+            } else {
+                assert.notEqual(context.receiver.name, name);
+                assert.notEqual(context.receiver.target, 'foo');
+                done();
+            }
+        });
+        var c = container.connect(listener.address());
+        c.options.sender_options = {offered_capabilities:['xyz']};
+        c.on('sender_open', function(context) {});
+        c.open_sender({target:'foo'}).on('sender_open', function () {
+            c.open_sender();
+        });
+    });
 });
 
 describe('preset receiver options', function() {
