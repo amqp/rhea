@@ -107,7 +107,11 @@ describe('message content', function() {
     }));
     var test_uuid = rhea_util.uuid4();
     it('sends and receives message-id as uuid', transfer_test({message_id:test_uuid}, function(message) {
-        assert.equal(rhea_util.uuid_to_string(message.message_id), rhea_util.uuid_to_string(test_uuid));
+        assert.equal(rhea.uuid_to_string(message.message_id), rhea.uuid_to_string(test_uuid));
+    }));
+    var test_uuid_string = '55e6e3c7-a9c3-47da-83ff-9be7e2bd1b63';
+    it('sends and receives message-id as uuid when converted from string', transfer_test({message_id:rhea.string_to_uuid(test_uuid_string)}, function(message) {
+        assert.equal(rhea.uuid_to_string(message.message_id), test_uuid_string);
     }));
     it('sends and receives string property', transfer_test({application_properties:{colour:'red'}}, function(message) {
         assert.equal(message.application_properties.colour, 'red');
