@@ -129,15 +129,13 @@ describe('rpc', function() {
             assert.equal(result, undefined);
             assert.equal(error.name, 'bad-mood');
             assert.equal(error.description, 'I dont like the cut of your jib');
-            client.close();
-            done();
-        });
-        client.bar('hello', function(result, error) {
-            assert.equal(result, undefined);
-            assert.equal(error.name, 'error');
-            assert.equal(error.description, 'no joy');
-            client.close();
-            done();
+            client.bar('hello', function(result, error) {
+                assert.equal(result, undefined);
+                assert.equal(error.name, 'error');
+                assert.equal(error.description, 'no joy');
+                client.close();
+                done();
+            });
         });
     });
     it('multiple invocations', function(done) {

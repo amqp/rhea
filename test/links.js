@@ -633,3 +633,51 @@ describe('preset receiver options', function() {
     }));
 
 });
+
+describe('miscellaneous', function() {
+    var server, client, listener;
+
+    beforeEach(function(done) {
+        server = rhea.create_container();
+        client = rhea.create_container();
+        listener = server.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('receive if local closed but remote open', function(done) {
+        server.on('sender_open', function(context) {
+            context.sender.send({subject:'one'});
+        });
+        var msgs = ['two', 'three', 'four', 'five'];
+        server.once('settled', function (context) {
+            msgs.forEach(function (m) {
+                context.sender.send({subject:m});
+            });
+        });
+        function verify_after_close (context) {
+            assert(msgs.length);
+            var expected = msgs.shift();
+            assert.equal(context.message.subject, expected);
+            if (msgs.length === 0) {
+                context.connection.close();
+            }
+        }
+        client.once('message', function (context) {
+            assert.equal(context.message.subject, 'one');
+            client.on('message', verify_after_close);
+            context.receiver.close();
+        });
+        client.on('connection_close', function (context) {
+            assert.equal(msgs.length, 0);
+            done();
+        });
+        client.connect(listener.address()).open_receiver();
+    });
+});
