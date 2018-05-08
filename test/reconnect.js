@@ -68,6 +68,20 @@ describe('reconnect', function() {
             }
         });
     });
+    it('stops trying after limit reached', function(done) {
+        var container = rhea.create_container();
+        var count = 0;
+        var disconnects = 0;
+        var c = container.connect(add({port:65535}, 'reconnect_limit', 3));
+        container.on('connection_error', function () {});
+        c.on('disconnected', function (context) {
+            disconnects++;
+            if (!context.reconnecting) {
+                assert.equal(disconnects, 4/*first disconnection + 3 failed reconnect attempts*/);
+                done();
+            }
+        });
+    });
     it('re-establishes link successfully', function(done) {
         var container = rhea.create_container();
         var count = 0;

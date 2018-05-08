@@ -335,7 +335,13 @@ Raised when the remote peer indicates the connection is closed.
 
 ##### disconnected
 
-Raised when the underlying tcp connection is lost.
+Raised when the underlying tcp connection is lost. The context has a
+`reconnecting` property which is true if the library is attempting to
+automatically reconnect and false if it has reached the reconnect
+limit. If reconnect has not been enabled or if the connection is a tcp
+server, then the `reconnecting` property is undefined. The context may
+also have an `error` property giving some information about the reason
+for the disconnect.
 
 ---------------------------------------------------------------------
 ### Receiver
