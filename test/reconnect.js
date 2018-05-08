@@ -103,4 +103,63 @@ describe('reconnect', function() {
             }
         });
     });
+    it('does not re-establish removed link', function(done) {
+        var container = rhea.create_container();
+        var receiver_opens = 0;
+        var sender_opens = 0;
+        var disconnects = 0;
+        var c = container.connect(listener.address());
+        var r = c.open_receiver('my-receiver');
+        var s = c.open_sender('my-sender');
+        c.on('disconnected', function (context) {
+            disconnects++;
+            r.remove();
+        });
+        c.on('receiver_open', function (context) {
+            assert.equal(++receiver_opens, 1);
+            assert.equal(context.connection.remote.open.hostname, 'test' + receiver_opens);
+        });
+        c.on('sender_open', function (context) {
+            sender_opens++;
+            assert.equal(context.connection.remote.open.hostname, 'test' + sender_opens);
+            if (sender_opens === 1) {
+                socket.end();
+            } else {
+                assert.equal(disconnects, 1);
+                assert.equal(receiver_opens, 1);
+                context.connection.close();
+                done();
+            }
+        });
+    });
+    it('does not re-establish removed session', function(done) {
+        var container = rhea.create_container();
+        var sender_opens = 0;
+        var extra_session_opens = 0;
+        var disconnects = 0;
+        var c = container.connect(listener.address());
+        var s = c.open_sender('my-sender');
+        var extra_session = c.create_session();
+        extra_session.begin();
+        extra_session.on('session_open', function () {
+            assert.equal(disconnects, 0);
+            assert.equal(++extra_session_opens, 1);
+        });
+        c.on('disconnected', function (context) {
+            disconnects++;
+            extra_session.remove();
+        });
+        c.on('sender_open', function (context) {
+            sender_opens++;
+            assert.equal(context.connection.remote.open.hostname, 'test' + sender_opens);
+            if (sender_opens === 1) {
+                socket.end();
+            } else {
+                assert.equal(disconnects, 1);
+                assert.equal(extra_session_opens, 1);
+                context.connection.close();
+                done();
+            }
+        });
+    });
 });
