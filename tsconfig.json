@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "newLine": "LF",
+    "target": "es5",
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "declaration": true,
+    "declarationDir": "./typings",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es5",
+      "es6",
+      "es7",
+      "esnext",
+      "esnext.asynciterable",
+      "es2015.iterable"
+    ]
+  },
+  "compileOnSave": true,
+  "include": [
+    "typings/*"
+  ],
+  "exclude": [
+    "node_modules/*"
+  ]
+}

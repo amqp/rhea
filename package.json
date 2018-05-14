@@ -12,6 +12,9 @@
         "debug": ">=0.8.0"
     },
     "devDependencies": {
+        "@types/node": "^8.0.37",
+        "@types/debug": "^0.0.30",
+        "@types/mocha": "^5.2.0",
         "browserify": "",
         "eslint": "",
         "istanbul": "",
@@ -35,5 +38,6 @@
         "amqp",
         "messaging"
     ],
-    "main": "./lib/container.js"
+    "main": "./lib/container.js",
+    "types": "./typings/index.d.ts"
 }
