@@ -209,11 +209,11 @@ export interface ReceiverOptions extends LinkOptions {
   /**
    * @property {object} source  The source from which messages are received.
    */
-  source?: TerminusOptions;
+  source?: TerminusOptions | string;
   /**
    * @property {object} [target]  The target of a receiving link is the local identifier
    */
-  target?: TerminusOptions;
+  target?: TerminusOptions | string;
 }
 
 /**
@@ -229,11 +229,11 @@ export interface SenderOptions extends LinkOptions {
   /**
    * @property {object} target  - The target to which messages are sent
    */
-  target?: TerminusOptions;
+  target?: TerminusOptions | string;
   /**
    * @property {object} [source]  The source of a sending link is the local identifier
    */
-  source?: TerminusOptions;
+  source?: TerminusOptions | string;
 }
 /**
  * Provides a Dictionary like structure <Key, Value> of Type T.
@@ -305,7 +305,7 @@ export interface AmqpMessageProperties {
    * @property {string} [message_id] The application message identifier that uniquely idenitifes a message.
    * The user is responsible for making sure that this is unique in the given context. Guids usually make a good fit.
    */
-  message_id?: string;
+  message_id?: string | Buffer;
   /**
    * @property {string} [reply_to] The address of the node to send replies to.
    */
@@ -347,6 +347,40 @@ export interface AmqpMessageProperties {
    * @property {string} [reply_to_group_id] The group the reply message belongs to.
    */
   reply_to_group_id?: string;
+  /**
+   * @property {boolean} [first_acquirer] If this value is true, then this message has not been
+   * acquired by any other link. Ifthis value is false, then this message MAY have previously
+   * been acquired by another link or links.
+   */
+  first_acquirer?: boolean;
+  /**
+   * @property {number} [delivery_count] The number of prior unsuccessful delivery attempts.
+   */
+  delivery_count?: number;
+  /**
+   * @property {number} [ttl] time to live in ms.
+   */
+  ttl?: number;
+  /**
+   * @property {boolean} [durable] Specifies durability requirements.
+   */
+  durable?: boolean;
+  /**
+   * @property {number} [priority] The relative message priority. Higher numbers indicate higher
+   * priority messages.
+   */
+  priority?: number;
+  /**
+   * @property {string} [subject] A common field for summary information about the message
+   * content and purpose.
+   */
+  subject?: string;
+  /**
+   * @property {string} [user_id] The identity of the user responsible for producing the message.
+   */
+  user_id?: string;
+
+
 }
 
 /**
@@ -371,11 +405,11 @@ export interface Context {
   /**
    * @property {Connection} connection The amqp connection.
    */
-  connection: any;
+  connection: Connection;
   /**
    * @property {Container} container The amqp container
    */
-  container: any;
+  container: Container;
   /**
    * @property {Delivery} [delivery] The amqp delivery that is received after sending a message.
    */
@@ -388,15 +422,15 @@ export interface Context {
   /**
    * @property {Receiver} [receiver] The amqp receiver link that was created on the amqp connection.
    */
-  receiver?: any;
+  receiver?: Receiver;
   /**
    * @property {Session} session The amqp session link that was created on the amqp connection.
    */
-  session: any;
+  session: Session;
   /**
    * @property {Sender} [sender] The amqp sender link that was created on the amqp connection.
    */
-  sender?: any;
+  sender?: Sender;
 }
 
 /**
@@ -422,7 +456,14 @@ export interface AmqpError {
   value?: any[];
 }
 
-export declare class Connection extends EventEmitter {
+export declare interface Connection extends EventEmitter {
+  [x: string]: any;
+  options: any;
+  hostname?: string;
+  container_id: string;
+  max_frame_size?: number;
+  idle_time_out?: number;
+  channel_max?: number;
   registered: boolean;
   state: EndpointState;
   local_channel_map: { [x: string]: Session };
@@ -439,12 +480,12 @@ export declare class Connection extends EventEmitter {
   socket_ready: boolean;
   scheduled_reconnect?: NodeJS.Timer;
   default_sender?: Sender;
+  properties?: { [x: string]: any };
   readonly error?: any;
   transport_error: {
     condition: "amqp:unauthorized-access";
     description: string;
-  }
-  constructor(options: ConnectionOptions, container: Container);
+  };
   dispatch(name: string): boolean;
   reset(): void;
   connect(): Connection;
@@ -452,10 +493,10 @@ export declare class Connection extends EventEmitter {
   _connect(): Connection;
   accept(socket: Socket): Connection;
   init(socket: Socket): Connection;
-  attach_sender(options?: SenderOptions): Sender;
-  open_sender(options?: SenderOptions): Sender;
-  attach_receiver(options?: ReceiverOptions): Receiver;
-  open_receiver(options?: ReceiverOptions): Receiver;
+  attach_sender(options?: SenderOptions | string): Sender;
+  open_sender(options?: SenderOptions | string): Sender;
+  attach_receiver(options?: ReceiverOptions | string): Receiver;
+  open_receiver(options?: ReceiverOptions | string): Receiver;
   get_option(name: string, default_value: any): any;
   send(msg: any): Delivery;
   connected(): void;
@@ -471,7 +512,7 @@ export declare class Connection extends EventEmitter {
   eof(): void;
   _disconnected(error: any): void;
   open(): void;
-  close(): void;
+  close(error?: any): void;
   is_open(): boolean;
   is_remote_open(): boolean;
   is_closed(): boolean;
@@ -481,7 +522,7 @@ export declare class Connection extends EventEmitter {
   find_link(filter: Function): link | undefined;
   each_receiver(action: Function, filter?: Function): void;
   each_sender(action: Function, filter?: Function): void;
-  each_link(action: Function, filter?: Function): void;
+  each_link(action: Function,  filter?: Function): void;
   on_open(frame: frames): void;
   on_close(frame: frames): void;
   _register(): void;
@@ -492,7 +533,7 @@ export declare class Connection extends EventEmitter {
   on_begin(frame: frames): void;
   get_peer_certificate(): any | undefined;
   get_tls_socket(): Socket | undefined;
-  _context(c: any): any | undefined;
+  _context(c?: Context): Context | undefined;
   remove_session(session: Session): void;
   on_end(frame: frames): void;
   on_attach(frame: frames): void;

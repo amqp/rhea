@@ -1,12 +1,13 @@
 /// <reference types="node" />
 
-import { Connection } from "./connection";
+import { Connection, Context } from "./connection";
 import { EndpointState } from "./endpoint";
 import { EventEmitter } from "events";
 import { link, Sender, Receiver } from "./link";
 import { frames } from "./frames";
+import { CreateTypeDesc, AmqpError } from ".";
 
-export interface Delivery {
+export declare interface Delivery {
   data: Buffer[];
   format: number;
   id: number;
@@ -18,15 +19,18 @@ export interface Delivery {
   state?: any;
   remote_state?: any;
   update(settled: boolean, state?: any): void;
+  accept(): void;
+  release(params?: any): void;
+  reject(error: AmqpError): void;
+  modified?(params: any): void;
 }
 
-export class CircularBuffer {
+export declare interface CircularBuffer {
   capacity: number;
   size: number;
   head: number;
   tail: number;
   entries: any[];
-  constructor(capacity: number);
   available(): number;
   push(o: any): void;
   pop_if(f: Function): number;
@@ -35,8 +39,7 @@ export class CircularBuffer {
   get_tail(): any | undefined;
 }
 
-export class Outgoing {
-  constructor(connection: Connection);
+export declare interface Outgoing {
   deliveries: CircularBuffer;
   updated: any[];
   pending_dispositions: any[];
@@ -58,8 +61,7 @@ export class Outgoing {
   process(): void;
 }
 
-export class Incoming {
-  constructor();
+export declare interface Incoming {
   readonly window: number;
   deliveries: CircularBuffer;
   updated: any[];
@@ -76,7 +78,7 @@ export class Incoming {
   on_disposition(fields: any): void;
 }
 
-export class Session extends EventEmitter {
+export declare interface Session extends EventEmitter {
   connection: Connection;
   outgoing: Outgoing;
   incoming: Incoming;
@@ -85,7 +87,6 @@ export class Session extends EventEmitter {
   remote: any;
   links: {[prop: string]: link};
   options: any;
-  constructor(connection: Connection, local_channel: any);
   reset(): void;
   dispatch(name: string): boolean;
   output(frame: frames, payload: any): void;
@@ -119,7 +120,7 @@ export class Session extends EventEmitter {
   on_attach(frame: frames): void;
   on_disposition(frame: frames): void;
   on_flow(frame: frames): void;
-  _context(c: any): any;
+  _context(c?: Context): Context;
   _get_link(frame: frames): link;
   on_detach(frame: frames): void;
   remove_link(link: link): void;

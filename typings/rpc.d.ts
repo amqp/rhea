@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 import { Container } from "./container";
-import { Connection } from "./connection";
+import { Connection, Context } from "./connection";
 import { Sender, Receiver, link } from "./link";
 
 interface IdGenerator {
@@ -17,7 +17,7 @@ declare class Client {
   outstanding: any;
   constructor(container: Container, address: string);
   _request(id: string | number, name: string, args: any, callback: Function): void;
-  _response(context: any): void;
+  _response(context: Context): void;
   _ready(): void;
   _process_pending(): void;
   call(name: string, args: any, callback: Function): void;
@@ -56,10 +56,11 @@ declare class Server {
   constructor(container: Container, address: string, options: any);
   _connection_open(): void;
   _respond(response: { subject: string, body: any, [x: string]: any }): void;
-  _request(context: any): void;
+  _request(context: Context): void;
   bind_sync(f: Function, name: string): void;
   bind(f: Function, name: string): void;
   close(): void;
 }
+
 export const server: (container: Container, address: string, options: any) => Server;
 export const client: (connection: Connection, address: string) => Client;

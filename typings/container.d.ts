@@ -13,23 +13,23 @@ import { types } from "./types";
 
 interface ContainerOptions {
   id?: string;
+  non_fatal_errors?: any[];
   [x: string]: any;
 }
 
-export declare class Container extends EventEmitter {
+export declare interface IContainer extends EventEmitter {
   options: ContainerOptions;
   id: string;
   sasl_server_mechanisms: any;
-  constructor(options?: ContainerOptions);
   dispatch(name: string): boolean;
   connect(options?: any): Connection;
   listen(options: ListenOptions | TlsOptions): Server | TlsServer;
-  create_container(options?: ContainerOptions): Container;
+  create_container(options?: ContainerOptions): IContainer;
   get_option(name: string, default_value: any): any;
   generate_uuid: generate_uuid;
   string_to_uuid: string_to_uuid;
   uuid_to_string: uuid_to_string;
-  rpc_server(address: string, options: any): any;
+  rpc_server(address: string, options?: any): any;
   rpc_client(address: string): any;
   websocket_accept(socket: Socket, options: ConnectionOptions): void;
   websocket_connect: ws.connect;
@@ -38,3 +38,27 @@ export declare class Container extends EventEmitter {
   message: message;
   sasl: sasl;
 }
+
+export declare class Container extends EventEmitter implements IContainer {
+  constructor(options?: ContainerOptions);
+  options: ContainerOptions;
+  id: string;
+  sasl_server_mechanisms: any;
+  dispatch(name: string): boolean;
+  connect(options?: any): Connection;
+  listen(options: ListenOptions | TlsOptions): Server | TlsServer;
+  create_container(options?: ContainerOptions): IContainer;
+  get_option(name: string, default_value: any): any;
+  generate_uuid: generate_uuid;
+  string_to_uuid: string_to_uuid;
+  uuid_to_string: uuid_to_string;
+  rpc_server(address: string, options?: any): any;
+  rpc_client(address: string): any;
+  websocket_accept(socket: Socket, options: ConnectionOptions): void;
+  websocket_connect: ws.connect;
+  filter: filter;
+  types: types;
+  message: message;
+  sasl: sasl;
+}
+

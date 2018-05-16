@@ -1,12 +1,11 @@
 /// <reference types="node" />
 
-export declare class EndpointState {
+export declare interface EndpointState {
   local_open: boolean;
   remote_open: boolean;
   open_requests: number;
   close_requests: number;
   initialised: boolean;
-  constructor();
   init(): void;
   open(): boolean;
   close(): boolean;

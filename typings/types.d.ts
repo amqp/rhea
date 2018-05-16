@@ -172,7 +172,7 @@ export declare interface types {
   Uint: any;
   SmallUint: any;
   Uint0: any;
-  Ulong?: Typed | CreateTypeDesc;
+  Ulong?: any;
   SmallUlong: any;
   Ulong0: any;
   Byte: any;

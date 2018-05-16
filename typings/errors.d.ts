@@ -1,20 +1,18 @@
 /// <reference types="node" />
 
-export declare class ProtocolError extends Error {
+export declare interface ProtocolError extends Error {
     message: string;
     name: string;
-    constructor(message: string);
 }
-export declare class TypeError extends ProtocolError {
+
+export declare interface TypeError extends ProtocolError {
     message: string;
     name: string;
-    constructor(message: string);
 }
-export declare class ConnectionError extends Error {
+export declare interface ConnectionError extends Error {
     message: string;
     name: string;
     description: string;
     condition: any;
     connection: any;
-    constructor(message: string, condition: any, connection: any);
 }
