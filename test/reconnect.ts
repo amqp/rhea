@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-var assert = require('assert');
-var rhea = require('../lib/container.js');
+import * as assert from "assert";
+import * as rhea from "rhea";
 
 describe('reconnect', function() {
     this.slow(150);
-    var listener, socket;
+    var listener: any, socket: any;
 
-    beforeEach(function(done) {
-        var count = 0;
-        var container = rhea.create_container();
+    beforeEach(function(done: Function) {
+        var count: number = 0;
+        var container: rhea.IContainer = rhea.create_container();
         container.on('connection_open', function(context) {
             count++;
             context.connection.local.open.hostname = 'test' + count;
         });
         container.on('disconnected', function (context) {});
         listener = container.listen({port:0});
-        listener.on('connection', function (s) {
+        listener.on('connection', function (s: any) {
             socket = s;
         });
         listener.on('listening', function() {
@@ -43,16 +42,16 @@ describe('reconnect', function() {
         listener.close();
     });
 
-    function add(map, key, value) {
+    function add(map: any, key: string, value: any) {
         map[key] = value;
         return map;
     }
 
-    it('reconnects successfully', function(done) {
-        var container = rhea.create_container();
-        var count = 0;
-        var disconnects = 0;
-        var c = container.connect(add(listener.address(), 'reconnect_limit', 10));
+    it('reconnects successfully', function(done: Function) {
+        var container: rhea.IContainer = rhea.create_container();
+        var count: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(add(listener.address(), 'reconnect_limit', 10));
         c.on('disconnected', function (context) {
             disconnects++;
         });
@@ -68,11 +67,11 @@ describe('reconnect', function() {
             }
         });
     });
-    it('stops trying after limit reached', function(done) {
-        var container = rhea.create_container();
-        var count = 0;
-        var disconnects = 0;
-        var c = container.connect(add({port:65535}, 'reconnect_limit', 3));
+    it('stops trying after limit reached', function(done: Function) {
+        var container: rhea.IContainer = rhea.create_container();
+        var count: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(add({port:65535}, 'reconnect_limit', 3));
         container.on('connection_error', function () {});
         c.on('disconnected', function (context) {
             disconnects++;
@@ -82,11 +81,11 @@ describe('reconnect', function() {
             }
         });
     });
-    it('re-establishes link successfully', function(done) {
-        var container = rhea.create_container();
-        var count = 0;
-        var disconnects = 0;
-        var c = container.connect(listener.address());
+    it('re-establishes link successfully', function(done: Function) {
+        var container: rhea.IContainer = rhea.create_container();
+        var count: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(listener.address());
         c.open_sender('my-sender');
         c.on('disconnected', function (context) {
             disconnects++;
@@ -103,14 +102,14 @@ describe('reconnect', function() {
             }
         });
     });
-    it('does not re-establish removed link', function(done) {
-        var container = rhea.create_container();
-        var receiver_opens = 0;
-        var sender_opens = 0;
-        var disconnects = 0;
-        var c = container.connect(listener.address());
-        var r = c.open_receiver('my-receiver');
-        var s = c.open_sender('my-sender');
+    it('does not re-establish removed link', function(done: Function) {
+        var container: rhea.IContainer = rhea.create_container();
+        var receiver_opens: number = 0;
+        var sender_opens: number= 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(listener.address());
+        var r: rhea.Receiver = c.open_receiver('my-receiver');
+        var s: rhea.Sender = c.open_sender('my-sender');
         c.on('disconnected', function (context) {
             disconnects++;
             r.remove();
@@ -132,14 +131,14 @@ describe('reconnect', function() {
             }
         });
     });
-    it('does not re-establish removed session', function(done) {
-        var container = rhea.create_container();
-        var sender_opens = 0;
-        var extra_session_opens = 0;
-        var disconnects = 0;
-        var c = container.connect(listener.address());
-        var s = c.open_sender('my-sender');
-        var extra_session = c.create_session();
+    it('does not re-establish removed session', function(done: Function) {
+        var container: rhea.IContainer = rhea.create_container();
+        var sender_opens: number = 0;
+        var extra_session_opens: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(listener.address());
+        var s: rhea.Sender = c.open_sender('my-sender');
+        var extra_session: rhea.Session = c.create_session();
         extra_session.begin();
         extra_session.on('session_open', function () {
             assert.equal(disconnects, 0);

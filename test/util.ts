@@ -16,13 +16,13 @@
 
 import * as assert from "assert";
 const util = require("../lib/util");
-import Container from "rhea"
+import * as rhea from "rhea"
 
 describe('uuid', function() {
     it('converts uuid string to buffer', function(done) {
         var uuid = util.uuid4();
-        var uuid_string = Container.uuid_to_string(uuid);
-        var uuid_bytes = Container.string_to_uuid(uuid_string);
+        var uuid_string = rhea.uuid_to_string(uuid);
+        var uuid_bytes = rhea.string_to_uuid(uuid_string);
         assert(uuid.equals(uuid_bytes));
 
         var valid = [
@@ -30,8 +30,8 @@ describe('uuid', function() {
             '8CE9BB92-6D10-1740-A7C1-812D5C153C54'
         ];
         valid.forEach(function (s) {
-            var bytes = Container.string_to_uuid(s);
-            assert.equal(s.toLowerCase(), Container.uuid_to_string(bytes));
+            var bytes = rhea.string_to_uuid(s);
+            assert.equal(s.toLowerCase(), rhea.uuid_to_string(bytes));
         });
         done();
     });
@@ -46,7 +46,7 @@ describe('uuid', function() {
         invalid.forEach(function (s) {
             var failed;
             try {
-                Container.string_to_uuid(s);
+                rhea.string_to_uuid(s);
                 failed = false;
             } catch(e) {
                 failed = true;
