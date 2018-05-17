@@ -22,7 +22,7 @@ const amqp_messaging: rhea.IMessage = rhea.message;
 const filter: rhea.IFilter = rhea.filter;
 
 describe('link fields', function() {
-    var container: rhea.IContainer, listener: Server;
+    var container: rhea.Container, listener: Server;
 
     beforeEach(function(done: Function) {
         container = rhea.create_container();
@@ -40,7 +40,7 @@ describe('link fields', function() {
                 done();
             });
             var c: any = container.connect(listener.address());
-            c.on(local_role + '_open', function(context: rhea.Context) {});
+            c.on(local_role + '_open', function(context: rhea.EventContext) {});
             c['open_' + local_role](fields);
         };
     }
@@ -193,7 +193,7 @@ describe('link fields', function() {
     }));
     it('dynamic source aliased', open_receiver_test({source:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link: rhea.link) {
         assert.equal(link.source.dynamic, true);
-        assert.equal(link.source.dynamic_node_properties.foo, 'bar');
+        assert.equal(link.source.dynamic_node_properties!.foo, 'bar');
     }));
     it('target address as simple string', open_sender_test('my-target', function (link: rhea.link) {
         assert.equal(link.remote.attach.target.address, 'my-target');
@@ -267,7 +267,7 @@ for (var local_role in roles) {
                     if (--this.count == 0) done();
                 }
             };
-            var container: rhea.IContainer = rhea.create_container();
+            var container: rhea.Container = rhea.create_container();
 
             var c: rhea.Connection = container.connect(listener.address());
             c.on(local_role + '_open', function (context) {
@@ -314,7 +314,7 @@ for (var local_role in roles) {
             container.on(remote_role + '_open', function(context: any) {
                 context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
             });
-            container.on('connection_close', function(contex: rhea.Context) {
+            container.on('connection_close', function(contex: rhea.EventContext) {
                 assert.equal(error_handler_called, true);
                 assert.equal(close_handler_called, true);
                 done();
@@ -340,7 +340,7 @@ for (var local_role in roles) {
             container.on(remote_role + '_open', function(context: any) {
                 context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
             });
-            container.on('connection_close', function(context: rhea.Context) {
+            container.on('connection_close', function(context: rhea.EventContext) {
                 assert.equal(error_handler_called, true);
                 done();
             });
@@ -359,7 +359,7 @@ for (var local_role in roles) {
             container.on(remote_role + '_open', function(context: any) {
                 context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
             });
-            container.on('connection_close', function(context: rhea.Context) {
+            container.on('connection_close', function(context: rhea.EventContext) {
                 done();
             });
             var container2 = rhea.create_container();
@@ -375,7 +375,7 @@ for (var local_role in roles) {
 }
 
 describe('settlement modes', function() {
-    var server: rhea.IContainer, client: rhea.IContainer, listener: Server;
+    var server: rhea.Container, client: rhea.Container, listener: Server;
 
     beforeEach(function(done: Function) {
         server = rhea.create_container();
@@ -512,7 +512,7 @@ describe('settlement modes', function() {
 });
 
 describe('preset sender options', function() {
-    var container: rhea.IContainer, listener: Server;
+    var container: rhea.Container, listener: Server;
 
     beforeEach(function(done: Function) {
         container = rhea.create_container();
@@ -561,7 +561,7 @@ describe('preset sender options', function() {
     it('does not modify default options', function(done: Function) {
         var count: number = 0;
         var name: string;
-        container.on('receiver_open', function(context: rhea.Context) {
+        container.on('receiver_open', function(context: rhea.EventContext) {
             if (++count === 1) {
                 assert.equal(context.receiver!.offered_capabilities.length, 1);
                 assert.equal(context.receiver!.offered_capabilities[0], 'xyz');
@@ -582,7 +582,7 @@ describe('preset sender options', function() {
 });
 
 describe('preset receiver options', function() {
-    var container: rhea.IContainer, listener: Server;
+    var container: rhea.Container, listener: Server;
 
     beforeEach(function(done: Function) {
         container = rhea.create_container();
@@ -604,7 +604,7 @@ describe('preset receiver options', function() {
             });
             var c: rhea.Connection = container.connect(listener.address());
             c.options.receiver_options = default_options;
-            c.on('receiver_open', function(context :rhea.Context) {});
+            c.on('receiver_open', function(context :rhea.EventContext) {});
             c.open_receiver(open_options);
         };
     }
@@ -635,7 +635,7 @@ describe('preset receiver options', function() {
 });
 
 describe('miscellaneous', function() {
-    var server: rhea.IContainer, client: rhea.IContainer, listener: Server;
+    var server: rhea.Container, client: rhea.Container, listener: Server;
 
     beforeEach(function(done: Function) {
         server = rhea.create_container();
@@ -652,16 +652,16 @@ describe('miscellaneous', function() {
     });
 
     it('receive if local closed but remote open', function(done: Function) {
-        server.on('sender_open', function(context: rhea.Context) {
+        server.on('sender_open', function(context: rhea.EventContext) {
             context.sender!.send({subject:'one'} as rhea.AmqpMessage);
         });
         var msgs = ['two', 'three', 'four', 'five'];
-        server.once('settled', function (context: rhea.Context) {
+        server.once('settled', function (context: rhea.EventContext) {
             msgs.forEach(function (m) {
                 context.sender!.send({subject:m} as rhea.AmqpMessage);
             });
         });
-        function verify_after_close (context: rhea.Context) {
+        function verify_after_close (context: rhea.EventContext) {
             assert(msgs.length);
             var expected = msgs.shift();
             assert.equal(context.message!.subject, expected);
@@ -669,12 +669,12 @@ describe('miscellaneous', function() {
                 context.connection.close();
             }
         }
-        client.once('message', function (context: rhea.Context) {
+        client.once('message', function (context: rhea.EventContext) {
             assert.equal(context.message!.subject, 'one');
             client.on('message', verify_after_close);
             context.receiver!.close();
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(msgs.length, 0);
             done();
         });

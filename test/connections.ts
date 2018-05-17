@@ -16,7 +16,7 @@
 import * as assert from "assert";
 import * as rhea from "rhea";
 describe('connection fields', function () {
-    let container: rhea.IContainer, listener: any;
+    let container: rhea.Container, listener: any;
     beforeEach(function (done: Function) {
         container = rhea.create_container({ non_fatal_errors: [] });
         listener = rhea.listen({ port: 0 });
@@ -27,40 +27,40 @@ describe('connection fields', function () {
 
     function open_test(fields: any, verification: Function) {
         return function (done: Function) {
-            container.on('connection_open', function (context: rhea.Context) {
+            container.on('connection_open', function (context: rhea.EventContext) {
                 verification(context.connection);
                 done();
             });
             fields.port = listener.address().port;
-            container.connect(fields).on('connection_open', function (context: rhea.Context) { });
+            container.connect(fields).on('connection_open', function (context: rhea.EventContext) { });
         };
     }
 
     function close_test(error: any, verification: Function) {
         return function (done: Function) {
-            container.on('connection_close', function (context: rhea.Context) {
+            container.on('connection_close', function (context: rhea.EventContext) {
                 verification(context.connection);
                 done();
             });
             var c = container.connect(listener.address());
-            c.on('connection_open', function (context: rhea.Context) {
+            c.on('connection_open', function (context: rhea.EventContext) {
                 context.connection.local.close.error = error;
                 context.connection.close();
             });
-            c.on('connection_close', function (context: rhea.Context) { });
+            c.on('connection_close', function (context: rhea.EventContext) { });
         };
     }
     function close_test_simple(error: any, verification: Function) {
         return function (done: Function) {
-            container.on('connection_close', function (context: rhea.Context) {
+            container.on('connection_close', function (context: rhea.EventContext) {
                 verification(context.connection);
                 done();
             });
             var c = container.connect(listener.address());
-            c.on('connection_open', function (context: rhea.Context) {
+            c.on('connection_open', function (context: rhea.EventContext) {
                 context.connection.close(error);
             });
-            c.on('connection_close', function (context: rhea.Context) { });
+            c.on('connection_close', function (context: rhea.EventContext) { });
         };
     }
 
@@ -137,7 +137,7 @@ describe('connection fields', function () {
     }));
 });
 describe('connection error handling', function () {
-    var container: rhea.IContainer, listener: any;
+    var container: rhea.Container, listener: any;
 
     beforeEach(function (done: Function) {
         container = rhea.create_container();
@@ -155,22 +155,22 @@ describe('connection error handling', function () {
     it('error and close handled', function (done: Function) {
         var error_handler_called: boolean;
         var close_handler_called: boolean;
-        container.on('connection_open', function (context: rhea.Context) {
+        container.on('connection_open', function (context: rhea.EventContext) {
             context.connection.close({ condition: 'amqp:connection:forced', description: 'testing error on close' });
         });
-        container.on('connection_close', function (context: rhea.Context) {
+        container.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(error_handler_called, true);
             assert.equal(close_handler_called, true);
             done();
         });
         var c: rhea.Connection = container.connect(listener.address());
-        c.on('connection_error', function (context: rhea.Context) {
+        c.on('connection_error', function (context: rhea.EventContext) {
             error_handler_called = true;
             var error = context.connection.error;
             assert.equal(error.condition, 'amqp:connection:forced');
             assert.equal(error.description, 'testing error on close');
         });
-        c.on('connection_close', function (context: rhea.Context) {
+        c.on('connection_close', function (context: rhea.EventContext) {
             close_handler_called = true;
             var error = context.connection.error;
             assert.equal(error.condition, 'amqp:connection:forced');
@@ -179,7 +179,7 @@ describe('connection error handling', function () {
     });
     it('error handled', function (done: Function) {
         var error_handler_called: boolean;
-        container.on('connection_open', function (context: rhea.Context) {
+        container.on('connection_open', function (context: rhea.EventContext) {
             context.connection.close({ condition: 'amqp:connection:forced', description: 'testing error on close' });
         });
         container.on('connection_close', function () {
@@ -187,7 +187,7 @@ describe('connection error handling', function () {
             done();
         });
         var c: rhea.Connection = rhea.create_container({ non_fatal_errors: [] }).connect(listener.address());
-        c.on('connection_error', function (context: rhea.Context) {
+        c.on('connection_error', function (context: rhea.EventContext) {
             error_handler_called = true;
             var error = context.connection.error;
             assert.equal(error.condition, 'amqp:connection:forced');
@@ -195,10 +195,10 @@ describe('connection error handling', function () {
         });
     });
     it('unhandled error', function (done: Function) {
-        container.on('connection_open', function (context: rhea.Context) {
+        container.on('connection_open', function (context: rhea.EventContext) {
             context.connection.close({ condition: 'amqp:connection:forced', description: 'testing error on close' });
         });
-        container.on('connection_close', function (context: rhea.Context) {
+        container.on('connection_close', function (context: rhea.EventContext) {
             done();
         });
         var container2 = rhea.create_container({ non_fatal_errors: [] });
@@ -215,7 +215,7 @@ describe('connection events', function () {
 
     beforeEach(function (done: Function) {
         var container = rhea.create_container();
-        container.on('connection_open', function (context: rhea.Context) {
+        container.on('connection_open', function (context: rhea.EventContext) {
             var conn = context.connection;
             conn.local.open.offered_capabilities = conn.remote.open.desired_capabilities;
         });
@@ -236,23 +236,23 @@ describe('connection events', function () {
                 if (--this.count == 0) done();
             }
         };
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
 
         var c1: rhea.Connection = container.connect({ port: listener.address().port, desired_capabilities: 'one' });
-        c1.on('connection_open', function (context: rhea.Context) {
+        c1.on('connection_open', function (context: rhea.EventContext) {
             assert.equal(context.connection.remote.open.offered_capabilities, 'one');
             latch.decrement();
             context.connection.close();
         });
         var c2: rhea.Connection = container.connect({ port: listener.address().port, desired_capabilities: 'two' });
-        c2.on('connection_open', function (context: rhea.Context) {
+        c2.on('connection_open', function (context: rhea.EventContext) {
             assert.equal(context.connection.remote.open.offered_capabilities, 'two');
             latch.decrement();
             context.connection.close();
         });
         var c3: rhea.Connection = container.connect({ port: listener.address().port, desired_capabilities: 'three' });
         //third connection has no handler defined, so will default to container level handler:
-        container.on('connection_open', function (context: rhea.Context) {
+        container.on('connection_open', function (context: rhea.EventContext) {
             assert.equal(context.connection.remote.open.offered_capabilities, 'three');
             latch.decrement();
             context.connection.close();
@@ -265,8 +265,8 @@ describe('container id', function () {
     var client_container_name: string;
 
     beforeEach(function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container({ id: 'my-server-container' });
-        container.on('connection_open', function (context: rhea.Context) {
+        var container: rhea.Container = rhea.create_container({ id: 'my-server-container' });
+        container.on('connection_open', function (context: rhea.EventContext) {
             client_container_name = context.connection.remote.open.container_id;
         });
         listener = container.listen({ port: 0 });
@@ -280,10 +280,10 @@ describe('container id', function () {
     });
 
     it('correctly sets desired container id', function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container({ id: 'my-client-container' });
+        var container: rhea.Container = rhea.create_container({ id: 'my-client-container' });
 
         var c1: rhea.Connection = container.connect(listener.address());
-        c1.on('connection_open', function (context: rhea.Context) {
+        c1.on('connection_open', function (context: rhea.EventContext) {
             assert.equal(context.connection.remote.open.container_id, 'my-server-container');
             assert.equal(client_container_name, 'my-client-container');
             context.connection.close();
@@ -297,8 +297,8 @@ describe('connection send', function () {
     var received: any = {};
 
     beforeEach(function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
-        container.on('message', function (context: rhea.Context) {
+        var container: rhea.Container = rhea.create_container();
+        container.on('message', function (context: rhea.EventContext) {
             received[context.message!.to!] = context.message!.body;
         });
         listener = container.listen({ port: 0 });
@@ -313,11 +313,11 @@ describe('connection send', function () {
     });
 
     it('sends message via default sender', function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
 
         var c: rhea.Connection = container.connect(listener.address());
         var count = 0;
-        c.on('accepted', function (context: rhea.Context) {
+        c.on('accepted', function (context: rhea.EventContext) {
             if (++count === 2) {
                 assert.equal(received['a'], 'A');
                 assert.equal(received['b'], 'B');
@@ -335,7 +335,7 @@ describe('link lookup and iteration', function () {
     var listener: any;
 
     beforeEach(function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         listener = container.listen({ port: 0 });
         listener.on('listening', function () {
             done();
@@ -347,7 +347,7 @@ describe('link lookup and iteration', function () {
     });
 
     it('finds sender or receiver', function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var conn = container.connect(listener.address());
         var r1: rhea.Receiver = conn.open_receiver({ name: 'foo' });
         var r2: rhea.Receiver = conn.open_receiver({ name: 'bar' });
@@ -367,7 +367,7 @@ describe('link lookup and iteration', function () {
         });
     });
     it('iterates over senders or receivers', function (done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var conn: rhea.Connection = container.connect(listener.address());
         var r1: rhea.Receiver = conn.open_receiver({ name: 'foo' });
         var r2: rhea.Receiver = conn.open_receiver({ name: 'bar' });

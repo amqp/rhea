@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { Connection, Context } from "./connection";
+import { Connection, EventContext } from "./connection";
 import { EndpointState } from "./endpoint";
 import { EventEmitter } from "events";
 import { link, Sender, Receiver } from "./link";
@@ -8,16 +8,15 @@ import { frames } from "./frames";
 import { CreateTypeDesc, AmqpError } from ".";
 
 export declare interface Delivery {
-  data: Buffer[];
-  format: number;
-  id: number;
-  tag: Buffer;
-  link: any;
-  remote_settled: boolean;
-  sent: boolean;
-  settled: boolean;
-  state?: any;
-  remote_state?: any;
+  readonly format: number;
+  readonly id: number;
+  readonly tag: Buffer;
+  readonly link: any;
+  readonly remote_settled: boolean;
+  readonly sent: boolean;
+  readonly settled: boolean;
+  readonly state?: any;
+  readonly remote_state?: any;
   update(settled: boolean, state?: any): void;
   accept(): void;
   release(params?: any): void;
@@ -80,19 +79,8 @@ export declare interface Incoming {
 
 export declare interface Session extends EventEmitter {
   connection: Connection;
-  outgoing: Outgoing;
-  incoming: Incoming;
-  state: EndpointState;
-  local: any;
-  remote: any;
-  links: {[prop: string]: link};
   options: any;
   reset(): void;
-  dispatch(name: string): boolean;
-  output(frame: frames, payload: any): void;
-  create_link(name: string, constructor: any, opts: any): link;
-  create_sender(name: string, opts: any): Sender;
-  create_receiver(name: string, opts: any): Receiver;
   get_option(name: string, default_value: any): any;
   attach_sender(args: any): Sender;
   open_sender(args: any): Sender;
@@ -104,7 +92,6 @@ export declare interface Session extends EventEmitter {
   each_receiver(action: Function, filter: Function): void;
   each_sender(action: Function, filter: Function): void;
   each_link(action: Function, filter: Function): void;
-  create_link(name: string, constructor: any, opts: any): link;
   begin(): void;
   open(): void;
   end(error?: Error): void;
@@ -112,18 +99,5 @@ export declare interface Session extends EventEmitter {
   is_open(): boolean;
   is_remote_open(): boolean;
   is_closed(): boolean;
-  _process(): void;
-  send(sender: Sender, tag: Buffer, data: any, format: number): Delivery;
-  _write_flow(link: link): void;
-  on_begin(frame: frames): void;
-  on_end(frame: frames): void;
-  on_attach(frame: frames): void;
-  on_disposition(frame: frames): void;
-  on_flow(frame: frames): void;
-  _context(c?: Context): Context;
-  _get_link(frame: frames): link;
-  on_detach(frame: frames): void;
-  remove_link(link: link): void;
   remove(): void;
-  on_transfer(frame: frames): void;
 }

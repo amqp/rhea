@@ -23,7 +23,7 @@ describe('reconnect', function() {
 
     beforeEach(function(done: Function) {
         var count: number = 0;
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         container.on('connection_open', function(context) {
             count++;
             context.connection.local.open.hostname = 'test' + count;
@@ -48,7 +48,7 @@ describe('reconnect', function() {
     }
 
     it('reconnects successfully', function(done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var count: number = 0;
         var disconnects: number = 0;
         var c: rhea.Connection = container.connect(add(listener.address(), 'reconnect_limit', 10));
@@ -68,7 +68,7 @@ describe('reconnect', function() {
         });
     });
     it('stops trying after limit reached', function(done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var count: number = 0;
         var disconnects: number = 0;
         var c: rhea.Connection = container.connect(add({port:65535}, 'reconnect_limit', 3));
@@ -82,7 +82,7 @@ describe('reconnect', function() {
         });
     });
     it('re-establishes link successfully', function(done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var count: number = 0;
         var disconnects: number = 0;
         var c: rhea.Connection = container.connect(listener.address());
@@ -103,7 +103,7 @@ describe('reconnect', function() {
         });
     });
     it('does not re-establish removed link', function(done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var receiver_opens: number = 0;
         var sender_opens: number= 0;
         var disconnects: number = 0;
@@ -132,7 +132,7 @@ describe('reconnect', function() {
         });
     });
     it('does not re-establish removed session', function(done: Function) {
-        var container: rhea.IContainer = rhea.create_container();
+        var container: rhea.Container = rhea.create_container();
         var sender_opens: number = 0;
         var extra_session_opens: number = 0;
         var disconnects: number = 0;

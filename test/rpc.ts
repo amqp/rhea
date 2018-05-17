@@ -34,14 +34,14 @@ function create_broker() {
 }
 
 function dummy_broker(capabilities?: any) {
-    var container: rhea.IContainer = rhea.create_container();
+    var container: rhea.Container = rhea.create_container();
     var broker = create_broker();
     if (capabilities) {
-        container.on('connection_open', function (context: rhea.Context) {
+        container.on('connection_open', function (context: rhea.EventContext) {
             context.connection.local.open.offered_capabilities = capabilities;
         });
     }
-    container.on('sender_open', function (context: rhea.Context) {
+    container.on('sender_open', function (context: rhea.EventContext) {
         if (context.sender!.remote.attach.source.dynamic) {
             var temp: string = container.generate_uuid();
             context.sender!.set_source({address:temp});
@@ -50,14 +50,14 @@ function dummy_broker(capabilities?: any) {
             broker.subscribe(context.sender!.remote.attach.source.address, context.sender!);
         }
     });
-    container.on('sender_close', function (context: rhea.Context) {
+    container.on('sender_close', function (context: rhea.EventContext) {
         if (context.sender!.remote.attach.source.dynamic) {
             broker.unsubscribe(context.sender!.local.attach.source.address);
         } else {
             broker.unsubscribe(context.sender!.remote.attach.source.address);
         }
     });
-    container.on('message', function (context: rhea.Context) {
+    container.on('message', function (context: rhea.EventContext) {
         var address = context.receiver!.remote.attach.target.address || context.message!.to;
         broker.publish(address, context.message!);
     });
@@ -92,9 +92,9 @@ describe('rpc', function() {
 
     it('successful invocation', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
+        var server: any = (rhea as any).rpc_server(url);
         server.bind(function (s: any, callback: Function) { callback(reverse(s)); }, 'reverse');
-        var client = rhea.rpc_client(url);
+        var client = (rhea as any).rpc_client(url);
         client.define('reverse');
         client.reverse('hello', function(result: string, error: any) {
             assert.equal(result, 'olleh');
@@ -106,8 +106,8 @@ describe('rpc', function() {
     });
     it('non-existent procedure', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
-        var client: any = rhea.rpc_client(url);
+        var server: any = (rhea as any).rpc_server(url);
+        var client: any = (rhea as any).rpc_client(url);
         client.define('reverse');
         client.reverse('hello', function(result: any, error: Error) {
             assert.equal(result, undefined);
@@ -118,10 +118,10 @@ describe('rpc', function() {
     });
     it('failed procedure invocation', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
+        var server: any = (rhea as any).rpc_server(url);
         server.bind(function (s: any, callback: Function) { callback(undefined, {name:'bad-mood', description:'I dont like the cut of your jib'}); }, 'foo');
         server.bind(function (s: any, callback: Function) { callback(undefined, 'no joy'); }, 'bar');
-        var client: any = rhea.rpc_client(url);
+        var client: any = (rhea as any).rpc_client(url);
         client.define('foo');
         client.define('bar');
         client.foo('hello', function(result: any, error: any) {
@@ -139,10 +139,10 @@ describe('rpc', function() {
     });
     it('multiple invocations', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
+        var server: any = (rhea as any).rpc_server(url);
         server.bind(function (s: any, callback: Function) { callback(reverse(s)); }, 'reverse');
         server.bind(function (s: any, callback: Function) { callback(s.toUpperCase()); }, 'upper');
-        var client: any = rhea.rpc_client(url);
+        var client: any = (rhea as any).rpc_client(url);
         client.define('reverse');
         client.define('upper');
         client.reverse('hello', function(result: any, error: any) {
@@ -163,9 +163,9 @@ describe('rpc', function() {
     });
     it('bind synchronously', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
+        var server: any = (rhea as any).rpc_server(url);
         server.bind_sync(reverse);
-        var client: any = rhea.rpc_client(url);
+        var client: any = (rhea as any).rpc_client(url);
         client.define('reverse');
         client.reverse('hello', function(result: any, error: any) {
             assert.equal(result, 'olleh');
@@ -198,9 +198,9 @@ describe('rpc with anonymous-relay offered as single symbol', function() {
 
     it('successful invocation', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
+        var server: any = (rhea as any).rpc_server(url);
         server.bind(function (s: any, callback: Function) { callback(reverse(s)); }, 'reverse');
-        var client: any = rhea.rpc_client(url);
+        var client: any = (rhea as any).rpc_client(url);
         client.define('reverse');
         client.reverse('hello', function(result: any, error: any) {
             assert.equal(result, 'olleh');
@@ -233,9 +233,9 @@ describe('rpc without anonymous-relay', function() {
 
     it('successful invocation', function(done: Function) {
         var url: string = get_url();
-        var server: any = rhea.rpc_server(url);
+        var server: any = (rhea as any).rpc_server(url);
         server.bind(function (s: any, callback: Function) { callback(reverse(s)); }, 'reverse');
-        var client: any = rhea.rpc_client(url);
+        var client: any = (rhea as any).rpc_client(url);
         client.define('reverse');
         client.reverse('hello', function(result: any, error: any) {
             assert.equal(result, 'olleh');
@@ -248,9 +248,9 @@ describe('rpc without anonymous-relay', function() {
     for (var i = 0; i < 2; i++) {
         it(i === 0 ? 'cache expiry' : 'cache clear', function(done: Function) {
             var url: string = get_url();
-            var server: any = rhea.rpc_server(url, {cache_ttl:100});
+            var server: any = (rhea as any).rpc_server(url, {cache_ttl:100});
             server.bind(function (s: any, callback: Function) { callback(reverse(s)); }, 'reverse');
-            var client: any = rhea.rpc_client(url);
+            var client: any = (rhea as any).rpc_client(url);
             client.define('reverse');
             client.reverse('hello', function(result: any, error: any) {
                 assert.equal(result, 'olleh');

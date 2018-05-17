@@ -22,7 +22,7 @@ const amqp_message = rhea.message;
 const rhea_util = require('../lib/util.js');
 
 describe('message content', function() {
-    var container :rhea.IContainer, sender: rhea.Sender, listener: Server;
+    var container :rhea.Container, sender: rhea.Sender, listener: Server;
 
     beforeEach(function(done: Function) {
         container = rhea.create_container();
@@ -324,25 +324,25 @@ describe('message content', function() {
 });
 
 describe('acknowledgement', function() {
-    var server: rhea.IContainer, client: rhea.IContainer, listener: Server;
+    var server: rhea.Container, client: rhea.Container, listener: Server;
     var outcome: any;
 
     beforeEach(function(done: Function) {
         outcome = {};
         server = rhea.create_container();
-        server.on('accepted', function (context: rhea.Context) {
+        server.on('accepted', function (context: rhea.EventContext) {
             outcome.state = 'accepted';
         });
-        server.on('released', function (context: rhea.Context) {
+        server.on('released', function (context: rhea.EventContext) {
             outcome.state = 'released';
             outcome.delivery_failed = context.delivery!.remote_state.delivery_failed;
             outcome.undeliverable_here = context.delivery!.remote_state.undeliverable_here;
         });
-        server.on('rejected', function (context: rhea.Context) {
+        server.on('rejected', function (context: rhea.EventContext) {
             outcome.state = 'rejected';
             outcome.error = context.delivery!.remote_state.error;
         });
-        server.on('settled', function (context: rhea.Context) {
+        server.on('settled', function (context: rhea.EventContext) {
             context.connection.close();
         });
         client = rhea.create_container();
@@ -361,38 +361,38 @@ describe('acknowledgement', function() {
         server.once('sendable', function (context) {
             context.sender.send({body:'accept-me'});
         });
-        client.on('message', function(context: rhea.Context) {
+        client.on('message', function(context: rhea.EventContext) {
             assert.equal(context.message!.body, 'accept-me');
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'accepted');
             done();
         });
         client.connect(listener.address()).attach_receiver();
     });
     it('explicit accept', function(done: Function) {
-        server.once('sendable', function (context: rhea.Context) {
+        server.once('sendable', function (context: rhea.EventContext) {
             context.sender!.send({body:'accept-me'});
         });
-        client.on('message', function(context: rhea.Context) {
+        client.on('message', function(context: rhea.EventContext) {
             assert.equal(context.message!.body, 'accept-me');
             context.delivery!.accept();
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'accepted');
             done();
         });
         client.connect(listener.address()).attach_receiver({autoaccept: false});
     });
     it('explicit release', function(done: Function) {
-        server.once('sendable', function (context: rhea.Context) {
+        server.once('sendable', function (context: rhea.EventContext) {
             context.sender!.send({body:'release-me'});
         });
-        client.on('message', function(context: rhea.Context) {
+        client.on('message', function(context: rhea.EventContext) {
             assert.equal(context.message!.body, 'release-me');
             context.delivery!.release();
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'released');
             assert.equal(outcome.delivery_failed, undefined);
             assert.equal(outcome.undeliverable_here, undefined);
@@ -401,14 +401,14 @@ describe('acknowledgement', function() {
         client.connect(listener.address()).attach_receiver({autoaccept: false});
     });
     it('explicit reject', function(done: Function) {
-        server.once('sendable', function (context: rhea.Context) {
+        server.once('sendable', function (context: rhea.EventContext) {
             context.sender!.send({body:'reject-me'});
         });
-        client.on('message', function(context: rhea.Context) {
+        client.on('message', function(context: rhea.EventContext) {
             assert.equal(context.message!.body, 'reject-me');
             context.delivery!.reject({condition:'rhea:oops:string',description:'something bad occurred'});
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'rejected');
             assert.equal(outcome.error.condition, 'rhea:oops:string');
             assert.equal(outcome.modified, undefined);
@@ -418,20 +418,20 @@ describe('acknowledgement', function() {
     });
     it('explicit modify', function(done: Function) {
         server.options.treat_modified_as_released = false;
-        server.on('modified', function (context: rhea.Context) {
+        server.on('modified', function (context: rhea.EventContext) {
             assert.equal(outcome.state, undefined);
             outcome.state = 'modified';
             outcome.delivery_failed = context.delivery!.remote_state.delivery_failed;
             outcome.undeliverable_here = context.delivery!.remote_state.undeliverable_here;
         });
-        server.once('sendable', function (context: rhea.Context) {
+        server.once('sendable', function (context: rhea.EventContext) {
             context.sender!.send({body:'modify-me'});
         });
-        client.on('message', function(context: rhea.Context) {
+        client.on('message', function(context: rhea.EventContext) {
             assert.equal(context!.message!.body, 'modify-me');
             (context as any).delivery!.modified({delivery_failed:true, undeliverable_here: true});
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'modified');
             assert.equal(outcome.delivery_failed, true);
             assert.equal(outcome.undeliverable_here, true);
@@ -443,11 +443,11 @@ describe('acknowledgement', function() {
         server.once('sendable', function (context) {
             context.sender!.send({body:'try-again'});
         });
-        client.on('message', function(context: rhea.Context) {
+        client.on('message', function(context: rhea.EventContext) {
             assert.equal(context.message!.body, 'try-again');
             context.delivery!.release({delivery_failed:true, undeliverable_here: true});
         });
-        client.on('connection_close', function (context: rhea.Context) {
+        client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'released');
             assert.equal(outcome.delivery_failed, true);
             assert.equal(outcome.undeliverable_here, true);
@@ -459,7 +459,7 @@ describe('acknowledgement', function() {
 
 describe('fragmentation', function() {
     this.timeout(5000);
-    var container: rhea.IContainer, sender: rhea.Sender, listener: Server;
+    var container: rhea.Container, sender: rhea.Sender, listener: Server;
 
     beforeEach(function(done: Function) {
         container = rhea.create_container();
@@ -482,7 +482,7 @@ describe('fragmentation', function() {
         var received: number = 0;
         var n: number = count || 1;
         return function(done: Function) {
-            container.on('message', function(context: rhea.Context) {
+            container.on('message', function(context: rhea.EventContext) {
                 assert.equal(context.message!.body.length, size);
                 assert.equal(context.message!.body.toString(), message.body.toString());
                 if (++received === n) {

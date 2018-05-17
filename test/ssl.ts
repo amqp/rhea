@@ -31,9 +31,9 @@ describe('ssl', function() {
 
     function success(server_conf: any, client_conf: any) {
         return function(done: Function) {
-            var container: rhea.IContainer = server_conf.container || rhea.create_container();
+            var container: rhea.Container = server_conf.container || rhea.create_container();
 
-            container.on('connection_open', function (context: rhea.Context) {
+            container.on('connection_open', function (context: rhea.EventContext) {
                 if (server_conf.verification) server_conf.verification(context);
             });
             var server_options = server_conf.options || {};
@@ -44,7 +44,7 @@ describe('ssl', function() {
             if (server_options.ca === undefined) server_options.ca = fs.readFileSync(path.resolve(__dirname,'ca-cert.pem'));
             listener = container.listen(server_options);
             listener.on('listening', function() {
-                var client: rhea.IContainer = client_conf.container || rhea.create_container();
+                var client: rhea.Container = client_conf.container || rhea.create_container();
                 var client_options = client_conf.options || {};
                 client_options.port = listener.address().port;
                 if (client_options.transport === undefined) client_options.transport = 'tls';
@@ -86,7 +86,7 @@ describe('ssl', function() {
        success(
            {
                options:{enable_sasl_external:true, requestCert: true},
-               verification:function (context: rhea.Context) {
+               verification:function (context: rhea.EventContext) {
                    assert.equal(context.connection.get_peer_certificate().subject.CN, 'TestClient');
                },
            },

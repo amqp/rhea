@@ -11,17 +11,17 @@ import { Container } from "./container";
 
 /**
  * Defines the common set of properties that are applicable for a connection, session and a link (sender, receiver).
- * @interface EntityOptions
+ * @interface EndpointOptions
  */
-export interface EntityOptions {
+export interface EndpointOptions {
   /**
-   * @property {any} [desired_capabilities] Extension capabilities the sender can use if the receiver supports them.
+   * @property {string | string[]} [desired_capabilities] Extension capabilities the sender can use if the receiver supports them.
    */
-  desired_capabilities?: any;
+  desired_capabilities?: string | string[];
   /**
-   * @property {any} [offered_capabilities] Extension capabilities the sender supports.
+   * @property {string | string[]} [offered_capabilities] Extension capabilities the sender supports.
    */
-  offered_capabilities?: any;
+  offered_capabilities?: string | string[];
   /**
    * @property {object} [properties] Properties of the entity (connection, session, link) contain a set of fields
    * intended to provide more information about the entity.
@@ -32,25 +32,25 @@ export interface EntityOptions {
 /**
  * Defines the options that can be provided while creating a connection.
  * @interface ConnectionOptions
- * @extends EntityOptions
+ * @extends EndpointOptions
  */
-export interface ConnectionOptions extends EntityOptions {
+export interface ConnectionOptions extends EndpointOptions {
   /**
-   * @property {string} username - The username.
+   * @property {string} [username] - The username.
    */
-  username: string;
+  username?: string;
   /**
-   * @property {string} host - The host to connect to.
+   * @property {string} [host] - The host to connect to.
    */
-  host: string;
+  host?: string;
   /**
-   * @property {string} hostname - The hostname to connect to.
+   * @property {string} [hostname] - The hostname to connect to.
    */
-  hostname: string;
+  hostname?: string;
   /**
-   * @property {number} port - The port number (5671 or 5672) at which to connect to.
+   * @property {number} [port] - The port number (5671 or 5672) at which to connect to.
    */
-  port: number;
+  port?: number;
   /**
    * @property {string} [transport] - The transport option.
    */
@@ -128,9 +128,9 @@ export interface ConnectionOptions extends EntityOptions {
 /**
  * Defines the common set of options that can be provided while creating a link (sender, receiver).
  * @interface LinkOptions
- * @extends EntityOptions
+ * @extends EndpointOptions
  */
-export interface LinkOptions extends EntityOptions {
+export interface LinkOptions extends EndpointOptions {
   /**
    * @property {string} [name] The name of the link.
    * This should be unique for the container.
@@ -158,6 +158,23 @@ export interface LinkOptions extends EntityOptions {
 }
 
 /**
+ * Describes the link distribution policy;
+ * @enum DistributionMode
+ */
+export enum DistributionMode {
+  /**
+   * @property {string} move once successfully transferred over the link, the message will no longer be available
+   * to other links from the same node
+   */
+  move = "move",
+  /**
+   * @property {string} copy once successfully transferred over the link, the message is
+   * still available for other links from the same node
+   */
+  copy = "copy"
+}
+
+/**
  * Defines the options that can be provided while creating the source/target for a Sender or Receiver (link).
  * @interface TerminusOptions
  */
@@ -167,27 +184,56 @@ export interface TerminusOptions {
    */
   address: string;
   /**
-   * @property {object} [filter] - The filters to be added for the terminus.
-   */
-  filter?: {
-    [x: string]: any;
-  };
-  /**
-   * @property {boolean} [durable] - It specifies a request for the receiving peer
-   * to dynamically create a node at the target/source. Default: false.
-   */
-  dynamic?: boolean;
-  /**
-   * @property {string} [expiry_policy] - The expiry policy of the terminus. Default value "session-end".
-   */
-  expiry_policy?: string;
-  /**
    * @property {number} [durable] It specifies what state of the terminus will be retained durably:
    *  - the state of durable messages (unsettled_state value),
    *  - only existence and configuration of the terminus (configuration value), or
    *  - no state at all (none value);
    */
   durable?: number;
+  /**
+   * @property {string} [expiry_policy] - The expiry policy of the terminus. Default value "session-end".
+   */
+  expiry_policy?: string;
+  /**
+   * @property {boolean} [durable] - It specifies a request for the receiving peer
+   * to dynamically create a node at the target/source. Default: false.
+   */
+  dynamic?: boolean;
+  /**
+   * @property {object} [dynamic_node_properties] - Properties of the dynamically created node
+   */
+  dynamic_node_properties?: Dictionary<any>;
+  /**
+   * @property {string | string []} [capabilities] The extension capabilities the sender supports/desires
+   */
+  capabilities?: string | string[];
+  /**
+   * @property {number} [timeout] The duration that an expiring terminus will be retained.
+   */
+  timeout?: number;
+}
+
+/**
+ * Describes the source.
+ * @interface Source
+ */
+export interface Source extends TerminusOptions {
+   /**
+   * @property {number} [distribution_mode] The distribution mode of the link.
+   */
+  distribution_mode?: DistributionMode;
+  /**
+   * @property {object} [filter] - The filters to be added for the terminus.
+   */
+  filter?: Dictionary<any>;
+  /**
+   * @property {any} [default_outcome] The default outcome for unsettled transfers.
+   */
+  default_outcome?: any;
+  /**
+   * @property {string | string[]} [outcomes] The descriptors for the outcomes that can be chosen on this link.
+   */
+  outcomes?: string | string[];
 }
 
 /**
@@ -245,51 +291,24 @@ export interface Dictionary<T> {
 
 /**
  * Map containing message attributes that will be held in the message header.
+ * It conveys information about the message. This is the base interface.
+ * @interface AmqpMessageAnnotations
  */
 export interface AmqpMessageAnnotations {
   /**
-   * @property {string | null} [x-opt-partition-key] Annotation for the partition key set for the event.
-   */
-  "x-opt-partition-key"?: string | null;
-  /**
-   * @property {number} [x-opt-sequence-number] Annontation for the sequence number of the event.
-   */
-  "x-opt-sequence-number"?: number;
-  /**
-   * @property {number} [x-opt-enqueued-time] Annotation for the enqueued time of the event.
-   */
-  "x-opt-enqueued-time"?: number;
-  /**
-   * @property {string} [x-opt-offset] Annotation for the offset of the event.
-   */
-  "x-opt-offset"?: string;
-  /**
-   * @property {any} Any other annotation that can be added to the message.
+   * @property {any} .
    */
   [x: string]: any;
 }
 
 /**
- * Describes the delivery annotations.
- * @interface
+ * Describes the delivery annotations. It is used for delivery-specific non-standard
+ * properties at the head of the message. It conveys information from the sending
+ * peer to the receiving peer. This is the base interface for Delivery Annotations.
+ * 
+ * @interface DeliveryAnnotations
  */
 export interface DeliveryAnnotations {
-  /**
-   * @property {string} [last_enqueued_offset] The offset of the last event.
-   */
-  last_enqueued_offset?: string;
-  /**
-   * @property {number} [last_enqueued_sequence_number] The sequence number of the last event.
-   */
-  last_enqueued_sequence_number?: number;
-  /**
-   * @property {number} [last_enqueued_time_utc] The enqueued time of the last event.
-   */
-  last_enqueued_time_utc?: number;
-  /**
-   * @property {number} [runtime_info_retrieval_time_utc] The retrieval time of the last event.
-   */
-  runtime_info_retrieval_time_utc?: number;
   /**
    * @property {string} Any unknown delivery annotations.
    */
@@ -302,10 +321,10 @@ export interface DeliveryAnnotations {
  */
 export interface AmqpMessageProperties {
   /**
-   * @property {string} [message_id] The application message identifier that uniquely idenitifes a message.
+   * @property {string | number | Buffer} [message_id] The application message identifier that uniquely idenitifes a message.
    * The user is responsible for making sure that this is unique in the given context. Guids usually make a good fit.
    */
-  message_id?: string | Buffer;
+  message_id?: string | number | Buffer;
   /**
    * @property {string} [reply_to] The address of the node to send replies to.
    */
@@ -315,9 +334,9 @@ export interface AmqpMessageProperties {
    */
   to?: string;
   /**
-   * @property {string} [correlation_id] The id that can be used to mark or identify messages between clients.
+   * @property {string | number | Buffer} [correlation_id] The id that can be used to mark or identify messages between clients.
    */
-  correlation_id?: string;
+  correlation_id?: string | number | Buffer;
   /**
    * @property {string} [content_type] MIME type for the message.
    */
@@ -348,6 +367,22 @@ export interface AmqpMessageProperties {
    */
   reply_to_group_id?: string;
   /**
+   * @property {string} [subject] A common field for summary information about the message
+   * content and purpose.
+   */
+  subject?: string;
+  /**
+   * @property {string} [user_id] The identity of the user responsible for producing the message.
+   */
+  user_id?: string;
+}
+
+/**
+ * Describes the defined set of standard header properties of the message.
+ * @interface AmqpMessageProperties
+ */
+export interface AmqpMessageHeader {
+  /**
    * @property {boolean} [first_acquirer] If this value is true, then this message has not been
    * acquired by any other link. Ifthis value is false, then this message MAY have previously
    * been acquired by another link or links.
@@ -370,26 +405,14 @@ export interface AmqpMessageProperties {
    * priority messages.
    */
   priority?: number;
-  /**
-   * @property {string} [subject] A common field for summary information about the message
-   * content and purpose.
-   */
-  subject?: string;
-  /**
-   * @property {string} [user_id] The identity of the user responsible for producing the message.
-   */
-  user_id?: string;
-
-
 }
 
 /**
  * Describes the AMQP message that is sent or received on the wire.
  * @interface AmqpMessage
+ * @extends AmqpMessageProperties, AmqpMessageHeader
  */
-export interface AmqpMessage extends AmqpMessageProperties {
-  // TODO: Ask Gordon about other AMQP message properties like durable, first_acquirer, etc.
-  // https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-amqp-protocol-guide#messages
+export interface AmqpMessage extends AmqpMessageProperties, AmqpMessageHeader {
   body: any;
   message_annotations?: AmqpMessageAnnotations;
   application_properties?: Dictionary<any>;
@@ -399,9 +422,9 @@ export interface AmqpMessage extends AmqpMessageProperties {
 /**
  * Defines the AMQP Connection context. This context is provided when you add an
  * event handler to any of the objects created by rhea.
- * @interface Context
+ * @interface EventContext
  */
-export interface Context {
+export interface EventContext {
   /**
    * @property {Connection} connection The amqp connection.
    */
@@ -459,58 +482,23 @@ export interface AmqpError {
 export declare interface Connection extends EventEmitter {
   [x: string]: any;
   options: any;
-  hostname?: string;
-  container_id: string;
-  max_frame_size?: number;
-  idle_time_out?: number;
-  channel_max?: number;
-  registered: boolean;
-  state: EndpointState;
-  local_channel_map: { [x: string]: Session };
-  remote_channel_map: { [x: string]: Session };
-  local: any;
-  remote: any;
-  session_policy: any;
-  amqp_transport: Transport;
-  sasl_transport?: any;
-  conn_established_counter: number;
-  heartbeat_out: NodeJS.Timer;
-  heartbeat_in: NodeJS.Timer;
-  abort_idle: boolean;
-  socket_ready: boolean;
-  scheduled_reconnect?: NodeJS.Timer;
-  default_sender?: Sender;
-  properties?: { [x: string]: any };
+  readonly hostname?: string;
+  readonly container_id: string;
+  readonly max_frame_size?: number;
+  readonly idle_time_out?: number;
+  readonly channel_max?: number;
+  readonly properties?: { [x: string]: any };
   readonly error?: any;
-  transport_error: {
-    condition: "amqp:unauthorized-access";
-    description: string;
-  };
-  dispatch(name: string): boolean;
   reset(): void;
   connect(): Connection;
   reconnect(): Connection;
-  _connect(): Connection;
-  accept(socket: Socket): Connection;
-  init(socket: Socket): Connection;
   attach_sender(options?: SenderOptions | string): Sender;
   open_sender(options?: SenderOptions | string): Sender;
   attach_receiver(options?: ReceiverOptions | string): Receiver;
   open_receiver(options?: ReceiverOptions | string): Receiver;
   get_option(name: string, default_value: any): any;
   send(msg: any): Delivery;
-  connected(): void;
-  sasl_failed(tesxt: string): void;
-  _is_fatal(error_condition: string): boolean;
-  _handle_error(): void;
   get_error(): AmqpError | undefined;
-  _get_peer_details(): string;
-  output(): void;
-  input(buff: Buffer): void;
-  idle(): void;
-  on_error(e: any): void;
-  eof(): void;
-  _disconnected(error: any): void;
   open(): void;
   close(error?: any): void;
   is_open(): boolean;
@@ -525,20 +513,7 @@ export declare interface Connection extends EventEmitter {
   each_link(action: Function,  filter?: Function): void;
   on_open(frame: frames): void;
   on_close(frame: frames): void;
-  _register(): void;
-  _process(): void;
-  _write_frame(channel: any, frame: frames, payload?: any): void;
-  _write_open(): void;
-  _write_closed(): void;
-  on_begin(frame: frames): void;
   get_peer_certificate(): any | undefined;
   get_tls_socket(): Socket | undefined;
-  _context(c?: Context): Context | undefined;
   remove_session(session: Session): void;
-  on_end(frame: frames): void;
-  on_attach(frame: frames): void;
-  on_detach(frame: frames): void;
-  on_transfer(frame: frames): void;
-  on_disposition(frame: frames): void;
-  on_flow(frame: frames): void;
 }
