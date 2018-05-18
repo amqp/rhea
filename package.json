@@ -17,7 +17,7 @@
         "@types/mocha": "^5.2.0",
         "browserify": "",
         "eslint": "",
-        "istanbul": "",
+        "istanbul": "1.1.0-alpha.1",
         "minimist": "",
         "mocha": "^3.0.0",
         "uglify-js": "",
@@ -29,7 +29,7 @@
     "scripts": {
         "lint": "eslint lib/*.js",
         "test": "mocha -r ts-node/register ./test/*.ts",
-        "coverage": "istanbul cover _mocha",
+        "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
         "run-examples": "require-self && mocha examples/test_examples.js",
         "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
