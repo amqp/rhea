@@ -46,8 +46,8 @@ export declare interface link extends EventEmitter {
   readonly source: Source;
   readonly target: TerminusOptions;
   readonly max_message_size: any;
-  readonly offered_capabilities: any;
-  readonly desired_capabilities: any;
+  readonly offered_capabilities: string | string[];
+  readonly desired_capabilities: string | string[];
   readonly properties: any;
   set_source(fields: any): void;
   set_target(fields: any): void;
