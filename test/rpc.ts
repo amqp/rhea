@@ -15,7 +15,7 @@
  */
 
 import * as assert from "assert";
-import * as rhea from "rhea";
+import * as rhea from "../";
 
 function create_broker() {
     return {

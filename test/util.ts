@@ -16,7 +16,7 @@
 
 import * as assert from "assert";
 const util = require("../lib/util");
-import * as rhea from "rhea"
+import * as rhea from "../"
 
 describe('uuid', function() {
     it('converts uuid string to buffer', function(done) {

@@ -15,7 +15,7 @@
  */
 
 import * as assert from "assert";
-import * as rhea from "rhea";
+import * as rhea from "../";
 
 describe('sasl plain', function() {
     this.slow(200);

@@ -15,7 +15,7 @@
  */
 
 import * as assert from "assert";
-import * as rhea from "rhea";
+import * as rhea from "../";
 import { Server } from "net";
 const amqp_types: rhea.ITypes = rhea.types;
 const amqp_messaging: rhea.IMessage = rhea.message;
