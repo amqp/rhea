@@ -18,7 +18,7 @@ import * as assert from "assert";
 import * as rhea from "../";
 import { Server } from "net";
 const amqp_types: rhea.ITypes = rhea.types;
-const amqp_messaging: rhea.IMessage = rhea.message;
+const amqp_messaging: rhea.MessageUtil = rhea.message;
 const filter: rhea.IFilter = rhea.filter;
 
 describe('link fields', function() {
@@ -153,7 +153,7 @@ describe('link fields', function() {
             timeout:33,
             distribution_mode:'copy',
             filter: filter.selector("colour = 'green'"),
-            default_outcome: (amqp_messaging.modified() as any).described(),
+            default_outcome: ((amqp_messaging as any).modified() as any).described(),
             outcomes: ['amqp:list:accepted', 'amqp:list:rejected', 'amqp:list:released', 'amqp:list:modified'],
             capabilities: ['a', 'b', 'c']
         }},
@@ -653,12 +653,12 @@ describe('miscellaneous', function() {
 
     it('receive if local closed but remote open', function(done: Function) {
         server.on('sender_open', function(context: rhea.EventContext) {
-            context.sender!.send({subject:'one'} as rhea.AmqpMessage);
+            context.sender!.send({subject:'one'} as rhea.Message);
         });
         var msgs = ['two', 'three', 'four', 'five'];
         server.once('settled', function (context: rhea.EventContext) {
             msgs.forEach(function (m) {
-                context.sender!.send({subject:m} as rhea.AmqpMessage);
+                context.sender!.send({subject:m} as rhea.Message);
             });
         });
         function verify_after_close (context: rhea.EventContext) {

@@ -26,7 +26,7 @@ function create_broker() {
         unsubscribe: function (address: string) {
             delete this.listeners[address];
         },
-        publish: function (address: string, message: rhea.AmqpMessage) {
+        publish: function (address: string, message: rhea.Message) {
             var s: rhea.Sender = this.listeners[address];
             if (s) s.send(message);
         }

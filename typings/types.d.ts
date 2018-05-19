@@ -105,8 +105,8 @@ export declare class Reader {
   read_array_items(n: number, type: TypeDesc): Typed[];
   read_n(n: any): any[];
   read_size_count(width: number): {
-      'size': number;
-      'count': number;
+    'size': number;
+    'count': number;
   };
   read_compound(type: TypeDesc): Typed;
   read_array(type: TypeDesc): Typed;
@@ -158,53 +158,7 @@ export declare class c {
 }
 
 export declare interface types {
-  by_code: {
-    [x: number]: TypeDesc;
-  };
-  MAX_UINT: number;
-  MAX_USHORT: number;
-  Null: any;
-  Boolean: any;
-  True: any;
-  False: any;
-  Ubyte: any;
-  Ushort: any;
-  Uint: any;
-  SmallUint: any;
-  Uint0: any;
-  Ulong?: any;
-  SmallUlong: any;
-  Ulong0: any;
-  Byte: any;
-  Short: any;
-  Int: any;
-  SmallInt: any;
-  Long: any;
-  SmallLong: any;
-  Float: any;
-  Double: any;
-  Decimal32: any;
-  Decimal64: any;
-  Decimal128: any;
-  CharUTF32: any;
-  Timestamp: any;
-  Uuid: any;
-  Vbin8: any;
-  Vbin32: any;
-  Str8: any;
-  Str32: any;
-  Sym8: any;
-  Sym32: any;
-  List0: any;
-  List8: any;
-  List32: any;
-  Map8: any;
-  Map32: any;
-  Array8: any;
-  Array32: any;
-  Reader: Reader;
-  Writer: Writer;
-  wrap_error: any;
+  wrap_error(e: any): Typed;
   is_ulong(o: Typed): boolean;
   is_string(o: Typed): boolean;
   is_symbol(o: Typed): boolean;
@@ -235,7 +189,7 @@ export declare interface types {
   wrap_described(value: any, descriptor: string | number | Number): Typed;
   wrap_message_id(o: any): any;
   described_nc(descriptor: any[] | any, o: any): any;
-  described: (descriptor: any, o: any) => any;
+  described(descriptor: any, o: any): any;
   unwrap_map_simple(o: any): {};
   unwrap(o: any, leave_described?: boolean): any;
   define_composite(def: ICompositeType): c;

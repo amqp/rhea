@@ -1,15 +1,5 @@
 /// <reference types="node" />
 
-import { CreateTypeDesc } from "./types";
-
-export declare class Section {
-  typecode: number;
-  content: any;
-  multiple: any;
-  constructor(typecode: number, content: any, multiple: any);
-  described(item: any): any;
-}
-
 export declare interface Message {
   [x: string]: any;
   toJSON: () => {
@@ -20,21 +10,13 @@ export declare interface Message {
 }
 
 export interface message {
-  data_section: (data: any) => Section;
-  sequence_section: (list: any) => Section;
-  data_sections: (data_elements: any) => Section;
-  sequence_sections: (lists: any) => Section;
+  data_section: (data: any) => any;
+  sequence_section: (list: any) => any;
+  data_sections: (data_elements: any) => any;
+  sequence_sections: (lists: any) => any;
   encode: (msg: any) => any;
   decode: (buffer: Buffer) => Message;
-  unwrap_outcome: (outcome: any) => any;
   are_outcomes_equivalent: (a: any, b: any) => boolean;
-  header: CreateTypeDesc;
-  properties: CreateTypeDesc;
-  received: CreateTypeDesc;
-  accepted: CreateTypeDesc;
-  rejected: CreateTypeDesc;
-  released: CreateTypeDesc;
-  modified: CreateTypeDesc;
   is_received: (o: any) => boolean;
   is_accepted: (o: any) => boolean;
   is_rejected: (o: any) => boolean;

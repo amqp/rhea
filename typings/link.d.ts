@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { frames } from "./frames";
 import { EndpointState } from "./endpoint";
 import { Delivery, Session } from "./session";
-import { EventContext, AmqpMessage, TerminusOptions, Connection, LinkOptions, Source } from "./connection";
+import { EventContext, Message, TerminusOptions, Connection, LinkOptions, Source } from "./connection";
 
 export declare interface FlowController {
   window: number;
@@ -69,7 +69,7 @@ export declare interface link extends EventEmitter {
 export declare interface Sender extends link {
   set_drained(drained: any): void;
   sendable(): boolean;
-  send(msg: AmqpMessage | Buffer, tag?: Buffer, format?: number): Delivery;
+  send(msg: Message | Buffer, tag?: Buffer, format?: number): Delivery;
 }
 
 export declare interface Receiver extends link {

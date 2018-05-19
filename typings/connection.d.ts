@@ -48,6 +48,14 @@ export interface ConnectionOptions extends EndpointOptions {
    */
   hostname?: string;
   /**
+   * @property {string} [servername] - The name of the server.
+   */
+  servername?: string;
+  /**
+   * @property {string} [sasl_init_hostname] - The hostname for initialising sasl.
+   */
+  sasl_init_hostname?: string;
+  /**
    * @property {number} [port] - The port number (5671 or 5672) at which to connect to.
    */
   port?: number;
@@ -55,12 +63,6 @@ export interface ConnectionOptions extends EndpointOptions {
    * @property {string} [transport] - The transport option.
    */
   transport?: "tls" | "ssl" | "tcp";
-  connection_details: {
-    host: "string",
-    port: number;
-    options: ConnectionOptions;
-    connect: any;
-  }
   /**
    * @property {string} [container_id] The id of the source container. If not provided then
    * this will a guid string.
@@ -292,9 +294,9 @@ export interface Dictionary<T> {
 /**
  * Map containing message attributes that will be held in the message header.
  * It conveys information about the message. This is the base interface.
- * @interface AmqpMessageAnnotations
+ * @interface MessageAnnotations
  */
-export interface AmqpMessageAnnotations {
+export interface MessageAnnotations {
   /**
    * @property {any} .
    */
@@ -317,9 +319,9 @@ export interface DeliveryAnnotations {
 
 /**
  * Describes the defined set of standard properties of the message.
- * @interface AmqpMessageProperties
+ * @interface MessageProperties
  */
-export interface AmqpMessageProperties {
+export interface MessageProperties {
   /**
    * @property {string | number | Buffer} [message_id] The application message identifier that uniquely idenitifes a message.
    * The user is responsible for making sure that this is unique in the given context. Guids usually make a good fit.
@@ -379,9 +381,9 @@ export interface AmqpMessageProperties {
 
 /**
  * Describes the defined set of standard header properties of the message.
- * @interface AmqpMessageProperties
+ * @interface MessageHeader
  */
-export interface AmqpMessageHeader {
+export interface MessageHeader {
   /**
    * @property {boolean} [first_acquirer] If this value is true, then this message has not been
    * acquired by any other link. Ifthis value is false, then this message MAY have previously
@@ -409,12 +411,12 @@ export interface AmqpMessageHeader {
 
 /**
  * Describes the AMQP message that is sent or received on the wire.
- * @interface AmqpMessage
- * @extends AmqpMessageProperties, AmqpMessageHeader
+ * @interface Message
+ * @extends MessageProperties, MessageHeader
  */
-export interface AmqpMessage extends AmqpMessageProperties, AmqpMessageHeader {
+export interface Message extends MessageProperties, MessageHeader {
   body: any;
-  message_annotations?: AmqpMessageAnnotations;
+  message_annotations?: MessageAnnotations;
   application_properties?: Dictionary<any>;
   delivery_annotations?: DeliveryAnnotations;
 }
@@ -441,7 +443,7 @@ export interface EventContext {
    * @property {AmqpMessage} [message] The amqp message that is received in the message event
    * handler when rhea emits a message event on a receiver.
    */
-  message?: AmqpMessage;
+  message?: Message;
   /**
    * @property {Receiver} [receiver] The amqp receiver link that was created on the amqp connection.
    */

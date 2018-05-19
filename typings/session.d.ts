@@ -5,7 +5,7 @@ import { EndpointState } from "./endpoint";
 import { EventEmitter } from "events";
 import { link, Sender, Receiver } from "./link";
 import { frames } from "./frames";
-import { CreateTypeDesc, AmqpError } from ".";
+import { AmqpError } from ".";
 
 export declare interface Delivery {
   readonly format: number;

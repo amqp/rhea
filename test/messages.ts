@@ -48,24 +48,24 @@ describe('message content', function() {
         listener.close();
     });
 
-    it('sends and receives string body', transfer_test({body:'hello world!'}, function(message: rhea.AmqpMessage) {
+    it('sends and receives string body', transfer_test({body:'hello world!'}, function(message: rhea.Message) {
         assert.equal(message.body, 'hello world!');
     }));
-    it('sends and receives binary body', transfer_test({body:amqp_types.wrap_binary(new Buffer('hello world!'))}, function(message: rhea.AmqpMessage) {
+    it('sends and receives binary body', transfer_test({body:amqp_types.wrap_binary(new Buffer('hello world!'))}, function(message: rhea.Message) {
         assert.equal(message.body.toString(), 'hello world!');
     }));
-    it('sends and receives body as data section', transfer_test({body:amqp_message.data_section(new Buffer('hello world!'))}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body as data section', transfer_test({body:amqp_message.data_section(new Buffer('hello world!'))}, function(message: rhea.Message) {
         assert.equal(message.body.typecode, 0x75);
         assert.equal(message.body.content.toString(), 'hello world!');
     }));
-    it('sends and receives body as two data sections', transfer_test({body:amqp_message.data_sections([new Buffer('hello'), new Buffer('world!')])}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body as two data sections', transfer_test({body:amqp_message.data_sections([new Buffer('hello'), new Buffer('world!')])}, function(message: rhea.Message) {
         assert.equal(message.body.typecode, 0x75);
         assert.equal(message.body.multiple, true);
         assert.equal(message.body.content.length, 2);
         assert.equal(message.body.content[0].toString(), 'hello');
         assert.equal(message.body.content[1].toString(), 'world!');
     }));
-    it('sends and receives body as multiple data sections', transfer_test({body:amqp_message.data_sections([new Buffer('farewell'), new Buffer('cruel'), new Buffer('world!')])}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body as multiple data sections', transfer_test({body:amqp_message.data_sections([new Buffer('farewell'), new Buffer('cruel'), new Buffer('world!')])}, function(message: rhea.Message) {
         assert.equal(message.body.typecode, 0x75);
         assert.equal(message.body.multiple, true);
         assert.equal(message.body.content.length, 3);
@@ -73,13 +73,13 @@ describe('message content', function() {
         assert.equal(message.body.content[1].toString(), 'cruel');
         assert.equal(message.body.content[2].toString(), 'world!');
     }));
-    it('sends and receives body as sequence section', transfer_test({body:amqp_message.sequence_section(['hello', 1, 'world!'])}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body as sequence section', transfer_test({body:amqp_message.sequence_section(['hello', 1, 'world!'])}, function(message: rhea.Message) {
         assert.equal(message.body.typecode, 0x76);
         assert.equal(message.body.content[0], 'hello');
         assert.equal(message.body.content[1], 1);
         assert.equal(message.body.content[2], 'world!');
     }));
-    it('sends and receives body as multiple sequence sections', transfer_test({body:amqp_message.sequence_sections([['hello', 1, 'world!'], ['foo', 'bar', 1234, 5678], ['pi', 3.14]])}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body as multiple sequence sections', transfer_test({body:amqp_message.sequence_sections([['hello', 1, 'world!'], ['foo', 'bar', 1234, 5678], ['pi', 3.14]])}, function(message: rhea.Message) {
         assert.equal(message.body.typecode, 0x76);
         assert.equal(message.body.multiple, true);
         assert.equal(message.body.content.length, 3);
@@ -96,60 +96,60 @@ describe('message content', function() {
         assert.equal(message.body.content[2][0], 'pi');
         assert.equal(message.body.content[2][1], 3.14);
     }));
-    it('sends and receives subject', transfer_test({subject:'my-subject'}, function(message: rhea.AmqpMessage) {
+    it('sends and receives subject', transfer_test({subject:'my-subject'}, function(message: rhea.Message) {
         assert.equal(message.subject, 'my-subject');
     }));
-    it('sends and receives message-id as string', transfer_test({message_id:'my-id'}, function(message: rhea.AmqpMessage) {
+    it('sends and receives message-id as string', transfer_test({message_id:'my-id'}, function(message: rhea.Message) {
         assert.equal(message.message_id, 'my-id');
     }));
-    it('sends and receives message-id as long', transfer_test({message_id:12345}, function(message: rhea.AmqpMessage) {
+    it('sends and receives message-id as long', transfer_test({message_id:12345}, function(message: rhea.Message) {
         assert.equal(message.message_id, 12345);
     }));
     var test_uuid = rhea_util.uuid4();
-    it('sends and receives message-id as uuid', transfer_test({message_id:test_uuid}, function(message: rhea.AmqpMessage) {
+    it('sends and receives message-id as uuid', transfer_test({message_id:test_uuid}, function(message: rhea.Message) {
         assert.equal(rhea.uuid_to_string(message.message_id as Buffer), rhea.uuid_to_string(test_uuid));
     }));
     var test_uuid_string = '55e6e3c7-a9c3-47da-83ff-9be7e2bd1b63';
-    it('sends and receives message-id as uuid when converted from string', transfer_test({message_id: rhea.string_to_uuid(test_uuid_string)}, function(message: rhea.AmqpMessage) {
+    it('sends and receives message-id as uuid when converted from string', transfer_test({message_id: rhea.string_to_uuid(test_uuid_string)}, function(message: rhea.Message) {
         assert.equal(rhea.uuid_to_string(message.message_id as Buffer), test_uuid_string);
     }));
-    it('sends and receives string property', transfer_test({application_properties:{colour:'red'}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives string property', transfer_test({application_properties:{colour:'red'}}, function(message: rhea.Message) {
         assert.equal(message.application_properties!.colour, 'red');
     }));
-    it('sends and receives int property', transfer_test({application_properties:{age:101}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives int property', transfer_test({application_properties:{age:101}}, function(message: rhea.Message) {
         assert.equal(message.application_properties!.age, 101);
     }));
-    it('sends and receives float property', transfer_test({application_properties:{pi:3.14}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives float property', transfer_test({application_properties:{pi:3.14}}, function(message: rhea.Message) {
         assert.equal(message.application_properties!.pi, 3.14);
     }));
-    it('sends and receives long property', transfer_test({application_properties:{big:1467407965596}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives long property', transfer_test({application_properties:{big:1467407965596}}, function(message: rhea.Message) {
         assert.equal(message.application_properties!.big, 1467407965596);
     }));
-    it('sends and receives ulong property', transfer_test({application_properties:{bigneg:-1234567898765}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives ulong property', transfer_test({application_properties:{bigneg:-1234567898765}}, function(message: rhea.Message) {
         assert.equal(message.application_properties!.bigneg, -1234567898765);
     }));
-    it('sends and receives char property', transfer_test({application_properties:{'x':amqp_types.wrap_char(0x2603)}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives char property', transfer_test({application_properties:{'x':amqp_types.wrap_char(0x2603)}}, function(message: rhea.Message) {
         assert.equal(message.application_properties!.x, 0x2603);
     }));
-    it('sends and receives a uuid property', transfer_test({application_properties:{'x':amqp_types.wrap_uuid(test_uuid)}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives a uuid property', transfer_test({application_properties:{'x':amqp_types.wrap_uuid(test_uuid)}}, function(message: rhea.Message) {
         assert.equal(rhea_util.uuid_to_string(message.application_properties!.x), rhea_util.uuid_to_string(test_uuid));
     }));
-    it('sends and receives string message annotation', transfer_test({message_annotations:{colour:'blue'}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives string message annotation', transfer_test({message_annotations:{colour:'blue'}}, function(message: rhea.Message) {
         assert.equal(message.message_annotations!.colour, 'blue');
     }));
-    it('sends and receives int delivery annotation', transfer_test({delivery_annotations:{count:8765}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives int delivery annotation', transfer_test({delivery_annotations:{count:8765}}, function(message: rhea.Message) {
         assert.equal(message.delivery_annotations!.count, 8765);
     }));
-    it('sends and receives body of 1k', transfer_test({body:new Array(1024+1).join('x')}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body of 1k', transfer_test({body:new Array(1024+1).join('x')}, function(message: rhea.Message) {
         assert.equal(message.body, new Array(1024+1).join('x'));
     }));
-    it('sends and receives body of 5k', transfer_test({body:new Array(1024*5+1).join('y')}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body of 5k', transfer_test({body:new Array(1024*5+1).join('y')}, function(message: rhea.Message) {
         assert.equal(message.body, new Array(1024*5+1).join('y'));
     }));
-    it('sends and receives body of 50k', transfer_test({body:new Array(1024*50+1).join('z')}, function(message: rhea.AmqpMessage) {
+    it('sends and receives body of 50k', transfer_test({body:new Array(1024*50+1).join('z')}, function(message: rhea.Message) {
         assert.equal(message.body, new Array(1024*50+1).join('z'));
     }));
-    it('sends and receives map body', transfer_test({body:{colour:'green',age:8,happy:true, sad:false}}, function(message: rhea.AmqpMessage) {
+    it('sends and receives map body', transfer_test({body:{colour:'green',age:8,happy:true, sad:false}}, function(message: rhea.Message) {
         assert.equal(message.body.colour, 'green');
         assert.equal(message.body.age, 8);
         assert.equal(message.body.happy, true);
@@ -157,19 +157,19 @@ describe('message content', function() {
         assert.equal(message.body.indifferent, undefined);
     }));
     it('sends and receives map with doubles', transfer_test({body:{west:amqp_types.wrap_double(4.734), north:amqp_types.wrap_double(56.0023),
-                                                                     }}, function(message: rhea.AmqpMessage) {
+                                                                     }}, function(message: rhea.Message) {
 
         assert.equal(message.body.north, 56.0023);
         assert.equal(message.body.west, 4.734);
     }));
     it('sends and receives map with floats', transfer_test({body:{half:amqp_types.wrap_float(0.5), quarter:amqp_types.wrap_double(0.25),
-                                                                     }}, function(message: rhea.AmqpMessage) {
+                                                                     }}, function(message: rhea.Message) {
 
         assert.equal(message.body.half, 0.5);
         assert.equal(message.body.quarter, 0.25);
     }));
     it('sends and receives map with ulongs', transfer_test({body:{age:amqp_types.wrap_ulong(888), max:amqp_types.wrap_ulong(9007199254740992),
-                                                                     }}, function(message: rhea.AmqpMessage) {
+                                                                     }}, function(message: rhea.Message) {
         assert.equal(message.body.max, 9007199254740992);
         assert.equal(message.body.age, 888);
     }));
@@ -182,7 +182,7 @@ describe('message content', function() {
                                                                      awkward:amqp_types.wrap_long(1467407965596),
                                                                      max:amqp_types.wrap_long(9007199254740992),
                                                                      min:amqp_types.wrap_long(-9007199254740992)
-                                                                    }}, function(message: rhea.AmqpMessage) {
+                                                                    }}, function(message: rhea.Message) {
         assert.equal(message.body.one, 1);
         assert.equal(message.body.negative_one, -1);
         assert.equal(message.body.positive, 1000);
@@ -193,9 +193,9 @@ describe('message content', function() {
         assert.equal(message.body.max, 9007199254740992);
         assert.equal(message.body.min, -9007199254740992);
     }));
-    it('sends and receives map with ulongs/longs as buffers', transfer_test({body:{too_big:new amqp_types.Ulong(new Buffer([0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF])),
-                                                                                   too_small:new amqp_types.Long(new Buffer([0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00]))
-                                                                     }}, function(message: rhea.AmqpMessage) {
+    it('sends and receives map with ulongs/longs as buffers', transfer_test({body: {too_big: new (amqp_types as any).Ulong(new Buffer([0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF])),
+                                                                                   too_small: new (amqp_types as any).Long(new Buffer([0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00]))
+                                                                     }}, function(message: rhea.Message) {
         assert.equal(message.body.too_big.length, 8);
         for (var i = 0; i < 8; i++) {
             assert.equal(message.body.too_big[i], 0xFF);
@@ -229,7 +229,7 @@ describe('message content', function() {
         ttl:123456789,
         first_acquirer:false,
         delivery_count:8
-    }, function(message: rhea.AmqpMessage) {
+    }, function(message: rhea.Message) {
         assert.equal(message.message_id, 'my-id');
         assert.equal(message.user_id, 'my-user');
         assert.equal(message.to, 'my-to');
@@ -268,7 +268,7 @@ describe('message content', function() {
         ttl:123456789,
         first_acquirer:false,
         delivery_count:8
-    }, function(message: rhea.AmqpMessage) {
+    }, function(message: rhea.Message) {
         assert.equal(message.message_id, 'my-id');
         assert.equal(message.user_id, 'my-user');
         assert.equal(message.to, 'my-to');
@@ -288,7 +288,7 @@ describe('message content', function() {
         assert.equal(message.first_acquirer, false);
         assert.equal(message.delivery_count, 8);
     }));
-    it('test undefined properties and headers directly', transfer_test({body:'hello world!'}, function(message: rhea.AmqpMessage) {
+    it('test undefined properties and headers directly', transfer_test({body:'hello world!'}, function(message: rhea.Message) {
         assert.equal(message.body, 'hello world!');
         assert.equal(message.message_id, undefined);
         assert.equal(message.user_id, undefined);
@@ -309,7 +309,7 @@ describe('message content', function() {
         assert.equal(message.first_acquirer, undefined);
         assert.equal(message.delivery_count, undefined);
     }));
-    it('message has a toString', transfer_test({message_id:'my-id', body:'hello world!'}, function(message: rhea.AmqpMessage) {
+    it('message has a toString', transfer_test({message_id:'my-id', body:'hello world!'}, function(message: rhea.Message) {
         assert.equal(message.toString(), '{"message_id":"my-id","body":"hello world!"}');
     }));
     it('sends and receives message in custom format', function (done: Function) {
@@ -478,7 +478,7 @@ describe('fragmentation', function() {
     }
 
     function transfer_test(size: number, count?: number) {
-        var message: rhea.AmqpMessage = {body:get_data(size, 'x')};
+        var message: rhea.Message = {body:get_data(size, 'x')};
         var received: number = 0;
         var n: number = count || 1;
         return function(done: Function) {
