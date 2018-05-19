@@ -28,13 +28,12 @@
     },
     "scripts": {
         "lint": "eslint lib/*.js",
-        "test": "mocha -r ts-node/register ./test/*.ts",
+        "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts",
         "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
         "run-examples": "require-self && mocha examples/test_examples.js",
         "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
-        "prepublish": "npm run test",
-        "pretest": "npm run lint && npm run tsc && cd test && npm i",
+        "prepare": "npm run lint && npm run tsc",
         "tsc": "tsc"
     },
     "keywords": [
