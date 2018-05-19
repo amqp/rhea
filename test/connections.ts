@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import * as assert from "assert";
-import * as rhea from "rhea";
+import * as rhea from "../";
 describe('connection fields', function () {
-    let container: rhea.Container, listener: any;
+    var container: rhea.Container, listener: any;
     beforeEach(function (done: Function) {
         container = rhea.create_container({ non_fatal_errors: [] });
-        listener = rhea.listen({ port: 0 });
+        listener = container.listen({ port: 0 });
         listener.on('listening', function () {
             done();
         });
