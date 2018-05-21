@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-var assert = require('assert');
-var util = require('../lib/util.js');
+import * as assert from "assert";
+const util = require("../lib/util");
+import * as rhea from "../"
 
 describe('uuid', function() {
     it('converts uuid string to buffer', function(done) {
         var uuid = util.uuid4();
-        var uuid_string = util.uuid_to_string(uuid);
-        var uuid_bytes = util.string_to_uuid(uuid_string);
+        var uuid_string = rhea.uuid_to_string(uuid);
+        var uuid_bytes = rhea.string_to_uuid(uuid_string);
         assert(uuid.equals(uuid_bytes));
 
         var valid = [
@@ -30,8 +30,8 @@ describe('uuid', function() {
             '8CE9BB92-6D10-1740-A7C1-812D5C153C54'
         ];
         valid.forEach(function (s) {
-            var bytes = util.string_to_uuid(s);
-            assert.equal(s.toLowerCase(), util.uuid_to_string(bytes));
+            var bytes = rhea.string_to_uuid(s);
+            assert.equal(s.toLowerCase(), rhea.uuid_to_string(bytes));
         });
         done();
     });
@@ -46,7 +46,7 @@ describe('uuid', function() {
         invalid.forEach(function (s) {
             var failed;
             try {
-                util.string_to_uuid(s);
+                rhea.string_to_uuid(s);
                 failed = false;
             } catch(e) {
                 failed = true;

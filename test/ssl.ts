@@ -15,25 +15,25 @@
  */
 'use strict';
 
-var assert = require('assert');
-var rhea = require('../lib/container.js');
-var fs = require('fs');
-var path = require('path');
+import * as assert from "assert";
+import * as rhea from "../";
+import * as fs from "fs";
+import * as path from "path";
 
 
 describe('ssl', function() {
     this.slow(200);
-    var listener;
+    var listener: any;
 
     afterEach(function() {
         if (listener) listener.close();
     });
 
-    function success(server_conf, client_conf) {
-        return function(done) {
-            var container = server_conf.container || rhea.create_container();
+    function success(server_conf: any, client_conf: any) {
+        return function(done: Function) {
+            var container: rhea.Container = server_conf.container || rhea.create_container();
 
-            container.on('connection_open', function (context) {
+            container.on('connection_open', function (context: rhea.EventContext) {
                 if (server_conf.verification) server_conf.verification(context);
             });
             var server_options = server_conf.options || {};
@@ -44,7 +44,7 @@ describe('ssl', function() {
             if (server_options.ca === undefined) server_options.ca = fs.readFileSync(path.resolve(__dirname,'ca-cert.pem'));
             listener = container.listen(server_options);
             listener.on('listening', function() {
-                var client = client_conf.container || rhea.create_container();
+                var client: rhea.Container = client_conf.container || rhea.create_container();
                 var client_options = client_conf.options || {};
                 client_options.port = listener.address().port;
                 if (client_options.transport === undefined) client_options.transport = 'tls';
@@ -52,7 +52,7 @@ describe('ssl', function() {
                 if (client_options.cert === undefined) client_options.cert = fs.readFileSync(path.resolve(__dirname,'client-cert.pem'));
                 if (client_options.ca === undefined) client_options.ca = fs.readFileSync(path.resolve(__dirname,'ca-cert.pem'));
 
-                var conn = client.connect(client_options);
+                var conn: rhea.Connection = client.connect(client_options);
                 conn.on('connection_open', function(context) {
                     if (client_conf.verification) client_conf.verification(context);
                     context.connection.close();
@@ -73,7 +73,7 @@ describe('ssl', function() {
     function get_container_for_sasl_plain() {
         var container = rhea.create_container();
         container.sasl_server_mechanisms.enable_plain(
-            function(username, password) {
+            function(username: string, password: string) {
                 return username.split("").reverse().join("") === password;
             }
         );
@@ -86,8 +86,8 @@ describe('ssl', function() {
        success(
            {
                options:{enable_sasl_external:true, requestCert: true},
-               verification:function (context) {
-                   assert.equal(context.connection.get_peer_certificate().subject.CN, 'TestClient');
+               verification:function (context: rhea.EventContext) {
+                   assert.equal(context.connection!.get_peer_certificate()!.subject!.CN, 'TestClient');
                },
            },
            {

@@ -1,0 +1,15 @@
+coverage
+node_modules
+*~
+npm-debug.log
+package-lock.json
+.travis.yml
+.git*
+test
+examples
+.vscode
+.nyc*
+.ntvs_analysis.*
+*.sln
+*.obj
+.env

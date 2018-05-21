@@ -12,28 +12,34 @@
         "debug": ">=0.8.0"
     },
     "devDependencies": {
+        "@types/node": "^8.0.37",
+        "@types/debug": "^0.0.30",
+        "@types/mocha": "^5.2.0",
         "browserify": "",
         "eslint": "",
-        "istanbul": "",
+        "istanbul": "1.1.0-alpha.1",
         "minimist": "",
         "mocha": "^3.0.0",
         "uglify-js": "",
         "require-self": "^0.2.1",
-        "ws": "^5.1.1"
+        "ws": "^5.1.1",
+        "typescript": "^2.8.3",
+        "ts-node": "^6.0.3"
     },
     "scripts": {
         "lint": "eslint lib/*.js",
-        "test": "mocha",
-        "coverage": "istanbul cover _mocha",
+        "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts",
+        "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
         "run-examples": "require-self && mocha examples/test_examples.js",
         "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
-        "prepublish": "npm run test",
-        "pretest": "npm run lint"
+        "prepare": "npm run lint && npm run tsc",
+        "tsc": "tsc"
     },
     "keywords": [
         "amqp",
         "messaging"
     ],
-    "main": "./lib/container.js"
+    "main": "./lib/container.js",
+    "types": "./typings/index.d.ts"
 }

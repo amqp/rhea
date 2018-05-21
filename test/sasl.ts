@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-var assert = require('assert');
-var rhea = require('../lib/container.js');
+import * as assert from "assert";
+import * as rhea from "../";
 
 describe('sasl plain', function() {
     this.slow(200);
-    var container, listener;
+    var container: rhea.Container, listener: any;
 
-    function authenticate(username, password) {
+    function authenticate(username: string, password: string) {
         return username.split("").reverse().join("") === password;
     }
 
-    beforeEach(function(done) {
+    beforeEach(function(done: Function) {
         container = rhea.create_container();
         container.sasl_server_mechanisms.enable_plain(authenticate);
         container.on('disconnected', function () {});
@@ -40,10 +39,10 @@ describe('sasl plain', function() {
         listener.close();
     });
 
-    it('successfully authenticates', function(done) {
+    it('successfully authenticates', function(done: Function) {
         container.connect({username:'bob',password:'bob',port:listener.address().port}).on('connection_open', function(context) { context.connection.close(); done(); });
     });
-    it('handles authentication failure', function(done) {
+    it('handles authentication failure', function(done: Function) {
         container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port}).on('connection_error', function(context) { 
             var error = context.connection.get_error();
             assert.equal(error.condition, 'amqp:unauthorized-access');
@@ -54,14 +53,14 @@ describe('sasl plain', function() {
 
 describe('sasl init hostname', function() {
     this.slow(200);
-    var container, listener, hostname;
+    var container: rhea.Container, listener: any, hostname: string | undefined;
 
-    function authenticate(username, password, __hostname) {
+    function authenticate(username: string, password: string, __hostname: string): boolean {
         hostname = __hostname;
         return true;
     }
 
-    beforeEach(function(done) {
+    beforeEach(function(done: Function) {
         hostname = undefined;
         container = rhea.create_container();
         container.sasl_server_mechanisms.enable_plain(authenticate);
@@ -76,24 +75,24 @@ describe('sasl init hostname', function() {
         listener.close();
     });
 
-    it('uses host by default', function(done) {
-        container.connect({username:'a',password:'a', host:'localhost', port:listener.address().port}).on('connection_open', function(context) {
+    it('uses host by default', function(done: Function) {
+        container.connect({username:'a',password:'a', host:'localhost', port:listener.address().port}).on('connection_open', function(context: rhea.EventContext) {
             context.connection.close();
             assert.equal(hostname, 'localhost');
             done();
         });
     });
 
-    it('prefers servername to host', function(done) {
-        container.connect({username:'a',password:'b', servername:'somethingelse', host:'localhost', port:listener.address().port}).on('connection_open', function(context) {
+    it('prefers servername to host', function(done: Function) {
+        container.connect({username:'a',password:'b', servername:'somethingelse', host:'localhost', port:listener.address().port}).on('connection_open', function(context: rhea.EventContext) {
             context.connection.close();
             assert.equal(hostname, 'somethingelse');
             done();
         });
     });
 
-    it('prefers sasl_init_hostname to servername or host', function(done) {
-        container.connect({username:'a',password:'b', sasl_init_hostname:'yetanother', servername:'somethingelse', host:'localhost', port:listener.address().port}).on('connection_open', function(context) {
+    it('prefers sasl_init_hostname to servername or host', function(done: Function) {
+        container.connect({username:'a',password:'b', sasl_init_hostname:'yetanother', servername:'somethingelse', host:'localhost', port:listener.address().port}).on('connection_open', function(context: rhea.EventContext) {
             context.connection.close();
             assert.equal(hostname, 'yetanother');
             done();
@@ -105,9 +104,9 @@ describe('sasl init hostname', function() {
 describe('sasl anonymous', function() {
     this.slow(200);
 
-    var container, listener;
+    var container: rhea.Container, listener: any;
 
-    beforeEach(function(done) {
+    beforeEach(function(done: Function) {
         container = rhea.create_container();
         container.sasl_server_mechanisms.enable_anonymous();
         container.on('disconnected', function () {});
@@ -121,14 +120,14 @@ describe('sasl anonymous', function() {
         listener.close();
     });
 
-    it('successfully authenticates', function(done) {
+    it('successfully authenticates', function(done: Function) {
         container.connect({username:'bob',port:listener.address().port}).on('connection_open', function(context) { context.connection.close(); done(); });
     });
-    it('handles authentication failure', function(done) {
-        container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port}).on('connection_error', function(context) {
+    it('handles authentication failure', function(done: Function) {
+        container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port}).on('connection_error', function(context: rhea.EventContext) {
             var error = context.connection.get_error();
-            assert.equal(error.condition, 'amqp:unauthorized-access');
-            assert.equal(error.description, 'No suitable mechanism; server supports ANONYMOUS');
+            assert.equal((error as rhea.AmqpError).condition, 'amqp:unauthorized-access');
+            assert.equal((error as rhea.AmqpError).description, 'No suitable mechanism; server supports ANONYMOUS');
             done();
         });
     });
