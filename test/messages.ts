@@ -335,12 +335,12 @@ describe('acknowledgement', function() {
         });
         server.on('released', function (context: rhea.EventContext) {
             outcome.state = 'released';
-            outcome.delivery_failed = context.delivery!.remote_state.delivery_failed;
-            outcome.undeliverable_here = context.delivery!.remote_state.undeliverable_here;
+            outcome.delivery_failed = context.delivery!.remote_state!.delivery_failed;
+            outcome.undeliverable_here = context.delivery!.remote_state!.undeliverable_here;
         });
         server.on('rejected', function (context: rhea.EventContext) {
             outcome.state = 'rejected';
-            outcome.error = context.delivery!.remote_state.error;
+            outcome.error = context.delivery!.remote_state!.error;
         });
         server.on('settled', function (context: rhea.EventContext) {
             context.connection.close();
@@ -421,8 +421,8 @@ describe('acknowledgement', function() {
         server.on('modified', function (context: rhea.EventContext) {
             assert.equal(outcome.state, undefined);
             outcome.state = 'modified';
-            outcome.delivery_failed = context.delivery!.remote_state.delivery_failed;
-            outcome.undeliverable_here = context.delivery!.remote_state.undeliverable_here;
+            outcome.delivery_failed = context.delivery!.remote_state!.delivery_failed;
+            outcome.undeliverable_here = context.delivery!.remote_state!.undeliverable_here;
         });
         server.once('sendable', function (context: rhea.EventContext) {
             context.sender!.send({body:'modify-me'});

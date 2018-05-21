@@ -87,7 +87,7 @@ describe('ssl', function() {
            {
                options:{enable_sasl_external:true, requestCert: true},
                verification:function (context: rhea.EventContext) {
-                   assert.equal(context.connection.get_peer_certificate().subject.CN, 'TestClient');
+                   assert.equal(context.connection!.get_peer_certificate()!.subject!.CN, 'TestClient');
                },
            },
            {

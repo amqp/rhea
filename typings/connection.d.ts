@@ -8,6 +8,7 @@ import { Socket } from "net";
 import { frames } from "./frames";
 import { EventEmitter } from "events";
 import { Container } from "./container";
+import { PeerCertificate } from "tls";
 
 /**
  * Describes the signature of the event handler for any event emitted by rhea.
@@ -132,6 +133,19 @@ export interface ConnectionOptions extends EndpointOptions {
    * permits for incoming informational text. This list is ordered in decreasing level of preference.
    */
   incoming_locales?: string[];
+  /**
+   * @property {SenderOptions} [sender_options] Default options that can be provided while creating any
+   * sender link on this connection. These options will be overridden by the specific sender options
+   * that will be provided while creating a sender.
+   */
+  sender_options?: SenderOptions
+
+  /**
+   * @property {ReceiverOptions} [receiver_options] Default options that can be provided while creating any
+   * receiver link on this connection. These options will be overridden by the specific receiver options
+   * that will be provided while creating a sender.
+   */
+  receiver_options?: ReceiverOptions
 }
 
 /**
@@ -458,6 +472,10 @@ export interface EventContext {
    */
   container: Container;
   /**
+   * @property {Session} session The amqp session link that was created on the amqp connection.
+   */
+  session: Session;
+  /**
    * @property {Delivery} [delivery] The amqp delivery that is received after sending a message.
    */
   delivery?: Delivery;
@@ -470,10 +488,6 @@ export interface EventContext {
    * @property {Receiver} [receiver] The amqp receiver link that was created on the amqp connection.
    */
   receiver?: Receiver;
-  /**
-   * @property {Session} session The amqp session link that was created on the amqp connection.
-   */
-  session: Session;
   /**
    * @property {Sender} [sender] The amqp sender link that was created on the amqp connection.
    */
@@ -512,7 +526,7 @@ export declare interface Connection extends EventEmitter {
   readonly idle_time_out?: number;
   readonly channel_max?: number;
   readonly properties?: { [x: string]: any };
-  readonly error?: any;
+  readonly error?: AmqpError | Error;
   reset(): void;
   connect(): Connection;
   reconnect(): Connection;
@@ -521,10 +535,10 @@ export declare interface Connection extends EventEmitter {
   attach_receiver(options?: ReceiverOptions | string): Receiver;
   open_receiver(options?: ReceiverOptions | string): Receiver;
   get_option(name: string, default_value: any): any;
-  send(msg: any): Delivery;
+  send(msg: Message): Delivery;
   get_error(): AmqpError | undefined;
   open(): void;
-  close(error?: any): void;
+  close(error?: AmqpError): void;
   is_open(): boolean;
   is_remote_open(): boolean;
   is_closed(): boolean;
@@ -537,7 +551,7 @@ export declare interface Connection extends EventEmitter {
   each_link(action: Function,  filter?: Function): void;
   on_open(frame: frames): void;
   on_close(frame: frames): void;
-  get_peer_certificate(): any | undefined;
+  get_peer_certificate(): PeerCertificate | undefined;
   get_tls_socket(): Socket | undefined;
   remove_session(session: Session): void;
 }

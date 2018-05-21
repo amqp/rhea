@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as assert from "assert";
 import * as rhea from "../";
+
 describe('connection fields', function () {
     var container: rhea.Container, listener: any;
     beforeEach(function (done: Function) {
@@ -127,13 +129,13 @@ describe('connection fields', function () {
     }));
     it('error on close', close_test({ condition: 'amqp:connection:forced', description: 'testing error on close' }, function (connection: rhea.Connection) {
         var error = connection.remote.close.error;
-        assert.equal(error.condition, 'amqp:connection:forced');
-        assert.equal(error.description, 'testing error on close');
+        assert.equal((error as any).condition, 'amqp:connection:forced');
+        assert.equal((error as any).description, 'testing error on close');
     }));
     it('pass error to close', close_test_simple({ condition: 'amqp:connection:forced', description: 'testing error on close' }, function (connection: rhea.Connection) {
         var error = connection.remote.close.error;
-        assert.equal(error.condition, 'amqp:connection:forced');
-        assert.equal(error.description, 'testing error on close');
+        assert.equal((error as any).condition, 'amqp:connection:forced');
+        assert.equal((error as any).description, 'testing error on close');
     }));
 });
 describe('connection error handling', function () {
@@ -167,14 +169,14 @@ describe('connection error handling', function () {
         c.on('connection_error', function (context: rhea.EventContext) {
             error_handler_called = true;
             var error = context.connection.error;
-            assert.equal(error.condition, 'amqp:connection:forced');
-            assert.equal(error.description, 'testing error on close');
+            assert.equal((error as any).condition, 'amqp:connection:forced');
+            assert.equal((error as any).description, 'testing error on close');
         });
         c.on('connection_close', function (context: rhea.EventContext) {
             close_handler_called = true;
             var error = context.connection.error;
-            assert.equal(error.condition, 'amqp:connection:forced');
-            assert.equal(error.description, 'testing error on close');
+            assert.equal((error as any).condition, 'amqp:connection:forced');
+            assert.equal((error as any).description, 'testing error on close');
         });
     });
     it('error handled', function (done: Function) {
@@ -190,8 +192,8 @@ describe('connection error handling', function () {
         c.on('connection_error', function (context: rhea.EventContext) {
             error_handler_called = true;
             var error = context.connection.error;
-            assert.equal(error.condition, 'amqp:connection:forced');
-            assert.equal(error.description, 'testing error on close');
+            assert.equal((error as any).condition, 'amqp:connection:forced');
+            assert.equal((error as any).description, 'testing error on close');
         });
     });
     it('unhandled error', function (done: Function) {
@@ -203,8 +205,8 @@ describe('connection error handling', function () {
         });
         var container2 = rhea.create_container({ non_fatal_errors: [] });
         container2.on('error', function (error: rhea.AmqpError) {
-            assert.equal(error.condition, 'amqp:connection:forced');
-            assert.equal(error.description, 'testing error on close');
+            assert.equal((error as any).condition, 'amqp:connection:forced');
+            assert.equal((error as any).description, 'testing error on close');
         });
         var c: rhea.Connection = container2.connect(listener.address());
     });

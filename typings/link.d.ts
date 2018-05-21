@@ -4,7 +4,7 @@ import { EventEmitter } from "events";
 import { frames } from "./frames";
 import { EndpointState } from "./endpoint";
 import { Delivery, Session } from "./session";
-import { EventContext, Message, TerminusOptions, Connection, LinkOptions, Source } from "./connection";
+import { EventContext, Message, TerminusOptions, Connection, LinkOptions, Source, AmqpError, Dictionary } from "./connection";
 
 export declare interface FlowController {
   window: number;
@@ -17,44 +17,27 @@ export declare interface LinkError extends Error {
   link: link;
 }
 
-export declare interface ILocal {
-  handle: any;
-  attach: {
-    role: boolean;
-    initial_delivery_count?: number;
-    snd_settle_mode?: number;
-    [x: string]: any;
-  };
-  detach: {
-    closed?: boolean;
-    error?: any;
-    [x: string]: any;
-  }
-}
-
 export declare interface link extends EventEmitter {
   init(session: Session, name: string, local_handle: any, opts: any, is_receiver: boolean): void;
   session: Session;
   connection: Connection;
   name: string;
   options: LinkOptions;
-  local: ILocal;
-  remote: any;
-  readonly error: any;
+  readonly error: AmqpError | Error;
   readonly snd_settle_mode: 0 | 1 | 2;
   readonly rcv_settle_mode: 0 | 1;
   readonly source: Source;
   readonly target: TerminusOptions;
-  readonly max_message_size: any;
+  readonly max_message_size: number;
   readonly offered_capabilities: string | string[];
   readonly desired_capabilities: string | string[];
-  readonly properties: any;
-  set_source(fields: any): void;
-  set_target(fields: any): void;
+  readonly properties: Dictionary<any>;
+  set_source(fields: Source): void;
+  set_target(fields: TerminusOptions): void;
   attach(): void;
   open(): void;
   detach(): void;
-  close(error?: any): void;
+  close(error?: AmqpError): void;
   remove(): void;
   is_open(): boolean;
   is_remote_open(): boolean;
@@ -67,14 +50,25 @@ export declare interface link extends EventEmitter {
 }
 
 export declare interface Sender extends link {
-  set_drained(drained: any): void;
+  set_drained(drained: boolean): void;
+  /**
+   * Determines whether the message is sendable.
+   * @returns {boolean} `true` Sendable. `false` Not Sendable.
+   */
   sendable(): boolean;
-  send(msg: Message | Buffer, tag?: Buffer, format?: number): Delivery;
+  /**
+   * Sends a message
+   * @param {Message | Buffer} msg The message to be sent. For default AMQP format msg parameter
+   * should be of type Message interface. For a custom format, the msg parameter should be a Buffer.
+   * @param {Buffer | string} [tag] The message tag if any.
+   * @param {number} [format] The message format. Usually it is zero. Specify this
+   * if a message with custom format needs to be sent.
+   * @returns {Delivery} Delivery
+   */
+  send(msg: Message | Buffer, tag?: Buffer | string, format?: number): Delivery;
 }
 
 export declare interface Receiver extends link {
-  local_handle: any;
-  opts: any;
   drain: boolean;
   add_credit(credit: number): void;
   set_credit_window(credit_window: number): void;

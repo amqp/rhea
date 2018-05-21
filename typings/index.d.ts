@@ -9,9 +9,9 @@ export {
 export { ConnectionError, ProtocolError, TypeError } from "./errors";
 export { Delivery, Session, SessionEvents } from "./session";
 export { message as MessageUtil } from "./message";
-export { filter as IFilter } from "./filter"
+export { filter as Filter } from "./filter"
 export { Container, ContainerOptions } from "./container";
-export { types as ITypes } from "./types";
+export { types as Types } from "./types";
 export {
   connect, create_container, filter, generate_uuid, id, message,
   options, get_option, sasl, sasl_server_mechanisms, string_to_uuid, types,

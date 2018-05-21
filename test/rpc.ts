@@ -42,23 +42,23 @@ function dummy_broker(capabilities?: any) {
         });
     }
     container.on('sender_open', function (context: rhea.EventContext) {
-        if (context.sender!.remote.attach.source.dynamic) {
+        if ((context.sender as any).remote.attach.source.dynamic) {
             var temp: string = container.generate_uuid();
             context.sender!.set_source({address:temp});
             broker.subscribe(temp, context.sender!);
         } else {
-            broker.subscribe(context.sender!.remote.attach.source.address, context.sender!);
+            broker.subscribe((context.sender as any).remote.attach.source.address, context.sender!);
         }
     });
     container.on('sender_close', function (context: rhea.EventContext) {
-        if (context.sender!.remote.attach.source.dynamic) {
-            broker.unsubscribe(context.sender!.local.attach.source.address);
+        if ((context.sender as any).remote.attach.source.dynamic) {
+            broker.unsubscribe((context.sender as any).local.attach.source.address);
         } else {
-            broker.unsubscribe(context.sender!.remote.attach.source.address);
+            broker.unsubscribe((context.sender as any).remote.attach.source.address);
         }
     });
     container.on('message', function (context: rhea.EventContext) {
-        var address = context.receiver!.remote.attach.target.address || context.message!.to;
+        var address = (context.receiver as any).remote.attach.target.address || context.message!.to;
         broker.publish(address, context.message!);
     });
 

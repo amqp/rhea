@@ -17,9 +17,9 @@
 import * as assert from "assert";
 import * as rhea from "../";
 import { Server } from "net";
-const amqp_types: rhea.ITypes = rhea.types;
+const amqp_types: rhea.Types = rhea.types;
 const amqp_messaging: rhea.MessageUtil = rhea.message;
-const filter: rhea.IFilter = rhea.filter;
+const filter: rhea.Filter = rhea.filter;
 
 describe('link fields', function() {
     var container: rhea.Container, listener: Server;
@@ -98,52 +98,52 @@ describe('link fields', function() {
     for (var i = 0; i < link_types.length; i++) {
         var t = link_types[i];
         it(t + ' name', open_test(t, {name:'my-link'}, function(link: rhea.link) {
-            assert.equal(link.remote.attach.name, 'my-link');
+            assert.equal((link as any).remote.attach.name, 'my-link');
         }));
         it('single offered ' + t + ' capability explicit', open_test(t, {offered_capabilities:'foo'}, function(link: rhea.link) {
-            assert.equal(link.remote.attach.offered_capabilities, 'foo');
+            assert.equal((link as any).remote.attach.offered_capabilities, 'foo');
         }));
         it('single offered ' + t + ' capability aliased', open_test(t, {offered_capabilities:'foo'}, function(link: rhea.link) {
             assert.equal(link.offered_capabilities, 'foo');
         }));
         it('multiple offered ' + t + ' capabilities', open_test(t, {offered_capabilities:['foo', 'bar']}, function(link: rhea.link) {
-            assert.equal(link.remote.attach.offered_capabilities.length, 2);
-            assert.equal(link.remote.attach.offered_capabilities[0], 'foo');
-            assert.equal(link.remote.attach.offered_capabilities[1], 'bar');
+            assert.equal((link as any).remote.attach.offered_capabilities.length, 2);
+            assert.equal((link as any).remote.attach.offered_capabilities[0], 'foo');
+            assert.equal((link as any).remote.attach.offered_capabilities[1], 'bar');
         }));
         it('single desired ' + t + ' capability', open_test(t, {desired_capabilities:'foo'}, function(link: rhea.link) {
-            assert.equal(link.remote.attach.desired_capabilities, 'foo');
+            assert.equal((link as any).remote.attach.desired_capabilities, 'foo');
         }));
         it('multiple desired ' + t + ' capabilities', open_test(t, {desired_capabilities:['a', 'b', 'c']}, function(link: rhea.link) {
-            assert.equal(link.remote.attach.desired_capabilities.length, 3);
-            assert.equal(link.remote.attach.desired_capabilities[0], 'a');
-            assert.equal(link.remote.attach.desired_capabilities[1], 'b');
-            assert.equal(link.remote.attach.desired_capabilities[2], 'c');
+            assert.equal((link as any).remote.attach.desired_capabilities.length, 3);
+            assert.equal((link as any).remote.attach.desired_capabilities[0], 'a');
+            assert.equal((link as any).remote.attach.desired_capabilities[1], 'b');
+            assert.equal((link as any).remote.attach.desired_capabilities[2], 'c');
         }));
         it(t + ' properties', open_test(t, {properties:{flavour:'vanilla', scoops:2, cone:true}}, function(link: rhea.link) {
-            assert.equal(link.remote.attach.properties.flavour, 'vanilla');
-            assert.equal(link.remote.attach.properties.scoops, 2);
-            assert.equal(link.remote.attach.properties.cone, true);
+            assert.equal((link as any).remote.attach.properties.flavour, 'vanilla');
+            assert.equal((link as any).remote.attach.properties.scoops, 2);
+            assert.equal((link as any).remote.attach.properties.cone, true);
         }));
         it('error on ' + t + ' close', close_test(t, {condition:'amqp:link:detach-forced', description:'testing error on close'}, function(link: rhea.link) {
-            var error = link.remote.detach.error;
+            var error = (link as any).remote.detach.error;
             assert.equal(error.condition, 'amqp:link:detach-forced');
             assert.equal(error.description, 'testing error on close');
         }));
         it('pass error to ' + t + ' close', close_test_simple(t, {condition:'amqp:link:detach-forced', description:'testing error on close'}, function(link: rhea.link) {
-            var error = link.remote.detach.error;
+            var error = (link as any).remote.detach.error;
             assert.equal(error.condition, 'amqp:link:detach-forced');
             assert.equal(error.description, 'testing error on close');
         }));
     }
     it('source address as simple string', open_receiver_test('my-source', function (link: rhea.link) {
-        assert.equal(link.remote.attach.source.address, 'my-source');
+        assert.equal((link as any).remote.attach.source.address, 'my-source');
     }));
     it('source address aliased', open_receiver_test('my-source', function (link: rhea.link) {
         assert.equal(link.source.address, 'my-source');
     }));
     it('source address as single nested value', open_receiver_test({source:'my-source'}, function (link: rhea.link) {
-        assert.equal(link.remote.attach.source.address, 'my-source');
+        assert.equal((link as any).remote.attach.source.address, 'my-source');
     }));
     it('source as nested object', open_receiver_test(
         {source:{
@@ -158,24 +158,24 @@ describe('link fields', function() {
             capabilities: ['a', 'b', 'c']
         }},
         function (link: rhea.link) {
-            assert.equal(link.remote.attach.source.address, 'my-source');
-            assert.equal(link.remote.attach.source.durable, 1);
-            assert.equal(link.remote.attach.source.expiry_policy, 'session-end');
-            assert.equal(link.remote.attach.source.timeout, 33);
-            assert.equal(link.remote.attach.source.distribution_mode, 'copy');
-            var descriptor = amqp_types.unwrap(link.remote.attach.source.filter['jms-selector'].descriptor);
+            assert.equal((link as any).remote.attach.source.address, 'my-source');
+            assert.equal((link as any).remote.attach.source.durable, 1);
+            assert.equal((link as any).remote.attach.source.expiry_policy, 'session-end');
+            assert.equal((link as any).remote.attach.source.timeout, 33);
+            assert.equal((link as any).remote.attach.source.distribution_mode, 'copy');
+            var descriptor = amqp_types.unwrap((link as any).remote.attach.source.filter['jms-selector'].descriptor);
             assert.equal(descriptor, 0x0000468C00000004);
-            assert.equal(link.remote.attach.source.filter['jms-selector'], "colour = 'green'");
-            assert.ok(amqp_messaging.is_modified(link.remote.attach.source.default_outcome));
-            assert.equal(link.remote.attach.source.outcomes.length, 4);
-            assert.equal(link.remote.attach.source.outcomes[0], 'amqp:list:accepted');
-            assert.equal(link.remote.attach.source.outcomes[1], 'amqp:list:rejected');
-            assert.equal(link.remote.attach.source.outcomes[2], 'amqp:list:released');
-            assert.equal(link.remote.attach.source.outcomes[3], 'amqp:list:modified');
-            assert.equal(link.remote.attach.source.capabilities.length, 3);
-            assert.equal(link.remote.attach.source.capabilities[0], 'a');
-            assert.equal(link.remote.attach.source.capabilities[1], 'b');
-            assert.equal(link.remote.attach.source.capabilities[2], 'c');
+            assert.equal((link as any).remote.attach.source.filter['jms-selector'], "colour = 'green'");
+            assert.ok(amqp_messaging.is_modified((link as any).remote.attach.source.default_outcome));
+            assert.equal((link as any).remote.attach.source.outcomes.length, 4);
+            assert.equal((link as any).remote.attach.source.outcomes[0], 'amqp:list:accepted');
+            assert.equal((link as any).remote.attach.source.outcomes[1], 'amqp:list:rejected');
+            assert.equal((link as any).remote.attach.source.outcomes[2], 'amqp:list:released');
+            assert.equal((link as any).remote.attach.source.outcomes[3], 'amqp:list:modified');
+            assert.equal((link as any).remote.attach.source.capabilities.length, 3);
+            assert.equal((link as any).remote.attach.source.capabilities[0], 'a');
+            assert.equal((link as any).remote.attach.source.capabilities[1], 'b');
+            assert.equal((link as any).remote.attach.source.capabilities[2], 'c');
     }));
     it('source with single capability', open_receiver_test(
         {source:{
@@ -183,26 +183,26 @@ describe('link fields', function() {
             capabilities: 'sourceable'
         }},
         function (link: rhea.link) {
-            assert.equal(link.remote.attach.source.address, 'my-source');
-            assert.equal(link.remote.attach.source.capabilities, 'sourceable');
+            assert.equal((link as any).remote.attach.source.address, 'my-source');
+            assert.equal((link as any).remote.attach.source.capabilities, 'sourceable');
         }
     ));
     it('dynamic source', open_receiver_test({source:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link: rhea.link) {
-        assert.equal(link.remote.attach.source.dynamic, true);
-        assert.equal(link.remote.attach.source.dynamic_node_properties.foo, 'bar');
+        assert.equal((link as any).remote.attach.source.dynamic, true);
+        assert.equal((link as any).remote.attach.source.dynamic_node_properties.foo, 'bar');
     }));
     it('dynamic source aliased', open_receiver_test({source:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link: rhea.link) {
         assert.equal(link.source.dynamic, true);
         assert.equal(link.source.dynamic_node_properties!.foo, 'bar');
     }));
     it('target address as simple string', open_sender_test('my-target', function (link: rhea.link) {
-        assert.equal(link.remote.attach.target.address, 'my-target');
+        assert.equal((link as any).remote.attach.target.address, 'my-target');
     }));
     it('target address aliased', open_sender_test('my-target', function (link: rhea.link) {
         assert.equal(link.target.address, 'my-target');
     }));
     it('target address as single nested value', open_sender_test({target:'my-target'}, function (link: rhea.link) {
-        assert.equal(link.remote.attach.target.address, 'my-target');
+        assert.equal((link as any).remote.attach.target.address, 'my-target');
     }));
     it('target as nested object', open_receiver_test(
         {target:{
@@ -214,14 +214,14 @@ describe('link fields', function() {
             capabilities: ['d', 'e', 'f']
         }},
         function (link: rhea.link) {
-            assert.equal(link.remote.attach.target.address, 'my-target');
-            assert.equal(link.remote.attach.target.durable, 2);
-            assert.equal(link.remote.attach.target.expiry_policy, 'connection-close');
-            assert.equal(link.remote.attach.target.timeout, 33);
-            assert.equal(link.remote.attach.target.capabilities.length, 3);
-            assert.equal(link.remote.attach.target.capabilities[0], 'd');
-            assert.equal(link.remote.attach.target.capabilities[1], 'e');
-            assert.equal(link.remote.attach.target.capabilities[2], 'f');
+            assert.equal((link as any).remote.attach.target.address, 'my-target');
+            assert.equal((link as any).remote.attach.target.durable, 2);
+            assert.equal((link as any).remote.attach.target.expiry_policy, 'connection-close');
+            assert.equal((link as any).remote.attach.target.timeout, 33);
+            assert.equal((link as any).remote.attach.target.capabilities.length, 3);
+            assert.equal((link as any).remote.attach.target.capabilities[0], 'd');
+            assert.equal((link as any).remote.attach.target.capabilities[1], 'e');
+            assert.equal((link as any).remote.attach.target.capabilities[2], 'f');
     }));
     it('target with single capability', open_receiver_test(
         {target:{
@@ -229,13 +229,13 @@ describe('link fields', function() {
             capabilities: 'targetable'
         }},
         function (link: rhea.link) {
-            assert.equal(link.remote.attach.target.address, 'my-target');
-            assert.equal(link.remote.attach.target.capabilities, 'targetable');
+            assert.equal((link as any).remote.attach.target.address, 'my-target');
+            assert.equal((link as any).remote.attach.target.capabilities, 'targetable');
         }
     ));
     it('dynamic target', open_receiver_test({target:{dynamic:true, dynamic_node_properties:{foo:'bar'}}}, function (link: rhea.link) {
-        assert.equal(link.remote.attach.target.dynamic, true);
-        assert.equal(link.remote.attach.target.dynamic_node_properties.foo, 'bar');
+        assert.equal((link as any).remote.attach.target.dynamic, true);
+        assert.equal((link as any).remote.attach.target.dynamic_node_properties.foo, 'bar');
     }));
 });
 
@@ -248,7 +248,7 @@ for (var local_role in roles) {
             var container = rhea.create_container();
             container.on(roles[local_role] + '_open', function(context) {
                 var link = context[roles[local_role]];
-                link.local.attach.offered_capabilities = link.remote.attach.desired_capabilities;
+                link.local.attach.offered_capabilities = (link as any).remote.attach.desired_capabilities;
             });
             listener = container.listen({port:0});
             listener.on('listening', function() {
