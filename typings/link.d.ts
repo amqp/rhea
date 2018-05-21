@@ -14,7 +14,7 @@ export declare interface FlowController {
 export declare interface LinkError extends Error {
   message: string;
   condition: any;
-  link: any;
+  link: link;
 }
 
 export declare interface ILocal {
@@ -80,3 +80,57 @@ export declare interface Receiver extends link {
   set_credit_window(credit_window: number): void;
 }
 
+export declare enum ReceiverEvents {
+  /**
+   * @property {string} message Raised when a message is received.
+   */
+  message = "message",
+  /**
+   * @property {string} receiverOpen Raised when the remote peer indicates the link is
+   * open (i.e. attached in AMQP parlance).
+   */
+  receiverOpen = "receiver_open",
+  /**
+   * @property {string} receiverError Raised when the remote peer receives an error. The context
+   * may also have an error property giving some information about the reason for the error.
+   */
+  receiverError = "receiver_error",
+  /**
+   * @property {string} receiverClose Raised when the remote peer indicates the link is closed.
+   */
+  receiverClose = "receiver_close"
+}
+
+export declare enum SenderEvents {
+  /**
+   * @property {string} sendable Raised when the sender has sufficient credit to be able
+   * to transmit messages to its peer.
+   */
+  sendable = "sendable",
+  /**
+   * @property {string} senderOpen Raised when the remote peer indicates the link is
+   * open (i.e. attached in AMQP parlance).
+   */
+  senderOpen = "sender_open",
+  /**
+   * @property {string} senderError Raised when the remote peer receives an error. The context
+   * may also have an error property giving some information about the reason for the error.
+   */
+  senderError = "sender_error",
+  /**
+   * @property {string} senderClose Raised when the remote peer indicates the link is closed.
+   */
+  senderClose = "sender_close",
+  /**
+   * @property {string} accepted Raised when a sent message is accepted by the peer.
+   */
+  accepted = "accepted",
+  /**
+   * @property {string} released Raised when a sent message is released by the peer.
+   */
+  released = "released",
+  /**
+   * @property {string} rejected Raised when a sent message is rejected by the peer.
+   */
+  rejected = "rejected",
+}

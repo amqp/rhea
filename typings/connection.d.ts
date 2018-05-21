@@ -10,6 +10,13 @@ import { EventEmitter } from "events";
 import { Container } from "./container";
 
 /**
+ * Describes the signature of the event handler for any event emitted by rhea.
+ * @type OnAmqpEvent
+ * @param {EventContext} context The rhea event context.
+ */
+export type OnAmqpEvent = (context: EventContext) => void;
+
+/**
  * Defines the common set of properties that are applicable for a connection, session and a link (sender, receiver).
  * @interface EndpointOptions
  */
@@ -257,7 +264,7 @@ export interface ReceiverOptions extends LinkOptions {
   /**
    * @property {object} source  The source from which messages are received.
    */
-  source?: TerminusOptions | string;
+  source?: Source | string;
   /**
    * @property {object} [target]  The target of a receiving link is the local identifier
    */
@@ -281,7 +288,7 @@ export interface SenderOptions extends LinkOptions {
   /**
    * @property {object} [source]  The source of a sending link is the local identifier
    */
-  source?: TerminusOptions | string;
+  source?: Source | string;
 }
 /**
  * Provides a Dictionary like structure <Key, Value> of Type T.
@@ -298,7 +305,7 @@ export interface Dictionary<T> {
  */
 export interface MessageAnnotations {
   /**
-   * @property {any} .
+   * @property {any} Any Supported message annotations.
    */
   [x: string]: any;
 }
@@ -312,7 +319,7 @@ export interface MessageAnnotations {
  */
 export interface DeliveryAnnotations {
   /**
-   * @property {string} Any unknown delivery annotations.
+   * @property {any} Any Supported delivery annotations.
    */
   [x: string]: any;
 }
@@ -415,9 +422,24 @@ export interface MessageHeader {
  * @extends MessageProperties, MessageHeader
  */
 export interface Message extends MessageProperties, MessageHeader {
+  /**
+   * @property {any} body The message body.
+   */
   body: any;
+  /**
+   * @property {MessageAnnotations} [message_annotations] A dictionary containing message attributes
+   * that will be held in the message header
+   */
   message_annotations?: MessageAnnotations;
+  /**
+   * @property {Dictionary<any>} [application_properties] A dictionary containing application
+   * specific message properties.
+   */
   application_properties?: Dictionary<any>;
+  /**
+   * @property {DeliveryAnnotations} [delivery_annotations] A dictionary used for delivery-specific
+   * non-standard properties at the head of the message.
+   */
   delivery_annotations?: DeliveryAnnotations;
 }
 
@@ -483,7 +505,7 @@ export interface AmqpError {
 
 export declare interface Connection extends EventEmitter {
   [x: string]: any;
-  options: any;
+  options: ConnectionOptions;
   readonly hostname?: string;
   readonly container_id: string;
   readonly max_frame_size?: number;
@@ -518,4 +540,28 @@ export declare interface Connection extends EventEmitter {
   get_peer_certificate(): any | undefined;
   get_tls_socket(): Socket | undefined;
   remove_session(session: Session): void;
+}
+
+export enum ConnectionEvents {
+  /**
+   * @property {string} connectionOpen Raised when the remote peer indicates the connection is open.
+   */
+  connectionOpen = "connection_open",
+  /**
+   * @property {string} connectionClose Raised when the remote peer indicates the connection is closed.
+   */
+  connectionClose = "connection_close",
+  /**
+   * @property {string} connectionError Raised when the remote peer indicates an error occurred on
+   * the connection.
+   */
+  connectionError = "connection_error",
+  /**
+   * @property {string} disconnected Raised when the underlying tcp connection is lost. The context
+   * has a reconnecting property which is true if the library is attempting to automatically reconnect
+   * and false if it has reached the reconnect limit. If reconnect has not been enabled or if the connection
+   * is a tcp server, then the reconnecting property is undefined. The context may also have an error
+   * property giving some information about the reason for the disconnect.
+   */
+  disconnected = "disconnected"
 }

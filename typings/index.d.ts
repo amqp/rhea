@@ -1,12 +1,13 @@
 /// <reference types="node" />
-export { link, LinkError, Receiver, Sender } from "./link";
+export { link, LinkError, Receiver, Sender, ReceiverEvents, SenderEvents } from "./link";
 export {
   AmqpError, Message, MessageAnnotations, MessageProperties,
   Connection, ConnectionOptions, EventContext, DeliveryAnnotations, Dictionary,
-  EndpointOptions, LinkOptions, ReceiverOptions, SenderOptions, TerminusOptions
+  EndpointOptions, LinkOptions, ReceiverOptions, SenderOptions, TerminusOptions,
+  ConnectionEvents, MessageHeader, OnAmqpEvent, Source
 } from "./connection";
 export { ConnectionError, ProtocolError, TypeError } from "./errors";
-export { Delivery, Session } from "./session";
+export { Delivery, Session, SessionEvents } from "./session";
 export { message as MessageUtil } from "./message";
 export { filter as IFilter } from "./filter"
 export { Container, ContainerOptions } from "./container";

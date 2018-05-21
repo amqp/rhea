@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 import { sasl } from "./sasl";
-import {generate_uuid, string_to_uuid, uuid_to_string} from "./util";
+import { generate_uuid, string_to_uuid, uuid_to_string } from "./util";
 import { ws } from "./ws";
 import { filter } from "./filter";
 import { EventEmitter } from "events";

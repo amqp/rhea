@@ -11,7 +11,7 @@ export declare interface Delivery {
   readonly format: number;
   readonly id: number;
   readonly tag: Buffer;
-  readonly link: any;
+  readonly link: Sender | Receiver;
   readonly remote_settled: boolean;
   readonly sent: boolean;
   readonly settled: boolean;
@@ -100,4 +100,21 @@ export declare interface Session extends EventEmitter {
   is_remote_open(): boolean;
   is_closed(): boolean;
   remove(): void;
+}
+
+export declare enum SessionEvents {
+  /**
+   * @property {string} sessionOpen Raised when the remote peer indicates the session is
+   * open (i.e. attached in AMQP parlance).
+   */
+  sessionOpen = "session_open",
+  /**
+   * @property {string} sessionError Raised when the remote peer receives an error. The context
+   * may also have an error property giving some information about the reason for the error.
+   */
+  sessionError = "session_error",
+  /**
+   * @property {string} sessionClose Raised when the remote peer indicates the session is closed.
+   */
+  sessionClose = "session_close"
 }

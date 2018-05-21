@@ -119,15 +119,6 @@ declare type serverMechanisms = () => DefaultServerMechanisms;
 declare type clientMechanisms = () => DefaultClientMmechanisms;
 declare type serverAddExternal = (mechs: any) => any;
 
-export namespace sasl {
-  export const Client: SaslClient;
-  export const Server: SaslServer;
-  export const Selective: SelectiveServer;
-  export const server_mechanisms: serverMechanisms;
-  export const client_mechanisms: clientMechanisms;
-  export const server_add_external: serverAddExternal;
-}
-
 export interface sasl {
   Client: SaslClient;
   Server: SaslServer;
