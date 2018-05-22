@@ -34,6 +34,7 @@ export declare interface Delivery {
 export declare interface Session extends EventEmitter {
   connection: Connection;
   options: any;
+  readonly error?: AmqpError | Error;
   reset(): void;
   get_option(name: string, default_value: any): any;
   attach_sender(args: any): Sender;
