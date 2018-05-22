@@ -23,7 +23,7 @@ export declare interface link extends EventEmitter {
   connection: Connection;
   name: string;
   options: LinkOptions;
-  readonly error: AmqpError | Error;
+  readonly error?: AmqpError | Error;
   readonly snd_settle_mode: 0 | 1 | 2;
   readonly rcv_settle_mode: 0 | 1;
   readonly source: Source;
