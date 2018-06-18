@@ -27,8 +27,8 @@ export declare interface Delivery {
   update(settled: boolean, state?: any): void;
   accept(): void;
   release(params?: ReleaseParameters): void;
-  reject(error: AmqpError): void;
-  modified?(params: ReleaseParameters): void;
+  reject(error?: AmqpError): void;
+  modified(params?: ReleaseParameters): void;
 }
 
 export declare interface Session extends EventEmitter {
@@ -71,5 +71,9 @@ export declare enum SessionEvents {
   /**
    * @property {string} sessionClose Raised when the remote peer indicates the session is closed.
    */
-  sessionClose = "session_close"
+  sessionClose = "session_close",
+  /**
+   * @property {string} settled Raised when the session receives a disposition.
+   */
+  settled = "settled"
 }

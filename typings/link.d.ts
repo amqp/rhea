@@ -92,7 +92,11 @@ export declare enum ReceiverEvents {
   /**
    * @property {string} receiverClose Raised when the remote peer indicates the link is closed.
    */
-  receiverClose = "receiver_close"
+  receiverClose = "receiver_close",
+  /**
+   * @property {string} settled Raised when the receiver link receives a disposition.
+   */
+  settled = "settled"
 }
 
 export declare enum SenderEvents {
@@ -127,4 +131,12 @@ export declare enum SenderEvents {
    * @property {string} rejected Raised when a sent message is rejected by the peer.
    */
   rejected = "rejected",
+  /**
+   * @property {string} modified Raised when a sent message is modified by the peer.
+   */
+  modified = "modified",
+  /**
+   * @property {string} settled Raised when the sender link receives a disposition.
+   */
+  settled = "settled"
 }

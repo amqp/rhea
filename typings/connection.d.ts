@@ -556,7 +556,7 @@ export declare interface Connection extends EventEmitter {
   remove_session(session: Session): void;
 }
 
-export enum ConnectionEvents {
+export declare enum ConnectionEvents {
   /**
    * @property {string} connectionOpen Raised when the remote peer indicates the connection is open.
    */
@@ -577,5 +577,9 @@ export enum ConnectionEvents {
    * is a tcp server, then the reconnecting property is undefined. The context may also have an error
    * property giving some information about the reason for the disconnect.
    */
-  disconnected = "disconnected"
+  disconnected = "disconnected",
+  /**
+   * @property {string} settled Raised when the connection receives a disposition.
+   */
+  settled = "settled"
 }
