@@ -41,10 +41,12 @@ var connect_options = {
     //options to use. Here we use it to alternate between the
     //different ports supplied via command line arguments.
     connection_details: function() {
-        return {
-            port: args.ports.length ? args.ports[attempt++ % args.ports.length] : args.ports,
-            host: args.hosts.length ? args.hosts[attempt++ % args.hosts.length] : args.hosts
+        var details = {
+            port: args.ports.length ? args.ports[attempt % args.ports.length] : args.ports,
+            host: args.hosts.length ? args.hosts[attempt % args.hosts.length] : args.hosts
         };
+        attempt++;
+        return details;
     }
 };
 if (args.disable_reconnect) {
