@@ -17,7 +17,7 @@ export interface ReleaseParameters {
 export declare interface Delivery {
   readonly format: number;
   readonly id: number;
-  readonly tag: Buffer;
+  readonly tag: Buffer | string;
   readonly link: Sender | Receiver;
   readonly remote_settled: boolean;
   readonly sent: boolean;
