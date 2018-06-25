@@ -21,6 +21,7 @@ describe('event types', function() {
     it('for ReceiverEvents are well defined', function(done){
         assert.equal(rhea.ReceiverEvents.message, "message");
         assert.equal(rhea.ReceiverEvents.receiverClose, "receiver_close");
+        assert.equal(rhea.ReceiverEvents.receiverDrained, "receiver_drained");
         assert.equal(rhea.ReceiverEvents.receiverError, "receiver_error");
         assert.equal(rhea.ReceiverEvents.receiverOpen, "receiver_open");
         assert.equal(rhea.ReceiverEvents.settled, "settled");
@@ -31,6 +32,7 @@ describe('event types', function() {
         assert.equal(rhea.SenderEvents.rejected, "rejected");
         assert.equal(rhea.SenderEvents.released, "released");
         assert.equal(rhea.SenderEvents.modified, "modified");
+        assert.equal(rhea.SenderEvents.senderDraining, "sender_draining");
         assert.equal(rhea.SenderEvents.sendable, "sendable");
         assert.equal(rhea.SenderEvents.senderClose, "sender_close");
         assert.equal(rhea.SenderEvents.senderError, "sender_error");

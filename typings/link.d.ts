@@ -85,8 +85,15 @@ export declare enum ReceiverEvents {
    */
   receiverOpen = "receiver_open",
   /**
-   * @property {string} receiverError Raised when the remote peer receives an error. The context
-   * may also have an error property giving some information about the reason for the error.
+   * @property {string} receiverDrained Raised when the remote peer
+   * indicates that it has drained all credit (and therefore there
+   * are no more messages at present that it can send).
+   */
+  receiverDrained  = 'receiver_drained',
+  /**
+   * @property {string} receiverError Raised when the remote peer closes the receiver with an
+   * error. The context may also have an error property giving some information about the reason
+   * for the error.
    */
   receiverError = "receiver_error",
   /**
@@ -111,8 +118,16 @@ export declare enum SenderEvents {
    */
   senderOpen = "sender_open",
   /**
-   * @property {string} senderError Raised when the remote peer receives an error. The context
-   * may also have an error property giving some information about the reason for the error.
+   * @property {string} senderDraining Raised when the remote peer
+   * requests that the sender drain its credit; sending all
+   * available messages within the credit limit and ensuring credit
+   * is used up..
+   */
+  senderDraining = 'sender_draining',
+  /**
+   * @property {string} senderError Raised when the remote peer closes the sender with an
+   * error. The context may also have an error property giving some information about the
+   * reason for the error.
    */
   senderError = "sender_error",
   /**
