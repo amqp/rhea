@@ -16,7 +16,7 @@
         "@types/debug": "^0.0.30",
         "@types/mocha": "^5.2.0",
         "browserify": "",
-        "eslint": "",
+        "eslint": "^4.19.1",
         "istanbul": "1.1.0-alpha.1",
         "minimist": "",
         "mocha": "^3.0.0",
