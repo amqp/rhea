@@ -49,8 +49,8 @@ export declare interface Session extends EventEmitter {
   each_link(action: Function, filter: Function): void;
   begin(): void;
   open(): void;
-  end(error?: Error): void;
-  close(error?: Error): void;
+  end(error?: AmqpError): void;
+  close(error?: AmqpError): void;
   is_open(): boolean;
   is_remote_open(): boolean;
   is_closed(): boolean;
