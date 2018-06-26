@@ -29,7 +29,7 @@ container.on('sendable', function (context) {
     while (context.sender.sendable() && sent < total) {
         sent++;
         console.log('sent ' + sent);
-        context.sender.send({id:sent, body:{'sequence':sent}});
+        context.sender.send({message_id:sent, body:{'sequence':sent}});
     }
     if (sent === total) {
         context.sender.set_drained(sent === total);
