@@ -571,6 +571,14 @@ export declare enum ConnectionEvents {
    */
   connectionError = "connection_error",
   /**
+   * @property {string} protocolError Raised when a protocol error is received on the underlying socket.
+   */
+  protocolError = "protocol_error",
+  /**
+   * @property {string} error Raised when an error is received on the underlying socket.
+   */
+  error = "error",
+  /**
    * @property {string} disconnected Raised when the underlying tcp connection is lost. The context
    * has a reconnecting property which is true if the library is attempting to automatically reconnect
    * and false if it has reached the reconnect limit. If reconnect has not been enabled or if the connection

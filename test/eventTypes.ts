@@ -22,6 +22,7 @@ describe('event types', function() {
         assert.equal(rhea.ReceiverEvents.message, "message");
         assert.equal(rhea.ReceiverEvents.receiverClose, "receiver_close");
         assert.equal(rhea.ReceiverEvents.receiverDrained, "receiver_drained");
+        assert.equal(rhea.ReceiverEvents.receiverFlow, "receiver_flow");
         assert.equal(rhea.ReceiverEvents.receiverError, "receiver_error");
         assert.equal(rhea.ReceiverEvents.receiverOpen, "receiver_open");
         assert.equal(rhea.ReceiverEvents.settled, "settled");
@@ -33,6 +34,7 @@ describe('event types', function() {
         assert.equal(rhea.SenderEvents.released, "released");
         assert.equal(rhea.SenderEvents.modified, "modified");
         assert.equal(rhea.SenderEvents.senderDraining, "sender_draining");
+        assert.equal(rhea.SenderEvents.senderFlow, "sender_flow");
         assert.equal(rhea.SenderEvents.sendable, "sendable");
         assert.equal(rhea.SenderEvents.senderClose, "sender_close");
         assert.equal(rhea.SenderEvents.senderError, "sender_error");
@@ -52,6 +54,8 @@ describe('event types', function() {
         assert.equal(rhea.ConnectionEvents.connectionClose, "connection_close");
         assert.equal(rhea.ConnectionEvents.connectionError, "connection_error");
         assert.equal(rhea.ConnectionEvents.connectionOpen, "connection_open");
+        assert.equal(rhea.ConnectionEvents.protocolError, "protocol_error");
+        assert.equal(rhea.ConnectionEvents.error, "error");
         assert.equal(rhea.ConnectionEvents.disconnected, "disconnected");
         assert.equal(rhea.ConnectionEvents.settled, "settled");
         done();
