@@ -91,6 +91,10 @@ export declare enum ReceiverEvents {
    */
   receiverDrained  = 'receiver_drained',
   /**
+   * @property {string} receiverFlow Raised when a flow is received for receiver.
+   */
+  receiverFlow = "receiver_flow",
+  /**
    * @property {string} receiverError Raised when the remote peer closes the receiver with an
    * error. The context may also have an error property giving some information about the reason
    * for the error.
@@ -124,6 +128,10 @@ export declare enum SenderEvents {
    * is used up..
    */
   senderDraining = 'sender_draining',
+  /**
+   * @property {string} senderFlow Raised when a flow is received for sender.
+   */
+  senderFlow = "sender_flow",
   /**
    * @property {string} senderError Raised when the remote peer closes the sender with an
    * error. The context may also have an error property giving some information about the
