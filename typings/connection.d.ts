@@ -492,6 +492,13 @@ export interface EventContext {
    * @property {Sender} [sender] The amqp sender link that was created on the amqp connection.
    */
   sender?: Sender;
+  /**
+   * @property {boolean} [reconnecting] The value is true if the library is attempting to automatically
+   * reconnect and false if it has reached the reconnect limit. If reconnect has not been enabled
+   * or if the connection is a tcp server, then the reconnecting property is undefined. This property
+   * is used in conjunction with "disconnected" event.
+   */
+  reconnecting?: boolean;
 }
 
 /**
