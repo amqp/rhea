@@ -39,4 +39,4 @@ container.on('message', function (context) {
     }
 });
 
-container.connect({port: args.port, host: args.host}).open_receiver(args.node);
+container.connect({port: args.port, host: args.host, idle_time_out: 5000}).open_receiver(args.node);
