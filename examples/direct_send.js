@@ -38,6 +38,7 @@ container.on('sendable', function (context) {
 container.on('accepted', function (context) {
     if (++confirmed === total) {
         console.log('all messages confirmed');
+        context.connection.close({condition:'amqp:connection:forced', description:'Time to go!'});
     }
 });
 container.on('disconnected', function (context) {
