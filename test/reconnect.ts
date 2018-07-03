@@ -73,7 +73,7 @@ describe('reconnect', function() {
         var disconnects: number = 0;
         var c: rhea.Connection = container.connect(add({port:65535}, 'reconnect_limit', 3));
         container.on('connection_error', function () {});
-        c.on('disconnected', function (context) {
+        c.on('disconnected', function (context: rhea.EventContext) {
             disconnects++;
             if (!context.reconnecting) {
                 assert.equal(disconnects, 4/*first disconnection + 3 failed reconnect attempts*/);
