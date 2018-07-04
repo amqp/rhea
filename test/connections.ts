@@ -395,3 +395,11 @@ describe('link lookup and iteration', function () {
         });
     });
 });
+
+describe('container', function () {
+    it('create_connection should return an instance of connection', function (done) {
+        var connection: rhea.Connection = rhea.create_connection();
+        assert.equal(connection.constructor.name, 'Connection');
+        done();
+    });
+});
