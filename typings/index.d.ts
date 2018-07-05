@@ -15,5 +15,5 @@ export { types as Types } from "./types";
 export {
   connect, create_container, filter, generate_uuid, id, message,
   options, get_option, sasl, sasl_server_mechanisms, string_to_uuid, types,
-  uuid_to_string, websocket_accept, websocket_connect, listen
+  uuid_to_string, websocket_accept, websocket_connect, listen, create_connection
 } from "./containerInstance";
