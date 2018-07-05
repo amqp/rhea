@@ -395,3 +395,42 @@ describe('link lookup and iteration', function () {
         });
     });
 });
+
+describe('container create connection', function () {
+    var listener: any;
+    var received: any = {};
+
+    beforeEach(function (done: Function) {
+        var container: rhea.Container = rhea.create_container();
+        container.on('message', function (context: rhea.EventContext) {
+            received[context.message!.to!] = context.message!.body;
+        });
+        listener = container.listen({ port: 0 });
+        listener.on('listening', function () {
+            done();
+        });
+    });
+
+    afterEach(function () {
+        listener.close();
+        received = {};
+    });
+
+    it('returns a connection that can be used to send message via default sender', function (done: Function) {
+        var container: rhea.Container = rhea.create_container();
+        var c: rhea.Connection = container.create_connection(listener.address());
+        c.connect();
+        var count = 0;
+        c.on('accepted', function (context: rhea.EventContext) {
+            if (++count === 2) {
+                assert.equal(received['a'], 'A');
+                assert.equal(received['b'], 'B');
+                context.sender!.close();
+                context.connection!.close();
+                done();
+            }
+        });
+        c.send({ to: 'a', body: 'A' });
+        c.send({ to: 'b', body: 'B' });
+    });
+});

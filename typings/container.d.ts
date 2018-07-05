@@ -22,6 +22,7 @@ export declare interface Container extends EventEmitter {
   id: string;
   sasl_server_mechanisms: any;
   connect(options?: ConnectionOptions): Connection;
+  create_connection(options?: ConnectionOptions): Connection;
   listen(options: ListenOptions | TlsOptions): Server | TlsServer;
   create_container(options?: ContainerOptions): Container;
   get_option(name: string, default_value: any): any;
