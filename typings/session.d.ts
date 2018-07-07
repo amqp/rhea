@@ -75,5 +75,25 @@ export declare enum SessionEvents {
   /**
    * @property {string} settled Raised when the session receives a disposition.
    */
-  settled = "settled"
+  settled = "settled",
+  /**
+   * @property {string} receiverError Raised when the remote peer indicates an error occurred on
+   * the receiver link and the event was not handled on the receiver link.
+   */
+  receiverError = "receiver_error",
+  /**
+   * @property {string} receiverClose Raised when the remote peer indicates that the receiver link is 
+   * closed and the event was not handled on the receiver link.
+   */
+  receiverClose = "receiver_close",
+  /**
+   * @property {string} senderError Raised when the remote peer indicates closes the sender link with
+   * an error and the event was not handled on the sender link.
+   */
+  senderError = "sender_error",
+  /**
+   * @property {string} senderClose Raised when the remote peer indicates that the sender link is 
+   * closed and the event was not handled on the sender link.
+   */
+  senderClose = "sender_close",
 }
