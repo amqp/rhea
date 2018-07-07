@@ -48,6 +48,10 @@ describe('event types', function() {
         assert.equal(rhea.SessionEvents.sessionError, "session_error");
         assert.equal(rhea.SessionEvents.sessionOpen, "session_open");
         assert.equal(rhea.SessionEvents.settled, "settled");
+        assert.equal(rhea.SessionEvents.senderClose, "sender_close");
+        assert.equal(rhea.SessionEvents.senderError, "sender_error");
+        assert.equal(rhea.SessionEvents.receiverError, "receiver_error");
+        assert.equal(rhea.SessionEvents.receiverClose, "receiver_close");
         done();
     });
     it('for ConnectionEvents are well defined', function(done){
@@ -58,6 +62,12 @@ describe('event types', function() {
         assert.equal(rhea.ConnectionEvents.error, "error");
         assert.equal(rhea.ConnectionEvents.disconnected, "disconnected");
         assert.equal(rhea.ConnectionEvents.settled, "settled");
+        assert.equal(rhea.ConnectionEvents.senderClose, "sender_close");
+        assert.equal(rhea.ConnectionEvents.senderError, "sender_error");
+        assert.equal(rhea.ConnectionEvents.sessionClose, "session_close");
+        assert.equal(rhea.ConnectionEvents.sessionError, "session_error");
+        assert.equal(rhea.ConnectionEvents.receiverError, "receiver_error");
+        assert.equal(rhea.ConnectionEvents.receiverClose, "receiver_close");
         done();
     });
 });

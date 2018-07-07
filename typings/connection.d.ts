@@ -582,6 +582,36 @@ export declare enum ConnectionEvents {
    */
   protocolError = "protocol_error",
   /**
+   * @property {string} receiverError Raised when the remote peer indicates an error occurred on
+   * the receiver link and the event was not handled on the receiver link or on the underlying session.
+   */
+  receiverError = "receiver_error",
+  /**
+   * @property {string} receiverClose Raised when the remote peer indicates that the receiver link is 
+   * closed and the event was not handled on the receiver link or on the underlying session.
+   */
+  receiverClose = "receiver_close",
+  /**
+   * @property {string} senderError Raised when the remote peer indicates closes the sender link with
+   * an error and the event was not handled on the sender link or on the underlying session.
+   */
+  senderError = "sender_error",
+  /**
+   * @property {string} senderClose Raised when the remote peer indicates that the sender link is 
+   * closed and the event was not handled on the sender link or on the underlying session.
+   */
+  senderClose = "sender_close",
+  /**
+   * @property {string} sessionError Raised when the remote peer closes the session with an error
+   * and the event was not handled on the session.
+   */
+  sessionError = "session_error",
+  /**
+   * @property {string} receiverClose Raised when the remote peer indicates that the session is 
+   * closed and the event was not handled on the session.
+   */
+  sessionClose = "session_close",
+  /**
    * @property {string} error Raised when an error is received on the underlying socket.
    */
   error = "error",
