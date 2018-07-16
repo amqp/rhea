@@ -1,6 +1,6 @@
 {
     "name": "rhea",
-    "version": "0.2.15",
+    "version": "0.2.16",
     "description": "reactive AMQP 1.0 library",
     "homepage": "http://github.com/amqp/rhea",
     "license": "Apache-2.0",
@@ -22,9 +22,9 @@
         "mocha": "^3.0.0",
         "uglify-js": "",
         "require-self": "^0.2.1",
-        "ws": "^5.1.1",
-        "typescript": "^2.8.3",
-        "ts-node": "^6.0.3"
+        "ws": "^5.2.2",
+        "typescript": "^2.9.2",
+        "ts-node": "^7.0.0"
     },
     "scripts": {
         "lint": "eslint lib/*.js",
