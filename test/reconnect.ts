@@ -161,4 +161,29 @@ describe('reconnect', function() {
             }
         });
     });
+    it('does not reconnect when disabled', function(done: Function) {
+        var container: rhea.Container = rhea.create_container();
+        var count: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(add(listener.address(), 'reconnect', false));
+        var receiver: rhea.Receiver = c.open_receiver('foo');
+        var sender: rhea.Sender = c.open_sender('foo');
+        c.on('disconnected', function (context) {
+            disconnects++;
+            assert.equal(receiver.is_open(), false);
+            assert.equal(sender.is_open(), false);
+            //wait before exiting to ensure no reconnect attempt is made
+            setTimeout(function () {
+                assert.equal(disconnects, 1);
+                done();
+            }, 500);
+        });
+        c.on('connection_open', function (context) {
+            count++;
+            assert.equal(count, 1);
+        });
+        c.on('sender_open', function (context) {
+            socket.end();
+        });
+    });
 });
