@@ -42,7 +42,6 @@ export declare interface link extends EventEmitter {
   is_open(): boolean;
   is_remote_open(): boolean;
   is_closed(): boolean;
-  reset(): void;
   has_credit(): boolean;
   is_receiver(): boolean;
   is_sender(): boolean;

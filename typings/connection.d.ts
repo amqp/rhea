@@ -538,7 +538,6 @@ export declare interface Connection extends EventEmitter {
   readonly channel_max?: number;
   readonly properties?: { [x: string]: any };
   readonly error?: AmqpError | Error;
-  reset(): void;
   connect(): Connection;
   reconnect(): Connection;
   attach_sender(options?: SenderOptions | string): Sender;

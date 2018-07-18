@@ -10,6 +10,7 @@ export declare interface EndpointState {
   open(): boolean;
   close(): boolean;
   disconnected(): void;
+  reconnect(): void;
   remote_opened(): boolean;
   remote_closed(): boolean;
   is_open(): boolean;
