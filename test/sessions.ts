@@ -37,7 +37,7 @@ describe('session error handling', function () {
         var error_handler_called: boolean;
         var close_handler_called: boolean;
         container.on('session_open', function (context: rhea.EventContext) {
-            context.session.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
         });
         container.on('session_close', function (context) {
             assert.equal(error_handler_called, true);
@@ -51,13 +51,13 @@ describe('session error handling', function () {
         s.begin();
         s.on('session_error', function (context: rhea.EventContext) {
             error_handler_called = true;
-            var error = context.session.error;
+            var error = context.session!.error;
             assert.equal((error as any).condition, 'amqp:internal-error');
             assert.equal((error as any).description, 'testing error on close');
         });
         s.on('session_close', function (context: rhea.EventContext) {
             close_handler_called = true;
-            var error = context.session.error;
+            var error = context.session!.error;
             assert.equal((error as any).condition, 'amqp:internal-error');
             assert.equal((error as any).description, 'testing error on close');
             context.connection.close();
@@ -66,7 +66,7 @@ describe('session error handling', function () {
     it('error handled', function (done: Function) {
         var error_handler_called: boolean;
         container.on('session_open', function (context: rhea.EventContext) {
-            context.session.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
         });
         container.on('session_close', function (context) {
             assert.equal(error_handler_called, true);
@@ -80,14 +80,14 @@ describe('session error handling', function () {
         s.begin();
         s.on('session_error', function (context: rhea.EventContext) {
             error_handler_called = true;
-            var error = context.session.error;
+            var error = context.session!.error;
             assert.equal((error as any).condition, 'amqp:internal-error');
             assert.equal((error as any).description, 'testing error on close');
         });
     });
     it('unhandled error', function (done: Function) {
         container.on('session_open', function (context: rhea.EventContext) {
-            context.session.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
         });
         container.on('connection_close', function (context: rhea.EventContext) {
             done();
