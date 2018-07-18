@@ -474,7 +474,7 @@ export interface EventContext {
   /**
    * @property {Session} session The amqp session link that was created on the amqp connection.
    */
-  session: Session;
+  session?: Session;
   /**
    * @property {Delivery} [delivery] The amqp delivery that is received after sending a message.
    */
@@ -492,6 +492,10 @@ export interface EventContext {
    * @property {Sender} [sender] The amqp sender link that was created on the amqp connection.
    */
   sender?: Sender;
+  /**
+   * @property {Error} error An optional error object.
+   */
+  error?: Error;
   /**
    * @property {boolean} [reconnecting] The value is true if the library is attempting to automatically
    * reconnect and false if it has reached the reconnect limit. If reconnect has not been enabled
@@ -543,7 +547,7 @@ export declare interface Connection extends EventEmitter {
   open_receiver(options?: ReceiverOptions | string): Receiver;
   get_option(name: string, default_value: any): any;
   send(msg: Message): Delivery;
-  get_error(): AmqpError | undefined;
+  get_error(): Error | undefined;
   open(): void;
   close(error?: AmqpError): void;
   is_open(): boolean;
