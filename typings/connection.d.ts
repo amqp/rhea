@@ -494,7 +494,7 @@ export interface EventContext {
    */
   sender?: Sender;
   /**
-   * @property {Error} [error] An optional error object.
+   * @property {Error | ConnectionError} [error] An optional error object.
    * - On `connection_error` event this property will be present. It will have the same information as
    * `connection.error` but the type will be `ConnectionError`.
    * - An error with SASL will be available through this property, but not through `connection.error`
@@ -504,7 +504,7 @@ export interface EventContext {
    * - The `session_error`, `sender_error` and `receiver_error` events will not have this (`error`)
    * property on the EventContext.
    */
-  error?: Error;
+  error?: Error | ConnectionError;
   /**
    * @property {boolean} [reconnecting] The value is true if the library is attempting to automatically
    * reconnect and false if it has reached the reconnect limit. If reconnect has not been enabled
@@ -555,7 +555,7 @@ export declare interface Connection extends EventEmitter {
   open_receiver(options?: ReceiverOptions | string): Receiver;
   get_option(name: string, default_value: any): any;
   send(msg: Message): Delivery;
-  get_error(): Error | ConnectionError | undefined;
+  get_error(): ConnectionError | undefined;
   open(): void;
   close(error?: AmqpError): void;
   is_open(): boolean;
