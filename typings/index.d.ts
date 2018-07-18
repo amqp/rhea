@@ -6,7 +6,7 @@ export {
   EndpointOptions, LinkOptions, ReceiverOptions, SenderOptions, TerminusOptions,
   ConnectionEvents, MessageHeader, OnAmqpEvent, Source
 } from "./connection";
-export { ConnectionError, ProtocolError, TypeError } from "./errors";
+export { ConnectionError, ProtocolError, TypeError, SimpleError } from "./errors";
 export { Delivery, Session, SessionEvents } from "./session";
 export { message as MessageUtil } from "./message";
 export { filter as Filter } from "./filter"

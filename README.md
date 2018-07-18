@@ -336,8 +336,8 @@ Raised when the remote peer indicates the connection is closed.
 ##### connection_error
 
 Raised when the remote peer indicates the connection is closed and
-specifies an error. A connection_close event will always follow this
-event, so it only needs to be implemented if there is specific actions
+specifies an error. A `connection_close` event will always follow this
+event, so it only needs to be implemented if there are specific actions
 to be taken on a close with an error as opposed to a close. The error
 is available as a property on the event context.
 
