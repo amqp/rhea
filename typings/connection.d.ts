@@ -494,7 +494,7 @@ export interface EventContext {
    */
   sender?: Sender;
   /**
-   * @property {Error | ConnectionError} [error] An optional error object.
+   * @property {Error} [error] An optional error object.
    * - On `connection_error` event this property will be present. It will have the same information as
    * `connection.error` but the type will be `ConnectionError`.
    * - An error with SASL will be available through this property, but not through `connection.error`
@@ -504,7 +504,7 @@ export interface EventContext {
    * - The `session_error`, `sender_error` and `receiver_error` events will not have this (`error`)
    * property on the EventContext.
    */
-  error?: Error | ConnectionError;
+  error?: Error;
   /**
    * @property {boolean} [reconnecting] The value is true if the library is attempting to automatically
    * reconnect and false if it has reached the reconnect limit. If reconnect has not been enabled
