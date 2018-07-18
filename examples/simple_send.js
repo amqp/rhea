@@ -39,6 +39,7 @@ container.on('accepted', function (context) {
     }
 });
 container.on('disconnected', function (context) {
+    if (context.error) console.error('%s %j', context.error, context.error);
     sent = confirmed;
 });
 
