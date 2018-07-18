@@ -333,6 +333,19 @@ Raised when the remote peer indicates the connection is open.
 
 Raised when the remote peer indicates the connection is closed.
 
+##### connection_error
+
+Raised when the remote peer indicates the connection is closed and
+specifies an error. A connection_close event will always follow this
+event, so it only needs to be implemented if there is specific actions
+to be taken on a close with an error as opposed to a close. The error
+is available as a property on the event context.
+
+If neither the connection_error or the connection_close is handled by
+the application, an error event will be raised. This can be handled on
+the connection or the container. If this is also unhandled, the
+application process will exit.
+
 ##### disconnected
 
 Raised when the underlying tcp connection is lost. The context has a
@@ -341,7 +354,8 @@ automatically reconnect and false if it has reached the reconnect
 limit. If reconnect has not been enabled or if the connection is a tcp
 server, then the `reconnecting` property is undefined. The context may
 also have an `error` property giving some information about the reason
-for the disconnect.
+for the disconnect. If the disconnect event is not handled, a warning
+will be logged to the console.
 
 ---------------------------------------------------------------------
 ### Receiver
