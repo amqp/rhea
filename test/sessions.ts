@@ -42,6 +42,7 @@ describe('session error handling', function () {
         container.on('session_close', function (context) {
             assert.equal(error_handler_called, true);
             assert.equal(close_handler_called, true);
+            assert.equal(context.session.is_closed(), true);
         });
         var c: rhea.Connection = container.connect(listener.address());
         c.on('connection_close', function (context: rhea.EventContext) {
@@ -60,6 +61,7 @@ describe('session error handling', function () {
             var error = context.session!.error;
             assert.equal((error as any).condition, 'amqp:internal-error');
             assert.equal((error as any).description, 'testing error on close');
+            assert.equal((context.session as any).is_closed(), true);
             context.connection.close();
         });
     });

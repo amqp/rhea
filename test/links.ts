@@ -64,7 +64,9 @@ describe('link fields', function() {
                 context[local_role].local.detach.error = error;
                 context[local_role].close();
             });
-            c.on(local_role + '_close', function(context) {});
+            c.on(local_role + '_close', function(context) {
+                assert.equal(context[local_role].is_closed(), true);
+            });
             c['open_' + local_role]();
         };
     }
@@ -129,6 +131,7 @@ describe('link fields', function() {
             var error = (link as any).remote.detach.error;
             assert.equal(error.condition, 'amqp:link:detach-forced');
             assert.equal(error.description, 'testing error on close');
+            assert.equal((link as any).is_closed(), false)
         }));
         it('pass error to ' + t + ' close', close_test_simple(t, {condition:'amqp:link:detach-forced', description:'testing error on close'}, function(link: rhea.link) {
             var error = (link as any).remote.detach.error;
