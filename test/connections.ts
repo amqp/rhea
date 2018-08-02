@@ -49,7 +49,9 @@ describe('connection fields', function () {
                 context.connection.local.close.error = error;
                 context.connection.close();
             });
-            c.on('connection_close', function (context: rhea.EventContext) { });
+            c.on('connection_close', function (context) {
+                assert.equal(context.connection.is_closed(), true);
+            });
         };
     }
     function close_test_simple(error: any, verification: Function) {
@@ -131,6 +133,7 @@ describe('connection fields', function () {
         var error = connection.remote.close.error;
         assert.equal((error as any).condition, 'amqp:connection:forced');
         assert.equal((error as any).description, 'testing error on close');
+        assert.equal(connection.is_closed(), false);
     }));
     it('pass error to close', close_test_simple({ condition: 'amqp:connection:forced', description: 'testing error on close' }, function (connection: rhea.Connection) {
         var error = connection.remote.close.error;
