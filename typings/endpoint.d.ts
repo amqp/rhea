@@ -18,4 +18,17 @@ export declare interface EndpointState {
   has_settled(): boolean;
   need_open(): boolean;
   need_close(): boolean;
+  /**
+   * Marks state with a specified token (or timestamp if none
+   * specified). This marker is then cleared if open() or close() are
+   * invoked. Used internally as a way to take action only if
+   * application does not do something that alters the state in the
+   * meantime.
+   */
+  mark(token?: any): any;
+  /**
+   * @property {any} [marker] holds token from previous call to mark,
+   * unless open() or close() were called since
+   */
+  marker: any;
 }
