@@ -38,6 +38,25 @@ export interface EndpointOptions {
   properties?: { [x: string]: any };
 }
 
+export interface ConnectionDetails {
+  /**
+   * @property {string} host The host name. Default value: `"localhost"`.
+   */
+  host: string;
+  /**
+   * @property {number} port The port number. Default value: `5672`.
+   */
+  port: number;
+  /**
+   * @property {any} options The options object provided to connection_details().
+   */
+  options: any;
+  /**
+   * @property {Function} connect The `connect` function of `"net"` or `"tls"` module.
+   */
+  connect: Function;
+}
+
 /**
  * Defines the options that can be provided while creating a connection.
  * @interface ConnectionOptions
@@ -116,8 +135,10 @@ export interface ConnectionOptions extends EndpointOptions {
    */
   max_frame_size?: number;
   /**
-   * @property {number} [idle_time_out] The largest frame size that the sending
-   * peer is able to accept on this connection.
+   * @property {number} [idle_time_out] The maximum period in milliseconds between activity
+   * (frames) on the connection that is desired from the peer. The open frame carries the
+   * idle-time-out field for this purpose. To avoid spurious timeouts, the value in idle_time_out
+   * is set to be half of the peer’s actual timeout threshold.
    */
   idle_time_out?: number;
   /**
@@ -139,14 +160,23 @@ export interface ConnectionOptions extends EndpointOptions {
    * sender link on this connection. These options will be overridden by the specific sender options
    * that will be provided while creating a sender.
    */
-  sender_options?: SenderOptions
-
+  sender_options?: SenderOptions;
   /**
    * @property {ReceiverOptions} [receiver_options] Default options that can be provided while creating any
    * receiver link on this connection. These options will be overridden by the specific receiver options
    * that will be provided while creating a sender.
    */
-  receiver_options?: ReceiverOptions
+  receiver_options?: ReceiverOptions;
+  /**
+   * @property {Function} [connection_details] A function which if specified will be invoked to get the options
+   * to use (e.g. this can be used to alternate between a set of different host/port combinations)
+   */
+  connection_details?: (options: ConnectionOptions | number) => ConnectionDetails;
+  /**
+   * @property {string[]} [non_fatal_errors] An array of error conditions which if received on connection close
+   * from peer should not prevent reconnect (by default this only includes `"amqp:connection:forced"`).
+   */
+  non_fatal_errors?: string[];
 }
 
 /**
@@ -242,9 +272,9 @@ export interface TerminusOptions {
  * @interface Source
  */
 export interface Source extends TerminusOptions {
-   /**
-   * @property {number} [distribution_mode] The distribution mode of the link.
-   */
+  /**
+  * @property {number} [distribution_mode] The distribution mode of the link.
+  */
   distribution_mode?: DistributionMode;
   /**
    * @property {object} [filter] - The filters to be added for the terminus.
@@ -567,7 +597,7 @@ export declare interface Connection extends EventEmitter {
   find_link(filter: Function): link | undefined;
   each_receiver(action: Function, filter?: Function): void;
   each_sender(action: Function, filter?: Function): void;
-  each_link(action: Function,  filter?: Function): void;
+  each_link(action: Function, filter?: Function): void;
   on_open(frame: frames): void;
   on_close(frame: frames): void;
   get_peer_certificate(): PeerCertificate | undefined;
