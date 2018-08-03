@@ -173,6 +173,17 @@ following fields:
   * username
   * password
   * container_id (overrides the container identifier)
+  * hostname
+  * servername
+  * transport
+  * sasl_init_hostname
+  * idle_time_out
+  * channel_max
+  * max_frame_size
+  * outgoing_locales
+  * incoming_locales
+  * sender_options
+  * receiver_options
   * reconnect
     * if true (the default), the library will automatically attempt to
       reconnect if disconnected
@@ -184,7 +195,7 @@ following fields:
     * initial_reconnect_delay (in milliseconds)
     * max_reconnect_delay (in milliseconds)
     * reconnect_limit (maximum number of reconnect attempts)
-  * connection_details - a function which is specified will be invoked
+  * connection_details - a function which if specified will be invoked
     to get the options to use (e.g. this can be used to alternate
     between a set of different host/port combinations)
   * non_fatal_errors - an array of error conditions which if received
@@ -465,3 +476,8 @@ in AMQP parlance).
 ##### sender_close
 
 Raised when the remote peer indicates the link is closed.
+
+---------------------------------------------------------------------
+**Note: For detailed options and types, please refer to the type definitions
+in the [typings](./typings) directory**.
+
