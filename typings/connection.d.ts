@@ -590,6 +590,10 @@ export declare interface Connection extends EventEmitter {
   close(error?: AmqpError): void;
   is_open(): boolean;
   is_remote_open(): boolean;
+  /**
+   * Determines whether the close for connection was initiated by the client.
+   * @returns {boolean} `true` - close was initiated by the client, `false` otherwise.
+   */
   is_closed(): boolean;
   create_session(): Session;
   find_sender(filter: Function): Sender | undefined;
