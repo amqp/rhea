@@ -42,14 +42,14 @@ export declare interface link extends EventEmitter {
   is_open(): boolean;
   is_remote_open(): boolean;
   /**
-   * Determines whether the close for link or it's underlying session or it's
-   * underlying connection was initiated by the client.
-   * @returns {boolean} `true` - close was initiated by the client, `false` otherwise.
+   * Determines whether both local and remote endpoint for link or it's underlying session
+   * or it's underlying connection are closed.
+   * @returns {boolean} `true` - closed, `false` otherwise.
    */
   is_closed(): boolean;
   /**
-   * Determines whether the close for just the link itself was initiated by the client.
-   * @returns {boolean} `true` - close was initiated by the client, `false` otherwise.
+   * Determines whether both local and remote endpoint for just the link itself are closed.
+   * @returns {boolean} `true` - closed, `false` otherwise.
    */
   is_itself_closed(): boolean;
   has_credit(): boolean;
