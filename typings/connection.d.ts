@@ -591,8 +591,8 @@ export declare interface Connection extends EventEmitter {
   is_open(): boolean;
   is_remote_open(): boolean;
   /**
-   * Determines whether the close for connection was initiated by the client.
-   * @returns {boolean} `true` - close was initiated by the client, `false` otherwise.
+   * Determines whether both local and remote endpoints are closed.
+   * @returns {boolean} `true` - closed, `false` otherwise.
    */
   is_closed(): boolean;
   create_session(): Session;
