@@ -17,6 +17,12 @@
 import * as assert from "assert";
 import * as rhea from "../";
 
+
+function add(map: any, key: string, value: any) {
+    map[key] = value;
+    return map;
+}
+
 describe('reconnect', function() {
     this.slow(150);
     var listener: any, socket: any;
@@ -41,11 +47,6 @@ describe('reconnect', function() {
     afterEach(function() {
         listener.close();
     });
-
-    function add(map: any, key: string, value: any) {
-        map[key] = value;
-        return map;
-    }
 
     it('reconnects successfully', function(done: Function) {
         var container: rhea.Container = rhea.create_container();
@@ -184,6 +185,40 @@ describe('reconnect', function() {
         });
         c.on('sender_open', function (context) {
             socket.end();
+        });
+    });
+});
+
+describe('non-fatal error', function() {
+    this.slow(150);
+    var listener: any, socket: any;
+
+    beforeEach(function(done: Function) {
+        var count: number = 0;
+        var container: rhea.Container = rhea.create_container();
+        container.on('connection_open', function(context) {
+            count++;
+            context.connection.local.open.hostname = 'test' + count;
+            context.connection.close({ condition: 'amqp:connection:forced', description: 'testing non-fatal error'});
+        });
+        container.on('disconnected', function (context) {});
+        listener = container.listen({port:0});
+        listener.on('connection', function (s: any) {
+            socket = s;
+        });
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+    it('emits disconnected event when reconnect when disabled', function(done: Function) {
+        var container: rhea.Container = rhea.create_container();
+        var c: rhea.Connection = container.connect(add(listener.address(), 'reconnect', false));
+        c.on('disconnected', function (context) {
+            done();
         });
     });
 });
