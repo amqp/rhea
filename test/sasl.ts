@@ -43,7 +43,7 @@ describe('sasl plain', function() {
         container.connect({username:'bob',password:'bob',port:listener.address().port}).on('connection_open', function(context) { context.connection.close(); done(); });
     });
     it('handles authentication failure', function(done: Function) {
-        container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port}).on('connection_error', function(context) { 
+        container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port}).on('connection_error', function(context) {
             var error = context.connection.get_error();
             assert.equal(error.condition, 'amqp:unauthorized-access');
             done();
@@ -128,6 +128,94 @@ describe('sasl anonymous', function() {
             var error = context.connection.get_error();
             assert.equal((error as rhea.AmqpError).condition, 'amqp:unauthorized-access');
             assert.equal((error as rhea.AmqpError).description, 'No suitable mechanism; server supports ANONYMOUS');
+            done();
+        });
+    });
+});
+
+describe('user-provided sasl mechanism', function () {
+    var container: rhea.Container, listener: any;
+    var testClientSaslMechanism = {
+        start: function (callback: Function) { callback(null, 'initialResponse'); },
+        step: function (challenge: any, callback: Function) { callback (null, 'challengeResponse'); }
+    };
+
+    beforeEach(function(done: Function) {
+        container = rhea.create_container();
+        container.on('disconnected', function () {});
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('calls start and step on the custom sasl mechanism', function (done: Function) {
+        var startCalled = false;
+        var stepCalled = false;
+        var connectOptions = {
+            sasl_mechanisms: {
+                'CUSTOM': testClientSaslMechanism
+            },
+            port: listener.address().port
+        }
+
+        container.sasl_server_mechanisms['CUSTOM'] = function () {
+            return {
+                outcome: undefined,
+                start: function () {
+                    startCalled = true;
+                    return 'initialResponse';
+                },
+                step: function () {
+                    stepCalled = true;
+                    this.outcome = <any>true;
+                    return;
+                }
+            };
+        };
+
+        container.connect(connectOptions).on('connection_open', function(context) {
+            context.connection.close();
+            assert(startCalled);
+            assert(stepCalled);
+            done();
+        });
+    });
+
+    it('handles authentication failure if the custom server sasl mechanism fails', function (done: Function) {
+        var startCalled = false;
+        var stepCalled = false;
+        var connectOptions = {
+            sasl_mechanisms: {
+                'CUSTOM': testClientSaslMechanism
+            },
+            port: listener.address().port
+        }
+
+        container.sasl_server_mechanisms['CUSTOM'] = function () {
+            return {
+                outcome: undefined,
+                start: function () {
+                    startCalled = true;
+                    return 'initialResponse';
+                },
+                step: function () {
+                    stepCalled = true;
+                    this.outcome = <any>false;
+                    return;
+                }
+            };
+        };
+
+        container.connect(connectOptions).on('connection_error', function(context) {
+            var error = context.connection.get_error();
+            assert.equal(error.condition, 'amqp:unauthorized-access');
+            assert(startCalled);
+            assert(stepCalled);
             done();
         });
     });
