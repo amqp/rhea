@@ -21,7 +21,7 @@ declare class PlainClient {
   username: string;
   password: string;
   constructor(username: string, password: string);
-  start(): Buffer;
+  start(callback: Function): void;
 }
 
 declare class AnonymousServer {
@@ -33,7 +33,7 @@ declare class AnonymousServer {
 declare class AnonymousClient {
   username: string;
   constructor(username: string);
-  start(): Buffer;
+  start(callback: Function): void;
 }
 
 declare class ExternalServer {
@@ -44,15 +44,15 @@ declare class ExternalServer {
 
 declare class ExternalClient {
   username?: string;
-  start(): "";
-  step(): ""
+  start(callback: Function): void;
+  step(callback: Function): void;
 }
 
 declare class XOAuth2Client {
   username: string;
   token: string;
   constructor(username: string, token: string);
-  start(): Buffer;
+  start(callback: Function): void;
 }
 
 declare class SaslServer {
