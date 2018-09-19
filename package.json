@@ -1,45 +1,45 @@
 {
-    "name": "rhea",
-    "version": "0.3.1",
-    "description": "reactive AMQP 1.0 library",
-    "homepage": "http://github.com/amqp/rhea",
-    "license": "Apache-2.0",
-    "repository": {
-        "type": "git",
-        "url": "http://github.com/amqp/rhea"
-    },
-    "dependencies": {
-        "debug": ">=0.8.0"
-    },
-    "devDependencies": {
-        "@types/node": "^8.0.37",
-        "@types/debug": "^0.0.30",
-        "@types/mocha": "^5.2.0",
-        "browserify": "",
-        "eslint": "^4.19.1",
-        "istanbul": "1.1.0-alpha.1",
-        "minimist": "",
-        "mocha": "^3.0.0",
-        "uglify-js": "",
-        "require-self": "^0.2.1",
-        "ws": "^6.0.0",
-        "typescript": "^3.0.1",
-        "ts-node": "^7.0.0"
-    },
-    "scripts": {
-        "lint": "eslint lib/*.js",
-        "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts",
-        "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
-        "browserify": "browserify -r .:rhea -o dist/rhea.js",
-        "run-examples": "require-self && mocha examples/test_examples.js",
-        "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
-        "prepare": "npm run lint && npm run tsc",
-        "tsc": "tsc"
-    },
-    "keywords": [
-        "amqp",
-        "messaging"
-    ],
-    "main": "./lib/container.js",
-    "types": "./typings/index.d.ts"
+  "name": "rhea",
+  "version": "0.3.2",
+  "description": "reactive AMQP 1.0 library",
+  "homepage": "http://github.com/amqp/rhea",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/amqp/rhea"
+  },
+  "dependencies": {
+    "debug": ">=0.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.37",
+    "@types/debug": "^0.0.30",
+    "@types/mocha": "^5.2.5",
+    "browserify": "",
+    "eslint": "^4.19.1",
+    "istanbul": "1.1.0-alpha.1",
+    "minimist": "",
+    "mocha": "^5.2.0",
+    "uglify-js": "",
+    "require-self": "^0.2.1",
+    "ws": "^6.0.0",
+    "typescript": "^3.0.3",
+    "ts-node": "^7.0.1"
+  },
+  "scripts": {
+    "lint": "eslint lib/*.js",
+    "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts --exit",
+    "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
+    "browserify": "browserify -r .:rhea -o dist/rhea.js",
+    "run-examples": "require-self && mocha examples/test_examples.js",
+    "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
+    "prepare": "npm run lint && npm run tsc",
+    "tsc": "tsc"
+  },
+  "keywords": [
+    "amqp",
+    "messaging"
+  ],
+  "main": "./lib/container.js",
+  "types": "./typings/index.d.ts"
 }
