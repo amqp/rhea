@@ -23,6 +23,7 @@ export declare interface link extends EventEmitter {
   connection: Connection;
   name: string;
   options: LinkOptions;
+  credit: number;
   readonly error?: AmqpError | Error;
   readonly snd_settle_mode: 0 | 1 | 2;
   readonly rcv_settle_mode: 0 | 1;
@@ -98,7 +99,7 @@ export declare enum ReceiverEvents {
    * indicates that it has drained all credit (and therefore there
    * are no more messages at present that it can send).
    */
-  receiverDrained  = 'receiver_drained',
+  receiverDrained = 'receiver_drained',
   /**
    * @property {string} receiverFlow Raised when a flow is received for receiver.
    */

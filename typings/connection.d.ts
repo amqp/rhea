@@ -570,6 +570,7 @@ export interface AmqpError {
 export declare interface Connection extends EventEmitter {
   [x: string]: any;
   options: ConnectionOptions;
+  readonly container: Container;
   readonly hostname?: string;
   readonly container_id: string;
   readonly max_frame_size?: number;

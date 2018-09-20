@@ -12,6 +12,7 @@ export { message as MessageUtil } from "./message";
 export { filter as Filter } from "./filter"
 export { Container, ContainerOptions } from "./container";
 export { types as Types } from "./types";
+export { sasl as Sasl } from "./sasl";
 export {
   connect, create_container, filter, generate_uuid, id, message,
   options, get_option, sasl, sasl_server_mechanisms, string_to_uuid, types,
