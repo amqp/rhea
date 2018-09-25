@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as fs from "fs";
 import * as assert from "assert";
 import * as rhea from "../";
 
@@ -437,3 +438,37 @@ describe('container create connection', function () {
         c.send({ to: 'b', body: 'B' });
     });
 });
+
+describe('default connect', function () {
+    var listener: any;
+    var filename: string;
+
+    beforeEach(function (done: Function) {
+        var container: rhea.Container = rhea.create_container();
+        listener = container.listen({ port: 0 });
+        listener.on('listening', function () {
+            filename = 'test-connect.json';
+            process.env.MESSAGING_CONNECT_FILE = filename;
+            fs.writeFile(filename, JSON.stringify({port:listener.address().port}), 'utf8', function () {
+                done();
+            });
+        });
+    });
+
+    afterEach(function () {
+        if (filename) fs.unlinkSync(filename);
+        listener.close();
+    });
+
+    it('retrieves necessary config from file', function (done: Function) {
+        var client: rhea.Container = rhea.create_container();
+        var conn = client.connect();
+        conn.on('connection_open', function () {
+            conn.close();
+        });
+        conn.on('connection_close', function () {
+            done();
+        });
+    });
+});
+
