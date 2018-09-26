@@ -212,7 +212,7 @@ options from a config file. This file is of similar structure to that
 used by Apache Qpid Proton clients. The location of the file can be
 specified through the MESSAGING_CONNECT_FILE environment variable. If
 that is not specified it will look for a file called connect.json in
-the current directory, the home directory or /etc/messaging/.
+the current directory, in <home>/.config/messaging or /etc/messaging/.
 
 The config file offers only limited configurability, specifically:
 
