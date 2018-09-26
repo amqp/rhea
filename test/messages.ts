@@ -45,6 +45,7 @@ describe('message content', function() {
     }
 
     afterEach(function() {
+        sender.connection.close();
         listener.close();
     });
 
@@ -366,6 +367,7 @@ describe('acknowledgement', function() {
         });
         client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'accepted');
+            context.connection.close();
             done();
         });
         client.connect(listener.address()).attach_receiver();
@@ -380,6 +382,7 @@ describe('acknowledgement', function() {
         });
         client.on('connection_close', function (context: rhea.EventContext) {
             assert.equal(outcome.state, 'accepted');
+            context.connection.close();
             done();
         });
         client.connect(listener.address()).attach_receiver({autoaccept: false});
@@ -396,6 +399,7 @@ describe('acknowledgement', function() {
             assert.equal(outcome.state, 'released');
             assert.equal(outcome.delivery_failed, undefined);
             assert.equal(outcome.undeliverable_here, undefined);
+            context.connection.close();
             done();
         });
         client.connect(listener.address()).attach_receiver({autoaccept: false});
@@ -412,6 +416,7 @@ describe('acknowledgement', function() {
             assert.equal(outcome.state, 'rejected');
             assert.equal(outcome.error.condition, 'rhea:oops:string');
             assert.equal(outcome.modified, undefined);
+            context.connection.close();
             done();
         });
         client.connect(listener.address()).attach_receiver({autoaccept: false});
@@ -435,6 +440,7 @@ describe('acknowledgement', function() {
             assert.equal(outcome.state, 'modified');
             assert.equal(outcome.delivery_failed, true);
             assert.equal(outcome.undeliverable_here, true);
+            context.connection.close();
             done();
         });
         client.connect(listener.address()).attach_receiver({autoaccept: false});
@@ -451,6 +457,7 @@ describe('acknowledgement', function() {
             assert.equal(outcome.state, 'released');
             assert.equal(outcome.delivery_failed, true);
             assert.equal(outcome.undeliverable_here, true);
+            context.connection.close();
             done();
         });
         client.connect(listener.address()).attach_receiver({autoaccept: false});
@@ -496,6 +503,7 @@ describe('fragmentation', function() {
     }
 
     afterEach(function() {
+        sender.connection.close();
         listener.close();
     });
 
