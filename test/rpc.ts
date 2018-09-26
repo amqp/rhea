@@ -113,6 +113,7 @@ describe('rpc', function() {
             assert.equal(result, undefined);
             assert.equal(error.name, 'bad-method');
             client.close();
+            server.close();
             done();
         });
     });
@@ -133,6 +134,7 @@ describe('rpc', function() {
                 assert.equal(error.name, 'error');
                 assert.equal(error.description, 'no joy');
                 client.close();
+                server.close();
                 done();
             });
         });

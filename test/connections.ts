@@ -32,6 +32,7 @@ describe('connection fields', function () {
         return function (done: Function) {
             container.on('connection_open', function (context: rhea.EventContext) {
                 verification(context.connection);
+                context.connection.close()
                 done();
             });
             fields.port = listener.address().port;

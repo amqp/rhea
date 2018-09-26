@@ -37,6 +37,7 @@ describe('link fields', function() {
         return function(done: Function) {
             container.on(remote_role + '_open', function(context) {
                 verification(context[remote_role]);
+                context.connection.close();
                 done();
             });
             var c: any = container.connect(listener.address());
@@ -57,6 +58,7 @@ describe('link fields', function() {
         return function(done: Function) {
             container.on(remote_role + '_close', function(context) {
                 verification(context[remote_role]);
+                context.connection.close();
                 done();
             });
             var c = container.connect(listener.address());
@@ -75,6 +77,7 @@ describe('link fields', function() {
         return function(done: Function) {
             container.on(remote_role + '_close', function(context: any) {
                 verification(context[remote_role]);
+                context.connection.close()
                 done();
             });
             var c: rhea.Connection = container.connect(listener.address());
@@ -363,6 +366,7 @@ for (var local_role in roles) {
                 context[remote_role].close({condition:'amqp:link:detach-forced', description:'testing error on close'});
             });
             container.on('connection_close', function(context: rhea.EventContext) {
+                context.connection.close();
                 done();
             });
             var container2 = rhea.create_container();
@@ -533,11 +537,12 @@ describe('preset sender options', function() {
         return function(done: Function) {
             container.on('receiver_open', function(context) {
                 verification(context.receiver);
-                done();
             });
             var c = container.connect(listener.address());
             c.options.sender_options = default_options;
             c.on('sender_open', function(context) {});
+            c.on('sender_open', function(context) { context.connection.close(); });
+            c.on('connection_close', function(context) { done();});
             c.open_sender(open_options);
         };
     }
@@ -565,21 +570,20 @@ describe('preset sender options', function() {
         var count: number = 0;
         var name: string;
         container.on('receiver_open', function(context: rhea.EventContext) {
+            assert.equal(context.receiver!.offered_capabilities.length, 1);
+            assert.equal(context.receiver!.offered_capabilities[0], 'parrot');
             if (++count === 1) {
-                assert.equal(context.receiver!.offered_capabilities.length, 1);
-                assert.equal(context.receiver!.offered_capabilities[0], 'xyz');
                 name = context.receiver!.name;
             } else {
                 assert.notEqual(context.receiver!.name, name);
                 assert.notEqual(context.receiver!.target, 'foo');
-                done();
             }
         });
         var c = container.connect(listener.address());
-        c.options.sender_options = {offered_capabilities:['xyz']};
-        c.on('sender_open', function(context) {});
+        c.options.sender_options = {offered_capabilities:['parrot']};
+        c.on('connection_close', function(context) { done();});
         c.open_sender({target:'foo'}).on('sender_open', function () {
-            c.open_sender();
+            c.open_sender().on('sender_open', function () {c.close(); });
         });
     });
 });
@@ -603,11 +607,17 @@ describe('preset receiver options', function() {
         return function(done: Function) {
             container.on('sender_open', function(context) {
                 verification(context.sender);
-                done();
+                context.sender.close();
             });
             var c: rhea.Connection = container.connect(listener.address());
             c.options.receiver_options = default_options;
             c.on('receiver_open', function(context :rhea.EventContext) {});
+            c.on('receiver_close', function(context) {
+                context.connection.close();
+            });
+            c.on('connection_close', function(context) {
+                done();
+            });
             c.open_receiver(open_options);
         };
     }
