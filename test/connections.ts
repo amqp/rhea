@@ -463,10 +463,13 @@ describe('default connect', function () {
     it('retrieves necessary config from file', function (done: Function) {
         var client: rhea.Container = rhea.create_container();
         var conn = client.connect();
+        var opened = false;
         conn.on('connection_open', function () {
+            opened = true;
             conn.close();
         });
         conn.on('connection_close', function () {
+            assert(opened);
             done();
         });
     });

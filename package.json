@@ -28,7 +28,7 @@
     },
     "scripts": {
         "lint": "eslint lib/*.js",
-        "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts --exit",
+        "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts",
         "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
         "run-examples": "require-self && mocha examples/test_examples.js",

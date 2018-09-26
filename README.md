@@ -207,6 +207,22 @@ If the transport is TLS, the options may additionally specify a
 from the host option. If servername is not specified, the SNI will
 default to the host.
 
+If options is undefined, the client will attempt to obtain default
+options from a config file. This file is of similar structure to that
+used by Apache Qpid Proton clients. The location of the file can be
+specified through the MESSAGING_CONNECT_FILE environment variable. If
+that is not specified it will look for a file called connect.json in
+the current directory, the home directory or /etc/messaging/.
+
+The config file offers only limited configurability, specifically:
+
+  * host
+  * port
+  * user (note not username)
+  * password
+  * sasl (a nested object with fields enabled and mechanisms)
+  * tls (a nested object with fields key, cert, ca and verify)
+
 ##### listen(options)
 
 Starts a server socket listening for incoming connections on the port
