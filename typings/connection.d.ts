@@ -230,13 +230,9 @@ export enum DistributionMode {
 
 /**
  * Defines the options that can be provided while creating the source/target for a Sender or Receiver (link).
- * @interface TerminusOptions
+ * @interface BaseTerminusOptions
  */
-export interface TerminusOptions {
-  /**
-   * @property {string} [address] - The AMQP address as target for this terminus.
-   */
-  address: string;
+export interface BaseTerminusOptions {
   /**
    * @property {number} [durable] It specifies what state of the terminus will be retained durably:
    *  - the state of durable messages (unsettled_state value),
@@ -265,6 +261,28 @@ export interface TerminusOptions {
    * @property {number} [timeout] The duration that an expiring terminus will be retained.
    */
   timeout?: number;
+}
+
+/**
+ * Defines the options that can be provided while creating the source for a Sender or Receiver (link).
+ * @interface TerminusOptions
+ */
+export interface TerminusOptions extends BaseTerminusOptions {
+  /**
+   * @property {string} address - The AMQP address as target for this terminus.
+   */
+  address: string;
+}
+
+/**
+ * Defines the options that can be provided while creating the target for a Sender or Receiver (link).
+ * @interface TargetTerminusOptions
+ */
+export interface TargetTerminusOptions extends BaseTerminusOptions {
+  /**
+   * @property {string} [address] - The AMQP address as target for this terminus.
+   */
+  address?: string;
 }
 
 /**
@@ -313,7 +331,7 @@ export interface ReceiverOptions extends LinkOptions {
   /**
    * @property {object} [target]  The target of a receiving link is the local identifier
    */
-  target?: TerminusOptions | string;
+  target?: TargetTerminusOptions | string;
 }
 
 /**
@@ -329,12 +347,13 @@ export interface SenderOptions extends LinkOptions {
   /**
    * @property {object} target  - The target to which messages are sent
    */
-  target?: TerminusOptions | string;
+  target?: TargetTerminusOptions | string;
   /**
    * @property {object} [source]  The source of a sending link is the local identifier
    */
   source?: Source | string;
 }
+
 /**
  * Provides a Dictionary like structure <Key, Value> of Type T.
  * @interface Dictionary
