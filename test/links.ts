@@ -40,7 +40,7 @@ describe('link fields', function() {
                 context.connection.close();
                 done();
             });
-            var c: any = container.connect(listener.address());
+            var c: any = container.connect(listener.address() as any);
             c.on(local_role + '_open', function(context: rhea.EventContext) {});
             c['open_' + local_role](fields);
         };
@@ -61,7 +61,7 @@ describe('link fields', function() {
                 context.connection.close();
                 done();
             });
-            var c = container.connect(listener.address());
+            var c = container.connect(listener.address() as any);
             c.on(local_role + '_open', function(context) {
                 context[local_role].local.detach.error = error;
                 context[local_role].close();
@@ -80,7 +80,7 @@ describe('link fields', function() {
                 context.connection.close()
                 done();
             });
-            var c: rhea.Connection = container.connect(listener.address());
+            var c: rhea.Connection = container.connect(listener.address() as any);
             c.on(local_role + '_open', function(context: any) {
                 context[local_role].close(error);
             });
@@ -275,7 +275,7 @@ for (var local_role in roles) {
             };
             var container: rhea.Container = rhea.create_container();
 
-            var c: rhea.Connection = container.connect(listener.address());
+            var c: rhea.Connection = container.connect(listener.address() as any);
             c.on(local_role + '_open', function (context) {
                 assert.equal(context[local_role].remote.attach.offered_capabilities, 'one');
                 latch.decrement();
@@ -288,7 +288,7 @@ for (var local_role in roles) {
                 latch.decrement();
                 context.connection.close();
             });
-            container.connect(listener.address())['open_' + local_role]({desired_capabilities:'three'});
+            container.connect(listener.address() as any)['open_' + local_role]({desired_capabilities:'three'});
             //third link has no handler defined at either link or connection level, so will default to container level handler:
             container.on(local_role + '_open', function(context) {
                 assert.equal(context[local_role].remote.attach.offered_capabilities, 'three');
@@ -325,7 +325,7 @@ for (var local_role in roles) {
                 assert.equal(close_handler_called, true);
                 done();
             });
-            var c: rhea.Connection = rhea.create_container().connect(listener.address());
+            var c: rhea.Connection = rhea.create_container().connect(listener.address() as any);
             c.on(local_role + '_error', function(context) {
                 error_handler_called = true;
                 var error = context[local_role].error;
@@ -350,7 +350,7 @@ for (var local_role in roles) {
                 assert.equal(error_handler_called, true);
                 done();
             });
-            var c = rhea.create_container().connect(listener.address());
+            var c = rhea.create_container().connect(listener.address() as any);
             c.on(local_role + '_error', function(context: any) {
                 error_handler_called = true;
                 var error = context[local_role].error;
@@ -370,7 +370,7 @@ for (var local_role in roles) {
                 done();
             });
             var container2 = rhea.create_container();
-            var c = container2.connect(listener.address());
+            var c = container2.connect(listener.address() as any);
             container2.on('error', function (error) {
                 assert.equal(error.condition, 'amqp:link:detach-forced');
                 assert.equal(error.description, 'testing error on close');
@@ -415,7 +415,7 @@ describe('settlement modes', function() {
         client.on('connection_close', function (context) {
             done();
         });
-        client.connect(listener.address()).attach_sender({snd_settle_mode:0});
+        client.connect(listener.address() as any).attach_sender({snd_settle_mode:0});
     });
     it('sender sends settled', function(done: Function) {
         server.on('receiver_open', function(context) {
@@ -432,7 +432,7 @@ describe('settlement modes', function() {
         client.on('connection_close', function (context) {
             done();
         });
-        client.connect(listener.address()).attach_sender({snd_settle_mode:1});
+        client.connect(listener.address() as any).attach_sender({snd_settle_mode:1});
     });
     it('receiver requests send unsettled', function(done: Function) {
         server.on('sender_open', function(context) {
@@ -452,7 +452,7 @@ describe('settlement modes', function() {
         client.on('connection_close', function (context) {
             done();
         });
-        client.connect(listener.address()).attach_receiver({snd_settle_mode:0});
+        client.connect(listener.address() as any).attach_receiver({snd_settle_mode:0});
     });
     it('receiver requests send settled', function(done: Function) {
         server.on('sender_open', function(context) {
@@ -470,7 +470,7 @@ describe('settlement modes', function() {
         client.on('connection_close', function (context) {
             done();
         });
-        client.connect(listener.address()).attach_receiver({snd_settle_mode:1});
+        client.connect(listener.address() as any).attach_receiver({snd_settle_mode:1});
     });
     it('receiver settles first', function(done: Function) {
         server.on('sender_open', function(context) {
@@ -490,7 +490,7 @@ describe('settlement modes', function() {
         client.on('connection_close', function (context) {
             done();
         });
-        client.connect(listener.address()).attach_receiver({rcv_settle_mode:0});
+        client.connect(listener.address() as any).attach_receiver({rcv_settle_mode:0});
     });
     it('receiver settles second', function(done: Function) {
         server.on('sender_open', function(context) {
@@ -514,7 +514,7 @@ describe('settlement modes', function() {
         client.on('connection_close', function (context) {
             done();
         });
-        client.connect(listener.address()).attach_receiver({rcv_settle_mode:1});
+        client.connect(listener.address() as any).attach_receiver({rcv_settle_mode:1});
     });
 });
 
@@ -538,7 +538,7 @@ describe('preset sender options', function() {
             container.on('receiver_open', function(context) {
                 verification(context.receiver);
             });
-            var c = container.connect(listener.address());
+            var c = container.connect(listener.address() as any);
             c.options.sender_options = default_options;
             c.on('sender_open', function(context) {});
             c.on('sender_open', function(context) { context.connection.close(); });
@@ -579,7 +579,7 @@ describe('preset sender options', function() {
                 assert.notEqual(context.receiver!.target, 'foo');
             }
         });
-        var c = container.connect(listener.address());
+        var c = container.connect(listener.address() as any);
         c.options.sender_options = {offered_capabilities:['parrot']};
         c.on('connection_close', function(context) { done();});
         c.open_sender({target:'foo'}).on('sender_open', function () {
@@ -609,7 +609,7 @@ describe('preset receiver options', function() {
                 verification(context.sender);
                 context.sender.close();
             });
-            var c: rhea.Connection = container.connect(listener.address());
+            var c: rhea.Connection = container.connect(listener.address() as any);
             c.options.receiver_options = default_options;
             c.on('receiver_open', function(context :rhea.EventContext) {});
             c.on('receiver_close', function(context) {
@@ -691,6 +691,6 @@ describe('miscellaneous', function() {
             assert.equal(msgs.length, 0);
             done();
         });
-        client.connect(listener.address()).open_receiver();
+        client.connect(listener.address() as any).open_receiver();
     });
 });

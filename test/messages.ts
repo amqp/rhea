@@ -16,7 +16,7 @@
 
 import * as assert from "assert";
 import * as rhea from "../";
-import { Server } from "net";
+import { Server, AddressInfo } from "net";
 const amqp_types = rhea.types;
 const amqp_message = rhea.message;
 const rhea_util = require('../lib/util.js');
@@ -28,7 +28,7 @@ describe('message content', function() {
         container = rhea.create_container();
         listener = container.listen({port:0});
         listener.on('listening', function() {
-            sender = container.connect(listener.address()).attach_sender();
+            sender = container.connect(listener.address() as any).attach_sender();
             done();
         });
 
@@ -370,7 +370,7 @@ describe('acknowledgement', function() {
             context.connection.close();
             done();
         });
-        client.connect(listener.address()).attach_receiver();
+        client.connect(listener.address() as any).attach_receiver();
     });
     it('explicit accept', function(done: Function) {
         server.once('sendable', function (context: rhea.EventContext) {
@@ -385,7 +385,7 @@ describe('acknowledgement', function() {
             context.connection.close();
             done();
         });
-        client.connect(listener.address()).attach_receiver({autoaccept: false});
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
     it('explicit release', function(done: Function) {
         server.once('sendable', function (context: rhea.EventContext) {
@@ -402,7 +402,7 @@ describe('acknowledgement', function() {
             context.connection.close();
             done();
         });
-        client.connect(listener.address()).attach_receiver({autoaccept: false});
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
     it('explicit reject', function(done: Function) {
         server.once('sendable', function (context: rhea.EventContext) {
@@ -419,7 +419,7 @@ describe('acknowledgement', function() {
             context.connection.close();
             done();
         });
-        client.connect(listener.address()).attach_receiver({autoaccept: false});
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
     it('explicit modify', function(done: Function) {
         server.options.treat_modified_as_released = false;
@@ -443,7 +443,7 @@ describe('acknowledgement', function() {
             context.connection.close();
             done();
         });
-        client.connect(listener.address()).attach_receiver({autoaccept: false});
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
     it('modified as released', function(done: Function) {
         server.once('sendable', function (context) {
@@ -460,7 +460,7 @@ describe('acknowledgement', function() {
             context.connection.close();
             done();
         });
-        client.connect(listener.address()).attach_receiver({autoaccept: false});
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
 });
 
@@ -472,7 +472,7 @@ describe('fragmentation', function() {
         container = rhea.create_container();
         listener = container.listen({port:0, max_frame_size:16384} as any);
         listener.on('listening', function() {
-            sender = container.connect({port:listener.address().port, max_frame_size:16384}).attach_sender();
+            sender = container.connect({port:(listener.address() as AddressInfo).port, max_frame_size:16384}).attach_sender();
             done();
         });
 
