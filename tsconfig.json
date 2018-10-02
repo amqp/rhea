@@ -9,6 +9,9 @@
     "strict": true,
     "declaration": true,
     "declarationDir": "./typings",
+    "lib": [
+      "es2015"
+    ]
   },
   "compileOnSave": true,
   "include": [
