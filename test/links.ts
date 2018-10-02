@@ -693,4 +693,32 @@ describe('miscellaneous', function() {
         });
         client.connect(listener.address() as any).open_receiver();
     });
+
+    it('handles session close', function(done: Function) {
+        var closed_session = false;
+        var outgoing = ['one', 'two'] as any;
+        var incoming = [] as any;
+        server.on('sender_open', function(context: rhea.EventContext) {
+            context.sender!.send({subject:outgoing.shift()} as rhea.Message);
+        });
+        server.once('accepted', function(context: rhea.EventContext) {
+            closed_session = true;
+            context.session!.close();
+        });
+        client.on('session_close', function (context: rhea.EventContext) {
+            context.connection.open_receiver();
+        });
+        client.on('message', function (context: rhea.EventContext) {
+            incoming.push(context.message!.subject);
+            if (incoming.length == 2) {
+                context.connection.close();
+            }
+        });
+        client.on('connection_close', function (context: rhea.EventContext) {
+            assert.deepEqual(incoming, ['one', 'two']);
+            done();
+        });
+        var conn = client.connect({port: (listener.address() as any).port, id: 'client'});
+        conn.open_receiver();
+    });
 });
