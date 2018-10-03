@@ -356,8 +356,12 @@ export interface SenderOptions extends LinkOptions {
    */
   autosettle?: boolean;
   /**
-   * @property {object} target  - The target to which messages are sent. If the address is set in
-   * each message in the `to` property, then the target should be set to `{}`.
+   * @property {object} target  - The target to which messages are sent.
+   * 
+   * If the target is set to `{}` no target address will be associated with the sender; the peer
+   * may use the `to` field on each individual message to handle it correctly in that case.
+   * This is useful where maintaining or setting up a sender for each target address is
+   * too burdensome.
    */
   target?: TargetTerminusOptions | string;
   /**
