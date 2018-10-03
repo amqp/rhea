@@ -93,7 +93,15 @@ export interface ConnectionOptions extends EndpointOptions {
   transport?: "tls" | "ssl" | "tcp";
   /**
    * @property {string} [container_id] The id of the source container. If not provided then
-   * this will a guid string.
+   * this will be the id (a guid string) of the assocaited container object. When this property is
+   * provided, it will be used in the `open` frame to let the peer know about the container id.
+   * However, the associated container object would still be the same container object from
+   * which the connection is being created.
+   * 
+   * The `"container_id"` is how the peer will identify the 'container' the connection is being
+   * established from. The container in AMQP terminology is roughly analogous to a process.
+   * Using a different container id on connections from the same process would cause the peer to
+   * treat them as coming from distinct processes.
    */
   container_id?: string;
   /**
@@ -303,7 +311,8 @@ export interface Source extends TerminusOptions {
    */
   default_outcome?: any;
   /**
-   * @property {string | string[]} [outcomes] The descriptors for the outcomes that can be chosen on this link.
+   * @property {string | string[]} [outcomes] The descriptors for the outcomes that can be chosen
+   * on this link.
    */
   outcomes?: string | string[];
 }
@@ -316,12 +325,13 @@ export interface Source extends TerminusOptions {
 export interface ReceiverOptions extends LinkOptions {
   /**
    * @property {object} [credit_window]  A "prefetch" window controlling the flow of messages over
-   * this receiver. Defaults to 1000 if not specified. A value of 0 can be used to
-   * turn of automatic flow control and manage it directly.
+   * this receiver. Defaults to `1000` if not specified. A value of `0` can be used to
+   * turn off automatic flow control and manage it directly.
    */
   credit_window?: number;
   /**
-   * @property {boolean} [autoaccept] Whether received messages should be automatically accepted. Defaults to true.
+   * @property {boolean} [autoaccept] Whether received messages should be automatically accepted.
+   * Defaults to `true`.
    */
   autoaccept?: boolean;
   /**
@@ -341,15 +351,21 @@ export interface ReceiverOptions extends LinkOptions {
  */
 export interface SenderOptions extends LinkOptions {
   /**
-   * @property {boolean} [autosettle] Whether sent messages should be automatically settled once the peer settles them. Defaults to true.
+   * @property {boolean} [autosettle] Whether sent messages should be automatically settled
+   * once the peer settles them. Defaults to `true`.
    */
   autosettle?: boolean;
   /**
-   * @property {object} target  - The target to which messages are sent
+   * @property {object} target  - The target to which messages are sent.
+   * 
+   * If the target is set to `{}` no target address will be associated with the sender; the peer
+   * may use the `to` field on each individual message to handle it correctly in that case.
+   * This is useful where maintaining or setting up a sender for each target address is
+   * too burdensome.
    */
   target?: TargetTerminusOptions | string;
   /**
-   * @property {object} [source]  The source of a sending link is the local identifier
+   * @property {object} [source]  The source of a sending link is the local identifier.
    */
   source?: Source | string;
 }
@@ -394,8 +410,9 @@ export interface DeliveryAnnotations {
  */
 export interface MessageProperties {
   /**
-   * @property {string | number | Buffer} [message_id] The application message identifier that uniquely idenitifes a message.
-   * The user is responsible for making sure that this is unique in the given context. Guids usually make a good fit.
+   * @property {string | number | Buffer} [message_id] The application message identifier that
+   * uniquely idenitifes a message. The user is responsible for making sure that this is unique in
+   * the given context. Guids usually make a good fit.
    */
   message_id?: string | number | Buffer;
   /**
@@ -407,7 +424,8 @@ export interface MessageProperties {
    */
   to?: string;
   /**
-   * @property {string | number | Buffer} [correlation_id] The id that can be used to mark or identify messages between clients.
+   * @property {string | number | Buffer} [correlation_id] The id that can be used to mark or
+   * identify messages between clients.
    */
   correlation_id?: string | number | Buffer;
   /**
@@ -573,7 +591,8 @@ export interface AmqpError {
    */
   condition?: string;
   /**
-   * @property {string} [description] Describes any supplementary information that is not indicated the error condition.
+   * @property {string} [description] Describes any supplementary information that is not indicated
+   * the error condition.
    */
   description?: string;
   /**
