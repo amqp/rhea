@@ -16,7 +16,7 @@
 
 import * as assert from "assert";
 import * as rhea from "../";
-import { Server, AddressInfo } from "net";
+import { Server } from "net";
 const amqp_types = rhea.types;
 const amqp_message = rhea.message;
 const rhea_util = require('../lib/util.js');
@@ -472,7 +472,7 @@ describe('fragmentation', function() {
         container = rhea.create_container();
         listener = container.listen({port:0, max_frame_size:16384} as any);
         listener.on('listening', function() {
-            sender = container.connect({port:(listener.address() as AddressInfo).port, max_frame_size:16384}).attach_sender();
+            sender = container.connect({port:(listener.address() as any).port, max_frame_size:16384}).attach_sender();
             done();
         });
 
