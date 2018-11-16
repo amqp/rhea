@@ -5,7 +5,6 @@ export declare interface Message {
   toJSON: () => {
     [x: string]: any;
   };
-  inspect: () => string;
   toString: () => string;
 }
 
