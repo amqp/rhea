@@ -342,6 +342,11 @@ export interface ReceiverOptions extends LinkOptions {
    * @property {object} [target]  The target of a receiving link is the local identifier
    */
   target?: TargetTerminusOptions | string;
+  /**
+   * @property {boolean} [autosettle] Whether received messages should be automatically settled
+   * once the remote settles them. Defaults to `true`.
+   */
+  autosettle?: boolean;
 }
 
 /**

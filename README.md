@@ -297,6 +297,8 @@ object that may contain any of the following fields:
     manage it directly.
   * autoaccept - Whether received messages should be automatically
     accepted. Defaults to true.
+  * autosettle - Whether received messages should be automatically
+    settled once the remote settles them. Defaults to true.
 
 Note: If the link doesn't specify a value for the credit_window and
 autoaccept options, the connection options are consulted followed by
