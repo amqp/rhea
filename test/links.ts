@@ -721,4 +721,74 @@ describe('miscellaneous', function() {
         var conn = client.connect({port: (listener.address() as any).port, id: 'client'});
         conn.open_receiver();
     });
+
+    it('removes presettled messages from outgoing buffer', function(done: Function) {
+        var outgoing = [] as any;
+        var incoming = [] as any;
+        var sent = 0;
+        var settled = 0;
+        for (var i = 0; i < 10000; i++) {
+            outgoing.push('message-' + i);
+        }
+        server.on('message', function (context: rhea.EventContext) {
+            incoming.push(context.message!.body);
+        });
+        var conn = client.connect(listener.address() as any);
+        var s = conn.open_sender({snd_settle_mode:1});
+        s.on('sendable', function (context: rhea.EventContext) {
+            if (sent === 0) {
+                context.sender!.send({body:outgoing[sent++]});
+                context.connection.open_sender();
+            }
+        });
+        client.on('sendable', function (context: rhea.EventContext) {
+            while (context.sender!.sendable() && sent < outgoing.length) {
+                context.sender!.send({body:outgoing[sent++]});
+            }
+        });
+        client.on('settled', function (context: rhea.EventContext) {
+            settled++
+            if (settled === (outgoing.length - 1)) {
+                context.connection.close();
+            }
+        });
+        client.on('connection_close', function (context: rhea.EventContext) {
+            assert.deepEqual(incoming, outgoing);
+            done();
+        });
+    });
+
+    it('sends presettled messages when sendable', function(done: Function) {
+        server.options.credit_window = 0;
+        var outgoing = [] as any;
+        var incoming = [] as any;
+        var sent = 0;
+        var settled = 0;
+        for (var i = 0; i < 10000; i++) {
+            outgoing.push('message-' + i);
+        }
+        server.on('receiver_open', function (context: rhea.EventContext) {
+            context.receiver!.add_credit(10000);
+        });
+        server.on('message', function (context: rhea.EventContext) {
+            incoming.push(context.message!.body);
+            if (incoming.length === outgoing.length) {
+                context.receiver!.close();
+            }
+        });
+        var conn = client.connect(listener.address() as any);
+        var s = conn.open_sender({snd_settle_mode:1});
+        client.on('sendable', function (context: rhea.EventContext) {
+            while (context.sender!.sendable() && sent < outgoing.length) {
+                context.sender!.send({body:outgoing[sent++]});
+            }
+        });
+        client.on('sender_close', function (context: rhea.EventContext) {
+            context.connection.close();
+        });
+        client.on('connection_close', function (context: rhea.EventContext) {
+            assert.deepEqual(incoming, outgoing);
+            done();
+        });
+    });
 });
