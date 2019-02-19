@@ -186,7 +186,7 @@ export declare interface types {
   wrap_symbolic_map(m: object): Typed;
   wrap_array(l: any, code: number, descriptors: any): Typed;
   wrap(o: any): Typed;
-  wrap_described(value: any, descriptor: string | number | Number): Typed;
+  wrap_described(value: any, descriptor: string | number | Number | Typed): Typed;
   wrap_message_id(o: any): any;
   described_nc(descriptor: any[] | any, o: any): any;
   described(descriptor: any, o: any): any;
