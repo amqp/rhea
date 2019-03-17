@@ -651,6 +651,7 @@ export declare interface Connection extends EventEmitter {
   get_peer_certificate(): PeerCertificate | undefined;
   get_tls_socket(): Socket | undefined;
   remove_session(session: Session): void;
+  remove_all_sessions(): void;
 }
 
 export declare enum ConnectionEvents {
