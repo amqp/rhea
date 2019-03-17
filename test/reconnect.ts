@@ -138,8 +138,8 @@ describe('reconnect', function() {
         var extra_session_opens: number = 0;
         var disconnects: number = 0;
         var c: rhea.Connection = container.connect(listener.address());
-        var s: rhea.Sender = c.open_sender('my-sender');
         var extra_session: rhea.Session = c.create_session();
+        var s: rhea.Sender = c.open_sender('my-sender');
         extra_session.begin();
         extra_session.on('session_open', function () {
             assert.equal(disconnects, 0);
@@ -161,6 +161,31 @@ describe('reconnect', function() {
                 done();
             }
         });
+    });
+    it('does not re-establish link when all sessions are removed', function(done: Function) {
+        var container: rhea.Container = rhea.create_container();
+        var sender_opens: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(listener.address());
+        var s: rhea.Sender = c.open_sender('my-sender');
+        c.on('disconnected', function (context) {
+            disconnects++;
+            c.remove_all_sessions();
+        });
+        c.on('sender_open', function (context) {
+            sender_opens++;
+            assert.equal(context.connection.remote.open.hostname, 'test' + sender_opens);
+            if (sender_opens === 1) {
+                socket.end();
+            } else {
+                assert.fail('Sender shouldnt have been reconnected')
+            }
+        });
+        setTimeout(() => {
+            assert.equal(disconnects, 1);
+            assert.equal(sender_opens, 1);
+            done();
+        }, 1000);
     });
     it('does not reconnect when disabled', function(done: Function) {
         var container: rhea.Container = rhea.create_container();
