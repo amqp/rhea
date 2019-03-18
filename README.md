@@ -52,6 +52,8 @@ folder. These include:
   by listening on a port and then openning a connection to itself over
   which the message is transfered.
 
+* [send_raw.js](examples/send_raw.js) - explicitly set the [data section](http://docs.oasis-open.org/amqp/core/v1.0/os/amqp-core-messaging-v1.0-os.html#type-data) of the message body
+
 * [simple_send.js](examples/simple_send.js) - connects to a specified
   port then sends a number of messages to a given address
 
