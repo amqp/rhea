@@ -12,7 +12,7 @@ export { Delivery, Session, SessionEvents } from "./session";
 export { message as MessageUtil } from "./message";
 export { filter as Filter } from "./filter"
 export { Container, ContainerOptions } from "./container";
-export { types as Types } from "./types";
+export { types as Types, Typed } from "./types";
 export { sasl as Sasl } from "./sasl";
 export {
   connect, create_container, filter, generate_uuid, id, message,
