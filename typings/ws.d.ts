@@ -6,9 +6,9 @@
  */
 export interface WebSocketInstance {
   send: Function;
+  close: Function;
   onmessage: Function | null;
   onopen: Function | null;
-  close: Function | null;
   onclose: Function | null;
   onerror: Function | null;
 }
