@@ -14,6 +14,7 @@ export { filter as Filter } from "./filter"
 export { Container, ContainerOptions } from "./container";
 export { types as Types, Typed } from "./types";
 export { sasl as Sasl } from "./sasl";
+export { WebSocketImpl, WebSocketInstance } from "./ws";
 export {
   connect, create_container, filter, generate_uuid, id, message,
   options, get_option, sasl, sasl_server_mechanisms, string_to_uuid, types,
