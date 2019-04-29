@@ -72,7 +72,8 @@ export declare interface Sender extends link {
    * and a valid value should be passed to the `format` argument.
    * @param {Buffer | string} [tag] The message tag if any.
    * @param {number} [format] The message format. Specify this if a message with custom format needs
-   * to be sent. `0` implies the standard AMQP 1.0 defined format.
+   * to be sent. `0` implies the standard AMQP 1.0 defined format. If no value is provided, then the
+   * given message is assumed to be of type Message interface and encoded appropriately.
    * @returns {Delivery} Delivery
    */
   send(msg: Message | Buffer, tag?: Buffer | string, format?: number): Delivery;
