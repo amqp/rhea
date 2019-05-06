@@ -220,23 +220,6 @@ export interface LinkOptions extends EndpointOptions {
 }
 
 /**
- * Describes the link distribution policy;
- * @enum DistributionMode
- */
-export enum DistributionMode {
-  /**
-   * @property {string} move once successfully transferred over the link, the message will no longer be available
-   * to other links from the same node
-   */
-  move = "move",
-  /**
-   * @property {string} copy once successfully transferred over the link, the message is
-   * still available for other links from the same node
-   */
-  copy = "copy"
-}
-
-/**
  * Defines the options that can be provided while creating the source/target for a Sender or Receiver (link).
  * @interface BaseTerminusOptions
  */
@@ -299,9 +282,14 @@ export interface TargetTerminusOptions extends BaseTerminusOptions {
  */
 export interface Source extends TerminusOptions {
   /**
-  * @property {number} [distribution_mode] The distribution mode of the link.
+  * @property {string} [distribution_mode] The distribution mode of the link.
+  * Valid values are:
+  * - **move** - once successfully transferred over the link, the message will no longer be
+  * available to other links from the same node.
+  * - **copy** - once successfully transferred over the link, the message is still available
+  * for other links from the same node.
   */
-  distribution_mode?: DistributionMode;
+  distribution_mode?: "move" | "copy";
   /**
    * @property {object} [filter] - The filters to be added for the terminus.
    */
