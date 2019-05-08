@@ -148,6 +148,11 @@ be handled at connection scope. Events that are not handled at
 connection scope are then propagated up to possibly be handled at
 container scope.
 
+Two other relevant objects are:
+
+  * <a href="#message">Message</a>
+  * and <a href="#delivery">Delivery</a>
+
 ---------------------------------------------------------------------
 ### Container
 
@@ -298,7 +303,10 @@ object that may contain any of the following fields:
     value of 0 can be used to turn of automatic flow control and
     manage it directly.
   * autoaccept - Whether received messages should be automatically
-    accepted. Defaults to true.
+    accepted. Defaults to true. If set to false, the application
+    should call accept, release or reject on the <a
+    href="#receiver">delivery</a> field of the context passed to the
+    message event.
   * autosettle - Whether received messages should be automatically
     settled once the remote settles them. Defaults to true.
 
@@ -418,9 +426,12 @@ Returns the amount of outstanding credit that has been issued.
 
 #### events:
 
-##### message
+##### message event
 
-Raised when a message is received.
+Raised when a message is received. The context passed will have a <a
+href="#message">message</a>, containing the received content, and a <a
+href="#delivery">delivery</a> which can be used to acknowledge receipt
+of the message if autoaccept has been disabled.
 
 ##### receiver_open
 
@@ -438,23 +449,7 @@ Raised when the remote peer indicates the link is closed.
 
 ##### send(msg)
 
-Sends a message. A message is an object that may contain the following fields:
-
-  * durable
-  * first_acquirer
-  * priority
-  * ttl
-  * delivery_count
-  * reply_to
-  * to
-  * subject
-  * content_type
-  * content_encoding
-  * group_id
-  * message_id
-  * correlation_id
-  * application_properties, an object/map which can take arbitrary, application defined named values
-  * body, which can be either a string, an object or a buffer
+Sends a <a href="#message">message</a>.
 
 ##### close()
 
@@ -496,6 +491,56 @@ in AMQP parlance).
 ##### sender_close
 
 Raised when the remote peer indicates the link is closed.
+
+### Message
+
+A message is an object that may contain the following fields:
+
+  * durable
+  * first_acquirer
+  * priority
+  * ttl
+  * delivery_count
+  * reply_to
+  * to
+  * subject
+  * content_type
+  * content_encoding
+  * group_id
+  * message_id
+  * correlation_id
+  * application_properties, an object/map which can take arbitrary, application defined named values
+  * body, which can be either a string, an object or a buffer
+
+Messages are passed to the send() method of Connection or Sender, and
+are made available as `message` on the event context for the `message`
+event on a Receiver or its parent(s).
+
+### Delivery
+
+The delivery object provides information on- and enables control over-
+the state of a message transfer.
+
+The methods on a delivery object are:
+
+  * accept, which will positively acknowledge the receipt of the
+    message
+  * release, which will inform the sender that the message can be
+    redelivered (to this or to any other receiver). The release can be
+    controlled through an object passed in with one or more fo the
+    following fields:
+      * delivery_failed, if true the sender should increment the
+        delivery_count on the next redelivery attempt, if false it should
+        not
+      * undeliverable_here, if true the sender should not try to
+        redeliver the same message to this receiver
+  * reject, which will inform the sender that the message is invalid
+    in some way.
+  * modified, which sets the modified outcome as defined in the AMQP
+    1.0 specification.
+
+If autoaccept is disabled on a receiver, the application should ensure
+that it accepts (or releases or rejects) all messages received.
 
 ---------------------------------------------------------------------
 **Note: For detailed options and types, please refer to the type definitions
