@@ -15,10 +15,6 @@ broker/server listening on port 5672:
 
 ```js
 var container = require('rhea');
-container.on('connection_open', function (context) {
-    context.connection.open_receiver('examples');
-    context.connection.open_sender('examples');
-});
 container.on('message', function (context) {
     console.log(context.message.body);
     context.connection.close();
@@ -26,7 +22,9 @@ container.on('message', function (context) {
 container.once('sendable', function (context) {
     context.sender.send({body:'Hello World!'});
 });
-container.connect({'port':5672});
+var connection = container.connect({'port':5672});
+connection.open_receiver('examples');
+connection.open_sender('examples');
 ```
 
 output:
@@ -44,8 +42,8 @@ Hello World!
 There are some examples of using the library under the examples
 folder. These include:
 
-* [helloworld.js](examples/helloworld.js) - essentially the code above, which sends and receives
-  a single message through a broker
+* [helloworld.js](examples/helloworld.js) - essentially the code above, which
+  sends and receives a single message through a broker
 
 * [direct_helloworld.js](examples/direct_helloworld.js) - an example
   showing the sending of a single message without the use of a broker,
@@ -116,8 +114,8 @@ default port of one or ther other will need to be changed through the
   node based scritps require the 'ws' node module to be installed. The
   browser based example requires a browserified version of the rhea
   library (this can be created e.g. by calling npm run-script
-  browserify or make browserify). The browserified and minimized javascript
-  library is stored under the dist/ directory.
+  browserify or make browserify). The browserified and minimized
+  javascript library is stored under the dist/ directory.
 
 To run the examples you will need the dependencies installed: the
 library itself depends on the 'debug' module, and some of the examples
@@ -134,19 +132,20 @@ offered by the ActiveMQ or Qpid Apache projects, is running.
 
 ## API
 
-There are four core types of object in the API:
+There are five core types of object in the API:
 
   * <a href="#container">Containers</a>,
   * <a href="#connection">Connections</a>,
+  * <a href="#session">Sessions</a>,
   * <a href="#receiver">Receivers</a>,
   * and <a href="#sender">Senders</a>
 
 Each of these inherits all the methods of EventEmitter, allowing
 handlers for particular events to be attached. Events that are not
 handled at sender or receiver scope are then propagated up to possibly
-be handled at connection scope. Events that are not handled at
-connection scope are then propagated up to possibly be handled at
-container scope.
+be handled at session scope. Events that are not handled at session
+scope are then propagated up to possibly be handled at connection
+scope, and if not there then in container scope.
 
 Two other relevant objects are:
 
@@ -215,20 +214,25 @@ from the host option. If servername is not specified, the SNI will
 default to the host.
 
 If options is undefined, the client will attempt to obtain default
-options from a config file. This file is of similar structure to that
-used by Apache Qpid Proton clients. The location of the file can be
-specified through the MESSAGING_CONNECT_FILE environment variable. If
-that is not specified it will look for a file called connect.json in
-the current directory, in <home>/.config/messaging or /etc/messaging/.
+options from a JSON config file. This file is of similar structure to
+that used by Apache Qpid Proton clients. The location of the file can
+be specified through the MESSAGING_CONNECT_FILE environment variable.
+If that is not specified it will look for a file called connect.json
+in the current directory, in <home>/.config/messaging or
+/etc/messaging/.
 
 The config file offers only limited configurability, specifically:
 
+  * scheme
   * host
   * port
   * user (note not username)
   * password
-  * sasl (a nested object with fields enabled and mechanisms)
-  * tls (a nested object with fields key, cert, ca and verify)
+  * sasl (a nested object with field enabled)
+  * sasl_mechanisms
+  * tls (a nested object with fields key, cert, ca for paths to
+    correspoding files)
+  * verify
 
 ##### listen(options)
 
@@ -360,41 +364,131 @@ that consists of condition and description fields).
 
 ##### is_open()/is_closed()
 
-Provide information about the connection status. If it's opened or closed.
+Provide information about the connection status. If it's opened or
+closed.
+
+##### create_session()
+
+Creates a new session if you want to manage sessions by yourself.
 
 #### events:
 
 ##### connection_open
 
 Raised when the remote peer indicates the connection is open.
+This occurs also on reconnect.
 
 ##### connection_close
 
 Raised when the remote peer indicates the connection is closed.
+This can happen either as a response to our close, or by itself.
+The connection and sessions will not be reconnected.
 
 ##### connection_error
 
 Raised when the remote peer indicates the connection is closed and
 specifies an error. A `connection_close` event will always follow this
-event, so it only needs to be implemented if there are specific actions
-to be taken on a close with an error as opposed to a close. The error
-is available as a property on the event context.
+event, so it only needs to be implemented if there are specific
+actions to be taken on a close with an error as opposed to a close.
+The error is available as a property on the event context.
 
 If neither the connection_error or the connection_close is handled by
-the application, an error event will be raised. This can be handled on
-the connection or the container. If this is also unhandled, the
+the application, an `error` event will be raised. This can be handled
+on the connection or the container. If this is also unhandled, the
 application process will exit.
+
+##### protocol_error
+
+Raised when a protocol error is received on the underlying socket.
+A `disconnected` event will follow with any reconnect as configured.
+
+##### error
+
+Raised when an error is received on the underlying socket. This
+catches any errors otherwise not handled.
 
 ##### disconnected
 
-Raised when the underlying tcp connection is lost. The context has a
-`reconnecting` property which is true if the library is attempting to
-automatically reconnect and false if it has reached the reconnect
-limit. If reconnect has not been enabled or if the connection is a tcp
-server, then the `reconnecting` property is undefined. The context may
-also have an `error` property giving some information about the reason
-for the disconnect. If the disconnect event is not handled, a warning
-will be logged to the console.
+Raised when the underlying tcp connection is lost or nonfatal error
+was received. The context has a `reconnecting` property which is true
+if the library is attempting to automatically reconnect and false if
+it has reached the reconnect limit. If reconnect has not been enabled
+or if the connection is a tcp server, then the `reconnecting` property
+is undefined. The context may also have an `error` property giving
+some information about the reason for the disconnect. If the
+disconnect event is not handled, a warning will be logged to the
+console.
+
+You should update the application state to resend any unsettled
+messages again once the connection is recovered.
+
+##### settled
+
+Raised when remote settled the message.
+
+---------------------------------------------------------------------
+### Session
+
+Session is an aggregation of <a href="#receiver">Receiver</a> and <a
+href="#sender">Sender</a> links and provides the context and
+sequencing of messages for all the links it contains. A <a
+href="#connection">Connection</a> creates a default session for you if
+you create receivers and senders on the Connection. You only need to
+use this object if you want to group your links into more than one
+session.
+
+#### methods:
+
+##### open_receiver(address|options)
+
+This adds a receiver on the session. The `open_receiver` on the <a
+href="#connection">Connection</a> object finds the session and calls
+this.
+
+##### open_sender(address|options)
+
+This adds a sender on the session. The `open_sender` on the <a
+href="#connection">Connection</a> object finds the session and calls
+this.
+
+##### close()
+
+End a session (may take an error object which is an object that
+consists of condition and description fields).
+
+##### is_open()/is_closed()
+
+Provide information about the session status. If it's opened or
+closed.
+
+#### events:
+
+##### session_open
+
+Raised when the remote peer indicates the session is open (i.e. begun
+in AMQP parlance).
+
+##### session_close
+
+Raised when the remote peer indicates the session is closed (i.e.
+ended in AMQP parlance). The session will be removed from the
+connection after the event.
+
+##### session_error
+
+Raised when the remote peer indicates the session has ended and
+specifies an error. A `session_close` event will always follow this
+event, so it only needs to be implemented if there are specific
+actions to be taken on a close with an error as opposed to a close.
+The error is available as `error` property on the session object.
+
+If neither the session_error or the session_close is handled by the
+application, an `error` event will be raised on the container. If this
+is also unhandled, the application process will exit.
+
+##### settled
+
+Raised when remote settled the message.
 
 ---------------------------------------------------------------------
 ### Receiver
@@ -403,8 +497,9 @@ will be logged to the console.
 
 ##### close()
 
-Closes a receiving link (i.e. cancels the subscription). (May take an error object which is an object
-that consists of condition and description fields).
+Closes a receiving link (i.e. cancels the subscription). (May take an
+error object which is an object that consists of condition and
+description fields).
 
 ##### detach()
 
@@ -438,9 +533,31 @@ of the message if autoaccept has been disabled.
 Raised when the remote peer indicates the link is open (i.e. attached
 in AMQP parlance).
 
+##### receiver_drained
+
+Raised when the remote peer indicates that it has drained all credit
+(and therefore there are no more messages at present that it can send).
+
+##### receiver_flow
+
+Raised when a flow is received for receiver.
+
+##### receiver_error
+
+Raised when the remote peer closes the receiver with an error. A
+`receiver_close` event will always follow this event, so it only needs
+to be implemented if there are specific actions to be taken on a close
+with an error as opposed to a close. The error is available as an
+`error` property on the receiver.
+
 ##### receiver_close
 
-Raised when the remote peer indicates the link is closed.
+Raised when the remote peer indicates the link is closed (i.e.
+detached in AMQP parlance).
+
+##### settled
+
+Raised when remote settled the message.
 
 ---------------------------------------------------------------------
 ### Sender
@@ -449,7 +566,19 @@ Raised when the remote peer indicates the link is closed.
 
 ##### send(msg)
 
-Sends a <a href="#message">message</a>.
+Sends a <a href="#message">message</a>. The link need not be yet open
+nor is any credit needed, but there is a limit of 2048 deliveries in
+the <a href="#session">Session</a> queue before it raises an exception
+for buffer overflow.
+
+Unsettled messages, whether transmitted or not, are lost on reconnect
+and there will be no `accepted`, `released`, `rejected` events. You
+may need to resend the messages on a `disconnected` event.
+
+If the messages to be sent can be generated or fetched on demand or
+there is large number of messages, it is recommended `send` is called
+only while the sender is `sendable()`. When sender is no longer
+sendable, continue sending in the `sendable` event.
 
 ##### close()
 
@@ -462,14 +591,21 @@ Detaches a link without closing it.
 
 ##### sendable()
 
-Returns true if the sender has available credits for sending a message. Otherwise it returns false.
+Returns true if the sender has available credits for sending a
+message. Otherwise it returns false.
+
+##### set_drained(bool)
+
+This must be called in response to `sender_draining` event to tell
+peer we have drained our messages or credit.
 
 #### events:
 
 ##### sendable
 
-Raised when the sender has sufficient credit to be able to transmit
-messages to its peer.
+Raised when the sender has received credit to be able to transmit
+messages to its peer. You will not receive a new event until the peer
+sends more credit, even if you have some credit left.
 
 ##### accepted
 
@@ -482,35 +618,86 @@ Raised when a sent message is released by the peer.
 ##### rejected
 
 Raised when a sent message is rejected by the peer.
+`context.delivery.remote_state.error` may carry diagnostics to explain
+rejection, for example a `condition` property with value
+`amqp:unauthorized-access`.
+
+##### modified
+
+Raised when a sent message is modified by the peer. The
+`context.delivery.remote_state` may have `delivery_failed` and
+`undeliverable_here` boolean and `message_annotations` map properties
+to guide any message retransmission as specified in the AMQP 1.0
+specification.
 
 ##### sender_open
 
 Raised when the remote peer indicates the link is open (i.e. attached
 in AMQP parlance).
 
+##### sender_draining
+
+Raised when the remote peer requests that the sender drain its credit;
+sending all available messages within the credit limit and calling
+`set_drained(true)`. After this the sender has no credit left.
+
+##### sender_flow
+
+Raised when a flow is received for sender. `sender_draining` and
+`sendable` events may follow this event, so it only needs to be
+implemented if there are specific actions to be taken.
+
+##### sender_error
+
+Raised when the remote peer closes the sender with an error. A
+`sender_close` event will always follow this event, so it only needs
+to be implemented if there are specific actions to be taken on a close
+with an error as opposed to a close. The error is available as an
+`error` property on the sender.
+
 ##### sender_close
 
-Raised when the remote peer indicates the link is closed.
+Raised when the remote peer indicates the link is closed (i.e.
+detached in AMQP parlance).
+
+##### settled
+
+Raised when remote settled the message.
 
 ### Message
 
 A message is an object that may contain the following fields:
 
   * durable
-  * first_acquirer
   * priority
   * ttl
+  * first_acquirer
   * delivery_count
-  * reply_to
+  * delivery_annotations, an object/map of non-standard delivery
+    annotations sent to link recipient peer that should be negotiated
+    at link attach
+  * message_annotations, an object/map of non-standard delivery
+    annotations propagated accross all steps that should be negotiated
+    at link attach
+  * message_id
+  * user_id
   * to
   * subject
+  * reply_to
+  * correlation_id
   * content_type
   * content_encoding
+  * absolute_expiry_time
+  * creation_time
   * group_id
-  * message_id
-  * correlation_id
-  * application_properties, an object/map which can take arbitrary, application defined named values
-  * body, which can be either a string, an object or a buffer
+  * group_sequence
+  * reply_to_group_id
+  * application_properties, an object/map which can take arbitrary,
+    application defined named simple values
+  * body, which can be of any AMQP type type or `data_section`,
+    `data_sections`, `sequence_section` or `sequence_sections` from
+    `rhea.message`.
+  * footer, an objec`t/map for HMACs or signatures or similar
 
 Messages are passed to the send() method of Connection or Sender, and
 are made available as `message` on the event context for the `message`
@@ -530,8 +717,8 @@ The methods on a delivery object are:
     controlled through an object passed in with one or more fo the
     following fields:
       * delivery_failed, if true the sender should increment the
-        delivery_count on the next redelivery attempt, if false it should
-        not
+        delivery_count on the next redelivery attempt, if false it
+        should not
       * undeliverable_here, if true the sender should not try to
         redeliver the same message to this receiver
   * reject, which will inform the sender that the message is invalid
@@ -543,6 +730,5 @@ If autoaccept is disabled on a receiver, the application should ensure
 that it accepts (or releases or rejects) all messages received.
 
 ---------------------------------------------------------------------
-**Note: For detailed options and types, please refer to the type definitions
-in the [typings](./typings) directory**.
-
+**Note: For detailed options and types, please refer to the type
+definitions in the [typings](./typings) directory**.
