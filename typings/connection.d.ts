@@ -50,11 +50,11 @@ export interface ConnectionDetails {
   /**
    * @property {any} options The options object provided to connection_details().
    */
-  options: any;
+  options?: any;
   /**
    * @property {Function} connect The `connect` function of `"net"` or `"tls"` module.
    */
-  connect: Function;
+  connect?: Function;
 }
 
 /**
