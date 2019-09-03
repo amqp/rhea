@@ -476,3 +476,78 @@ describe('default connect', function () {
     });
 });
 
+describe('connect string port (\'amqps\')', function () {
+    let listener: any;
+    let filename: string;
+
+    beforeEach(function (done: Function) {
+        let container: rhea.Container = rhea.create_container();
+        listener = container.listen({ port: 5761 });
+        listener.on('listening', function () {
+            filename = 'test-connect.json';
+            process.env.MESSAGING_CONNECT_FILE = filename;
+            
+            fs.writeFile(filename, JSON.stringify({port:'amqps'}), 'utf8', function () {
+                done();
+            });
+        });
+    });
+
+    afterEach(function () {
+        if (filename) fs.unlinkSync(filename);
+        listener.close();
+    });
+
+    //clarify on requirement string
+    it('retrieves necessary config from file', function (done: Function) {
+        let client: rhea.Container = rhea.create_container();
+        let conn = client.connect();
+        let opened = false;
+        conn.on('connection_open', function () {
+            opened = true;
+            conn.close();
+        });
+        conn.on('connection_close', function () {
+            assert(opened);
+            done();
+        });
+    });
+});
+
+describe('connect string port (\'amqp\')', function () {
+    let listener: any;
+    let filename: string;
+
+    beforeEach(function (done: Function) {
+        let container: rhea.Container = rhea.create_container();
+        listener = container.listen({ port: 5762 });
+        listener.on('listening', function () {
+            filename = 'test-connect.json';
+            process.env.MESSAGING_CONNECT_FILE = filename;
+            
+            fs.writeFile(filename, JSON.stringify({port:'amqp'}), 'utf8', function () {
+                done();
+            });
+        });
+    });
+
+    afterEach(function () {
+        if (filename) fs.unlinkSync(filename);
+        listener.close();
+    });
+
+    //clarify on requirement string
+    it('retrieves necessary config from file', function (done: Function) {
+        let client: rhea.Container = rhea.create_container();
+        let conn = client.connect();
+        let opened = false;
+        conn.on('connection_open', function () {
+            opened = true;
+            conn.close();
+        });
+        conn.on('connection_close', function () {
+            assert(opened);
+            done();
+        });
+    });
+});
