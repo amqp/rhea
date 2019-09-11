@@ -55,6 +55,10 @@ export interface ConnectionDetails {
    * @property {Function} connect The `connect` function of `"net"` or `"tls"` module.
    */
   connect?: Function;
+  /**
+   * @property {string} [transport] - The transport option.
+   */
+  transport?: "tls" | "ssl" | "tcp";
 }
 
 /**
@@ -88,7 +92,7 @@ export interface ConnectionOptions extends EndpointOptions {
    */
   port?: number;
   /**
-   * @property {string} [transport] - The transport option.
+   * @property {string} [transport] - The transport option. This is ignored if connection_details is set.
    */
   transport?: "tls" | "ssl" | "tcp";
   /**
