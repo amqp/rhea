@@ -180,7 +180,10 @@ following fields:
   * password
   * container_id (overrides the container identifier)
   * hostname
-  * servername
+  * ca (if using tls)
+  * servername (if using tls)
+  * key (if using tls with client auth)
+  * cert (if using tls with client auth)
   * transport
   * sasl_init_hostname
   * idle_time_out
@@ -211,7 +214,9 @@ following fields:
 If the transport is TLS, the options may additionally specify a
 'servername' property. This allows the SNI to be controlled separately
 from the host option. If servername is not specified, the SNI will
-default to the host.
+default to the host. If using TLS options for 'ca', 'cert' and 'key'
+may also be specified (see
+https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options)
 
 If options is undefined, the client will attempt to obtain default
 options from a JSON config file. This file is of similar structure to
