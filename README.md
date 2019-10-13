@@ -324,6 +324,12 @@ autoaccept options, the connection options are consulted followed by
 the container options. The default is used only if an option is not
 specified at any level.
 
+##### open_receiver_stream(address|options)
+
+Like the open_receiver method, establishes a link over which messages
+can be received, but instead returns a Readable stream object that wraps
+the receiver link inside it.
+
 ##### open_sender(address|options)
 
 Establishes a link over which messages can be sent and returns a <a
@@ -353,6 +359,12 @@ Note: If the link doesn't specify a value for the autosettle option,
 the connection options are consulted followed by the container
 options. The default is used only if an option is not specified at any
 level.
+
+##### open_sender_stream(address|options)
+
+Like the open_sender method, link over which messages can be sent,
+but instead returns a Writable stream object that wraps the sender
+link inside it.
 
 ##### send(message)
 
