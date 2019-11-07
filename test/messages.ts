@@ -55,6 +55,10 @@ describe('message content', function() {
     it('sends and receives binary body', transfer_test({body:amqp_types.wrap_binary(new Buffer('hello world!'))}, function(message: rhea.Message) {
         assert.equal(message.body.toString(), 'hello world!');
     }));
+    it('sends and receives awkward string body', transfer_test({body:'{"id":null,"model":"product-metafield","data":{"key":"meta_description_fr","value":"Bestel de Testing nu voor €0.00 bij Smartphonehoesjes Zakelijk. ✓ Altijd gratis verzonden ✓ 30 dagen bedenktijd","productId":104185737},"shopUId":"shz","op":"create"}'}, function(message: rhea.Message) {
+        assert.equal(message.body, '{"id":null,"model":"product-metafield","data":{"key":"meta_description_fr","value":"Bestel de Testing nu voor €0.00 bij Smartphonehoesjes Zakelijk. ✓ Altijd gratis verzonden ✓ 30 dagen bedenktijd","productId":104185737},"shopUId":"shz","op":"create"}');
+    }));
+
     it('sends and receives body as data section', transfer_test({body:amqp_message.data_section(new Buffer('hello world!'))}, function(message: rhea.Message) {
         assert.equal(message.body.typecode, 0x75);
         assert.equal(message.body.content.toString(), 'hello world!');
