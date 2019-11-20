@@ -23,14 +23,22 @@ var args = require('../options.js').options({
  * To authenticate using PLAIN and a simple username and password
  * combination, the application provides a callback function for
  * authenticating a connecting user given their specified username and
- * password. (The test used here - namely that the password is always
+ * password.  The callback may provide either a boolean or a promise
+ * yielding a boolean.
+ *
+ * (The test used here - namely that the password is always
  * the username in reverse - is of course NOT recommended in practice!
  * :-)
  */
 function authenticate(username, password) {
-    console.log('Authenticating as ' + username);
-    return username.split('').reverse().join('') === password;
+    return new Promise((resolve) => {
+        console.log('Authenticating as ' + username);
+        resolve(username.split('')
+                    .reverse()
+                    .join('') === password);
+    });
 }
+
 container.sasl_server_mechanisms.enable_plain(authenticate);
 var server = container.listen({ port: args.port, host: args.host });
 container.on('connection_open', function (context) {
