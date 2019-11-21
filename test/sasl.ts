@@ -51,6 +51,59 @@ describe('sasl plain', function() {
     });
 });
 
+describe('sasl plain callback using promise', function() {
+    this.slow(200);
+    var container: rhea.Container, listener: any;
+    var providerFailure : boolean;
+
+    function authenticate(username: string, password: string) {
+        return new Promise((resolve, reject) => {
+            if (providerFailure) {
+                reject("provider failure");
+            } else {
+                resolve(username.split("").reverse().join("") === password);
+            }
+        });
+    }
+
+    beforeEach(function(done: Function) {
+        container = rhea.create_container();
+        container.sasl_server_mechanisms.enable_plain(authenticate);
+        container.on('disconnected', function () {});
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    it('successfully authenticates', function(done: Function) {
+        container.connect({username:'bob',password:'bob',port:listener.address().port}).on('connection_open', function(context) { context.connection.close(); done(); });
+    });
+    it('handles authentication failure', function(done: Function) {
+        container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port}).on('connection_error', function(context) {
+            var error = context.connection.get_error();
+            assert.equal(error.condition, 'amqp:unauthorized-access');
+            done();
+        });
+    });
+    it('handles authentication provider failure', function(done: Function) {
+        providerFailure = true;
+        // Swallow the expected server side report of the provider failure
+        container.on('connection_error', function () {});
+
+        let connection = container.connect({username:'whatsit',password:'anyoldrubbish',port:listener.address().port});
+        connection.on('connection_error', function(context) {
+            var error = context.connection.get_error();
+            assert.equal(error.condition, 'amqp:internal-error');
+            done();
+        });
+    });
+});
+
 describe('sasl init hostname', function() {
     this.slow(200);
     var container: rhea.Container, listener: any, hostname: string | undefined;
@@ -219,4 +272,35 @@ describe('user-provided sasl mechanism', function () {
             done();
         });
     });
+
+    it('calls start and step on the custom sasl mechanism using promises', function (done: Function) {
+        var startCalled = false;
+        var stepCalled = false;
+        var connectOptions = {
+            sasl_mechanisms: {
+                'CUSTOM': testClientSaslMechanism
+            },
+            port: listener.address().port
+        }
+
+        container.sasl_server_mechanisms['CUSTOM'] = function () {
+            return {
+                outcome: undefined,
+                start: function () {
+                    return new Promise(resolve => { startCalled = true; resolve('initialResponse'); });
+                },
+                step: function () {
+                    return new Promise(resolve => { stepCalled = true; this.outcome = <any>true; resolve(); });
+                }
+            };
+        };
+
+        container.connect(connectOptions).on('connection_open', function(context) {
+            context.connection.close();
+            assert(startCalled);
+            assert(stepCalled);
+            done();
+        });
+    });
+
 });

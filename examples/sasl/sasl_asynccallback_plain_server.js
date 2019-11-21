@@ -30,10 +30,16 @@ var args = require('../options.js').options({
  * the username in reverse - is of course NOT recommended in practice!
  * :-)
  */
+
 function authenticate(username, password) {
+    return new Promise((resolve) => {
         console.log('Authenticating as ' + username);
-    return username.split('').reverse().join('') === password;
+        resolve(username.split('')
+            .reverse()
+            .join('') === password);
+    });
 }
+
 container.sasl_server_mechanisms.enable_plain(authenticate);
 var server = container.listen({ port: args.port, host: args.host });
 container.on('connection_open', function (context) {
