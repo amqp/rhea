@@ -58,11 +58,13 @@ describe('sasl plain callback using promise', function() {
 
     function authenticate(username: string, password: string) {
         return new Promise((resolve, reject) => {
-            if (providerFailure) {
-                reject("provider failure");
-            } else {
-                resolve(username.split("").reverse().join("") === password);
-            }
+            process.nextTick(() => {
+                if (providerFailure) {
+                    reject("provider failure");
+                } else {
+                    resolve(username.split("").reverse().join("") === password);
+                }
+            })
         });
     }
 
@@ -287,10 +289,21 @@ describe('user-provided sasl mechanism', function () {
             return {
                 outcome: undefined,
                 start: function () {
-                    return new Promise(resolve => { startCalled = true; resolve('initialResponse'); });
+                    return new Promise(resolve => {
+                        process.nextTick(() => {
+                            startCalled = true;
+                            resolve('initialResponse');
+                        });
+                    });
                 },
                 step: function () {
-                    return new Promise(resolve => { stepCalled = true; this.outcome = <any>true; resolve(); });
+                    return new Promise(resolve => {
+                        process.nextTick(() => {
+                            stepCalled = true;
+                            this.outcome = <any>true;
+                            resolve();
+                        });
+                    });
                 }
             };
         };
