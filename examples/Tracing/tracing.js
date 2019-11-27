@@ -10,7 +10,6 @@ const initTracer = (serviceName) => {
     serviceName: serviceName,
     sampler: {
       type: "const",
-      // priority: 1,
       param: 1,
       format: "proto",
     },
@@ -36,8 +35,8 @@ module.exports.testTracer = function test(serviceName){
   this.tracer = opentracing.globalTracer();
   opentracing.globalTracer.activeSpan = this.tracer;
   container.on('sender_open', (e) => {
-    e.sender.send2 = e.sender.send;
-    let testSender = (msg) => {
+    e.sender.sendNew = e.sender.send;
+    let newSender = (msg) => {
       connection = e.connection;
       let span_tags = {
         SPAN_KIND: opentracing.Tags.SPAN_KIND_MESSAGING_PRODUCER,
@@ -46,19 +45,18 @@ module.exports.testTracer = function test(serviceName){
         PEER_HOSTNAME: e.sender.connection.options.host, 
         'inserted_by': 'proton-message-tracing'
       }
-
-      span = this.tracer.startSpan('amqp-delivery-send', { childOf: opentracing.globalTracer().active},tags=span_tags);
+      span = this.tracer.startSpan("amqp-delivery-send", { childOf: opentracing.globalTracer().active});
+      span.addTags(span_tags);
       headers = {};
       this.tracer.inject(span, opentracing.FORMAT_TEXT_MAP, headers);
-  
-      console.log(msg)
+
       if(msg.annotations == undefined){
-          msg.annotations = { trace_key: headers}
+          msg.annotations = { _trace_key: headers}
       } else {
-          msg.annotations[trace_key] = headers
+          msg.annotations[_trace_key] = headers
       }
 
-      delivery = e.sender.send2(msg);
+      delivery = e.sender.sendNew(msg);
       delivery.span = span;
   
       span.setTag('delivery-tag', delivery.tag)
@@ -66,21 +64,25 @@ module.exports.testTracer = function test(serviceName){
       span.finish();
       return delivery;
     };
-    e.sender.send = testSender;
+    e.sender.send = newSender;
 
     e.sender.on('settled',(e) => {
       if(e.delivery!=undefined || e.delivery!=null){
         delivery = e.delivery;
-        //nasty fix not realistic nor correct
+        //needs fixing
         if(e.delivery.remote_settled==true){
           state = 'ACCEPTED';
         } else {
           
         }
         span = delivery.span;
-        span.setTag('delivery-terminal-state', state);
-        span.log({'event': 'delivery settled', 'state': state});
-        span.finish();
+        if(span == null || span == undefined) {
+
+        } else {
+          span.setTag('delivery-terminal-state', state);
+          span.log({'event': 'delivery settled', 'state': state});
+          span.finish();
+        }
       }
     });
   });
@@ -90,7 +92,7 @@ module.exports.testTracer = function test(serviceName){
     let receiver = e.receiver;
     let connection = e.connection;
 
-    //hard coded tempoary stupid fix on peer address
+    //hard coded tempoary fix on peer address
     span_tags = {
       [opentracing.Tags.SPAN_KIND]: opentracing.Tags.SPAN_KIND_MESSAGING_CONSUMER,
       [opentracing.Tags.MESSAGE_BUS_DESTINATION]: receiver.source.address,
@@ -100,15 +102,17 @@ module.exports.testTracer = function test(serviceName){
     }
 
     if(message.message_annotations == undefined){
+
       ctx = this.tracer.startSpan('amqp-deliver-receive', tags = span_tags);
       ctx.finish();
     } else {
       headers = message.message_annotations[_trace_key];
-      let abc = new Buffer(headers['uber-trace-id']);
-      let cba = { 'uber-trace-id': abc.toString()};
-      span_ctx = this.tracer.extract(opentracing.FORMAT_TEXT_MAP, cba);
-      let wft = this.tracer.startSpan('amqp-delivery-receive', { childOf: span_ctx}, tags = span_tags);
-      wft.finish();
+      let bufferHeaders = new Buffer(headers['uber-trace-id']);
+      let traceId = { 'uber-trace-id': bufferHeaders.toString()};
+
+      span_ctx = this.tracer.extract(opentracing.FORMAT_TEXT_MAP, traceId);
+      let receiveSpan = this.tracer.startSpan('amqp-delivery-receive', { childOf: span_ctx}, tags = span_tags);
+      receiveSpan.finish();
     }
   });
 }

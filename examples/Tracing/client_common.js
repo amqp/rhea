@@ -36,7 +36,7 @@ module.exports.client = function(url, requests, args, baseT){
     });
 
 
-    container.on('receiver_open',(z)=> {
+    container.on('receiver_open',(z) => {
         this.receiver = z.receiver;
         if(this.receiver.source.address != undefined && this.receiver.source.address != null){
                 while(this.requests_queued.length > 0){
@@ -60,7 +60,6 @@ module.exports.client = function(url, requests, args, baseT){
       id=e.message.correlation_id;
       reply = e.message.body;
       popVal = pop_request(id);
-  
       if(popVal[0] != undefined){
         req = popVal[0][0];
         tester = popVal[0][1];
