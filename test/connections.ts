@@ -482,7 +482,7 @@ describe('connect string port (\'amqps\')', function () {
 
     beforeEach(function (done: Function) {
         let container: rhea.Container = rhea.create_container();
-        listener = container.listen({ port: 5761 });
+        listener = container.listen({ port: 5671 });
         listener.on('listening', function () {
             filename = 'test-connect.json';
             process.env.MESSAGING_CONNECT_FILE = filename;
@@ -520,7 +520,7 @@ describe('connect string port (\'amqp\')', function () {
 
     beforeEach(function (done: Function) {
         let container: rhea.Container = rhea.create_container();
-        listener = container.listen({ port: 5762 });
+        listener = container.listen({ port: 5672 });
         listener.on('listening', function () {
             filename = 'test-connect.json';
             process.env.MESSAGING_CONNECT_FILE = filename;
