@@ -189,6 +189,28 @@ export interface ConnectionOptions extends EndpointOptions {
    * from peer should not prevent reconnect (by default this only includes `"amqp:connection:forced"`).
    */
   non_fatal_errors?: string[];
+  /**
+   * @property {string} [key] The private key of the certificate to be used with tls connection option
+   */
+  key?: string,
+  /**
+   * @property {string} [cert] The certificate to be used with tls connection option
+   */
+  cert?: string,
+  /**
+   * @property {string} [ca] The CA certificate used for signing certificate to be used with tls connection option
+   */
+  ca?: string,
+  /**
+   * @property {boolean} [requestCert] Flag to indicate client authentication to be used with tls connection option
+   * This is used in opening socket by nodejs
+   */
+  requestCert?: boolean,
+  /**
+   * @property {boolean} [rejectUnauthorized] Flag to indicate if certificate is self signed to be used with tls connection option
+   * This is used in opening socket by nodejs
+   */
+  rejectUnauthorized?: boolean
 }
 
 /**
