@@ -8,6 +8,11 @@
         "type": "git",
         "url": "http://github.com/amqp/rhea"
     },
+    "browser": {
+        "fs": false,
+        "net": false,
+        "tls": false
+    },
     "dependencies": {
         "debug": "0.8.0 - 3.5.0"
     },
