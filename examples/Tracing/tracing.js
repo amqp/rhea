@@ -8,7 +8,7 @@ let temp =0;
 const _trace_key = ('x-opt-qpid-tracestate');
 const boolCheck = true;
 
-const init_tracer_base = (serviceName) => {
+const initTracer = (serviceName) => {
   const config = {
     serviceName: serviceName,
     sampler: {
@@ -32,6 +32,7 @@ const init_tracer_base = (serviceName) => {
   };
   return initJaegerTracer(config, options);
 };
+
 // module.exports.testTracer = function test(serviceName){
 //   opentracing.initGlobalTracer(initTracer(serviceName));
 //   this.tracer = opentracing.globalTracer();
@@ -39,19 +40,20 @@ const init_tracer_base = (serviceName) => {
 
 //   // const tracerObj = tracer.tracer.startSpan('client-requests');
 // }
-module.exports.initTracer = function test(serviceName){
-  opentracing.initGlobalTracer(init_tracer_base(serviceName));
+
+function test(serviceName){
+  opentracing.initGlobalTracer(initTracer(serviceName));
   this.tracer = opentracing.globalTracer();
   opentracing.globalTracer.activeSpan = this.tracer;
+
   // const tracerObj = tracer.tracer.startSpan('client-requests');
 }
 
 module.exports.client = function(url, requests, args, baseT, abc, cba){
   // if()
-  // this.tracer = new test(abc);
-  this.tracer = baseT;
-  console.log(this.tracer)
-  this.tracerObj = this.tracer
+  this.tracer = new test(abc);
+  // console.log(tracer)
+  this.tracerObj = this.tracer.tracer.startSpan(cba);
 
   let span;
   this.url = url;
