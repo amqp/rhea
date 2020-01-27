@@ -10,10 +10,13 @@ module.exports.client = function(url, requests, args, baseT){
     this.sender =1;
 
     let add_request = (e) => {
-    tags = { 'request': e};
-    span = opentracing.globalTracer().startSpan('request', { childOf: baseT }, tags=tags);
-      id = container.generate_uuid();
-      this.requests_queued.push( [id, e, span] );
+        tags = { 'request': e};
+        span = opentracing.globalTracer().startSpan('request', { childOf: baseT }, tags=tags);
+
+        // console.log("her her")
+        id = container.generate_uuid();
+        this.requests_queued.push( [id, e, span] );
+        // span.finish()
     };
   
     requests.forEach(e => {
@@ -53,6 +56,7 @@ module.exports.client = function(url, requests, args, baseT){
         msg = { reply_to: this.receiver.source.address, correlation_id: id, body: req };
         this.sender.send(msg);
         this.requests_outstanding.push([id, req, span]);
+        span.finish();
       }
     }
   

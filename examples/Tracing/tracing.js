@@ -1,15 +1,18 @@
 const { initTracer: initJaegerTracer } = require("jaeger-client");
 const opentracing = require('opentracing');
 const container = require('rhea');
+//hack
+const {Tags, FORMAT_HTTP_HEADERS } = require('opentracing');
+let temp =0;
 
 const _trace_key = ('x-opt-qpid-tracestate');
+const boolCheck = true;
 
-
-const initTracer = (serviceName) => {
+const init_tracer_base = (serviceName) => {
   const config = {
     serviceName: serviceName,
     sampler: {
-      type: "const",
+      type: "probabilistic",
       param: 1,
       format: "proto",
     },
@@ -29,90 +32,102 @@ const initTracer = (serviceName) => {
   };
   return initJaegerTracer(config, options);
 };
+// module.exports.testTracer = function test(serviceName){
+//   opentracing.initGlobalTracer(initTracer(serviceName));
+//   this.tracer = opentracing.globalTracer();
+//   opentracing.globalTracer.activeSpan = this.tracer;
 
-module.exports.testTracer = function test(serviceName){
-  opentracing.initGlobalTracer(initTracer(serviceName));
+//   // const tracerObj = tracer.tracer.startSpan('client-requests');
+// }
+module.exports.initTracer = function test(serviceName){
+  opentracing.initGlobalTracer(init_tracer_base(serviceName));
   this.tracer = opentracing.globalTracer();
   opentracing.globalTracer.activeSpan = this.tracer;
-  container.on('sender_open', (e) => {
-    e.sender.sendNew = e.sender.send;
-    let newSender = (msg) => {
-      connection = e.connection;
-      let span_tags = {
-        SPAN_KIND: opentracing.Tags.SPAN_KIND_MESSAGING_PRODUCER,
-        MESSAGE_BUS_DESTINATION: e.sender.target.address,
-        PEER_ADDRESS: (`amqp:://${e.sender.connection.options.host}:${e.sender.connection.options.port}/${e.sender.target.address}`),
-        PEER_HOSTNAME: e.sender.connection.options.host, 
-        'inserted_by': 'proton-message-tracing'
-      }
-      span = this.tracer.startSpan("amqp-delivery-send", { childOf: opentracing.globalTracer().active});
-      span.addTags(span_tags);
-      headers = {};
-      this.tracer.inject(span, opentracing.FORMAT_TEXT_MAP, headers);
+  // const tracerObj = tracer.tracer.startSpan('client-requests');
+}
 
-      if(msg.annotations == undefined){
-          msg.annotations = { _trace_key: headers}
-      } else {
-          msg.annotations[_trace_key] = headers
-      }
+module.exports.client = function(url, requests, args, baseT, abc, cba){
+  // if()
+  // this.tracer = new test(abc);
+  this.tracer = baseT;
+  console.log(this.tracer)
+  this.tracerObj = this.tracer
 
-      delivery = e.sender.sendNew(msg);
-      delivery.span = span;
-  
-      span.setTag('delivery-tag', delivery.tag)
-  
-      span.finish();
-      return delivery;
-    };
-    e.sender.send = newSender;
+  let span;
+  this.url = url;
+  this.requests_queued = [];
+  this.requests_outstanding = [];
+  this.receiver;
+  this.sender =1;
 
-    e.sender.on('settled',(e) => {
-      if(e.delivery!=undefined || e.delivery!=null){
-        delivery = e.delivery;
-        //needs fixing
-        if(e.delivery.remote_settled==true){
-          state = 'ACCEPTED';
-        } else {
-          
-        }
-        span = delivery.span;
-        if(span == null || span == undefined) {
+  let add_request = (e) => {
+      tags = { 'request': e};
+      // console.log(opentracing.globalTracer.activeSpan);
+      span = opentracing.globalTracer().startSpan('request', { childOf: this.tracerObj}, tags=tags);
 
-        } else {
-          span.setTag('delivery-terminal-state', state);
-          span.log({'event': 'delivery settled', 'state': state});
-          span.finish();
-        }
-      }
-    });
+      // console.log("her her")
+      id = container.generate_uuid();
+      this.requests_queued.push( [id, e, span] );
+      // span.finish()
+  };
+
+  requests.forEach(e => {
+      add_request(e);
   });
+
+  let pop_request = (id) => {
+      let temp;
+      this.requests_outstanding.forEach(e => {
+      if(e[0]==id){
+        temp = e;
+      }
+    })
+    return this.requests_outstanding.splice(temp,1);;
+  }
+
+  container.on('connection_open',(e) => {
+      this.sender = e.connection.open_sender(args.node);
+      this.receiver = e.connection.open_receiver({source:{address:url,dynamic:true}});
+  });
+
+
+  container.on('receiver_open',(z) => {
+      this.receiver = z.receiver;
+      if(this.receiver.source.address != undefined && this.receiver.source.address != null){
+              while(this.requests_queued.length > 0){
+                  next_request();
+              }
+      }
+  });
+
+  let next_request = () => {
+    if(this.receiver.source.address != undefined || this.receiver.source.address != null ){
+      [id, req, span] = this.requests_queued.pop();
+      opentracing.globalTracer().active = span;     
+      span.log({'event': 'request-sent'});
+      msg = { reply_to: this.receiver.source.address, correlation_id: id, body: req };
+      this.sender.send(msg);
+      this.requests_outstanding.push([id, req, span]);
+      // span.finish();
+    }
+  }
 
   container.on('message', (e) => {
-    let message = e.message;
-    let receiver = e.receiver;
-    let connection = e.connection;
-
-    //hard coded tempoary fix on peer address
-    span_tags = {
-      [opentracing.Tags.SPAN_KIND]: opentracing.Tags.SPAN_KIND_MESSAGING_CONSUMER,
-      [opentracing.Tags.MESSAGE_BUS_DESTINATION]: receiver.source.address,
-      [opentracing.Tags.PEER_ADDRESS]: (`amqp:://${connection.options.host}:${connection.options.port}/examples`),
-      [opentracing.Tags.PEER_HOSTNAME]: connection.options.host,
-      'inserted_by': 'proton-message-tracing'
+    id=e.message.correlation_id;
+    reply = e.message.body;
+    popVal = pop_request(id);
+    if(popVal[0] != undefined){
+      req = popVal[0][0];
+      tester = popVal[0][1];
+      span = popVal[0][2];
+    } 
+    span.log({'event': 'reply-received', 'result': reply});
+    span.finish();
+    console.log(`${tester} => ${reply}`);
+    if(this.requests_queued.length > 0){
+       next_request();
+    } else if(this.requests_outstanding.length == 0) {
+      e.connection.close();
     }
-
-    if(message.message_annotations == undefined){
-
-      ctx = this.tracer.startSpan('amqp-deliver-receive', tags = span_tags);
-      ctx.finish();
-    } else {
-      headers = message.message_annotations[_trace_key];
-      let bufferHeaders = new Buffer(headers['uber-trace-id']);
-      let traceId = { 'uber-trace-id': bufferHeaders.toString()};
-
-      span_ctx = this.tracer.extract(opentracing.FORMAT_TEXT_MAP, traceId);
-      let receiveSpan = this.tracer.startSpan('amqp-delivery-receive', { childOf: span_ctx}, tags = span_tags);
-      receiveSpan.finish();
-    }
-  });
-}
+  })
+};

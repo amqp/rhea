@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 let container = require('rhea');
-const initTracer = require('./tracing').testTracer;
-const tracer = new initTracer('client');
-const abc = require('./client_common').client
-
-
+const tracer = require('./tracing').initTracer('client');
+// const client_common = require('/tracing').client;
 
 var args = require('../options.js').options({
     'n': { alias: 'node', default: 'examples', describe: 'name of node (e.g. queue) to which messages are sent'},
@@ -33,13 +30,16 @@ var requests = [
     'All mimsy were the borogroves,',
     'And the mome raths outgrabe.'
 ];
-const tracerObj = tracer.tracer.startSpan('client-requests');
+
+const client_common = require('./tracing').client
+console.log(tracer)
+const clientObj = client_common(`${args.host}:${args.port}/${args.node}`, requests, args, tracer, "", "client");
+
+container.connect({port: args.port, host: args.hos, tracing: true});
+// container.connect({port: args.port, host: args.hos, tracing: false});
 
 
-container.connect({port: args.port, host: args.host});
-const clientObj = new abc(`${args.host}:${args.port}/${args.node}`, requests, args, tracerObj);
-
-setTimeout(()=> { 
-    tracerObj.finish();
+// container.on('connection_close',()=>{
+//     clientObj.tracerObj.finish();
     console.log("all done")
-}, 15000);
+// });
