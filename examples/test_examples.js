@@ -47,11 +47,21 @@ function Program(name, args) {
     this.stopped = false;
     this.restart = false;
     this.verifier = undefined;
+    this.triggers = [];
 };
 
 Program.prototype.produces = function(text) {
     this.expected_output = text;
     return this;
+};
+
+Program.prototype.trigger_when_produces = function(program, text) {
+    var p = this;
+    var t = new Triggered(program, function () {
+        return p.actual_output.substring(0, text.length) === text;
+    });
+    this.triggers.push(t);
+    return t;
 };
 
 Program.prototype.run = function(done) {
@@ -60,6 +70,9 @@ Program.prototype.run = function(done) {
     var p = child_process.fork(path.resolve(__dirname, this.name), this.args, {silent:true});
     p.stdout.on('data', function (data) {
         prog.actual_output += data;
+        if (prog.triggers.length) {
+            prog.triggers.forEach(function (t) { t.check(); })
+        }
     });
     p.stderr.on('data', function (data) {
         console.log('stderr[' + name + ']: ' + data);
@@ -92,6 +105,35 @@ Program.prototype.kill = function() {
     if (this.process) {
         this.process.kill();
     }
+};
+
+function Triggered(program, condition) {
+    this.program = program;
+    this.condition = condition;
+    this.triggered = false;
+}
+
+Triggered.prototype.produces = function(text) {
+    return this.program.produces();
+};
+
+Triggered.prototype.run = function(done) {
+    this.done = done;
+}
+
+Triggered.prototype.check = function() {
+    if (!this.triggered && this.condition()) {
+        this.triggered = true;
+        this.program.run(this.done);
+    }
+}
+
+Triggered.prototype.stop = function() {
+    this.program.stop();
+}
+
+Triggered.prototype.kill = function() {
+    this.program.kill();
 };
 
 function example(example, args) {
@@ -187,9 +229,10 @@ describe('brokered examples', function() {
     it('pub-sub', function(done) {
         var messages = ['one', 'two', 'three', 'close'];
         var pub_output = lines(messages.map(function (m) { return 'sent ' + m; }));
-        var sub_output = lines(messages.slice(0,3));
-        verify(done, [example('durable_subscription/subscriber.js', ['-t', 'topic://PRICE.STOCK.NYSE.RHT']).produces(sub_output),
-                      example('durable_subscription/publisher.js', messages).produces(pub_output)]);
+        var sub_output = lines(['subscribed'].concat(messages.slice(0,3)));
+        var sub = example('durable_subscription/subscriber.js', ['-t', 'topic://PRICE.STOCK.NYSE.RHT']).produces(sub_output);
+        var pub = example('durable_subscription/publisher.js', messages).produces(pub_output);
+        verify(done, [sub, sub.trigger_when_produces(pub, 'subscribed')]);
     });
 
     it('queue browser', function(done) {
