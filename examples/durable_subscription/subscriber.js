@@ -24,6 +24,9 @@ var args = require('../options.js').options({
 }).help('help').argv;
 
 var connection = require('rhea').connect({ port:args.port, host: args.host, container_id:args.client });
+connection.on('receiver_open', function (context) {
+    console.log('subscribed');
+});
 connection.on('message', function (context) {
     if (context.message.body === 'detach') {
         // detaching leaves the subscription active, so messages sent
