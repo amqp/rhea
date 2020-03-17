@@ -244,6 +244,30 @@ describe('reconnect', function() {
             socket.end();
         });
     });
+    it('can set reconnect after connect', function(done: Function) {
+        this.slow(1200);
+        var container: rhea.Container = rhea.create_container();
+        var count: number = 0;
+        var disconnects: number = 0;
+        var c: rhea.Connection = container.connect(
+            add(listener.address(), 'reconnect', false)
+        );
+        c.on("disconnected", function(context) {
+            disconnects++;
+        });
+        c.on("connection_open", function(context) {
+            c.set_reconnect(true);
+            count++;
+            assert.equal(context.connection.remote.open.hostname, "test" + count);
+            if (count === 1) {
+                socket.end();
+            } else {
+                assert.equal(disconnects, 1);
+                context.connection.close();
+                done();
+            }
+        });
+    });
 });
 
 describe('non-fatal error', function() {
