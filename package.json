@@ -21,7 +21,7 @@
         "@types/mocha": "^5.2.0",
         "@types/node": "^8.0.37",
         "browserify": "",
-        "eslint": "^6.8.0",
+        "eslint": "^4.19.1",
         "istanbul": "1.1.0-alpha.1",
         "minimist": "",
         "mocha": "^7.1.2",
