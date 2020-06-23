@@ -120,7 +120,7 @@ export interface ConnectionOptions extends EndpointOptions {
    * - if it is a numeric value, it is interpreted as the delay between
    * reconnect attempts (in milliseconds)
    */
-  reconnect?: boolean;
+  reconnect?: boolean | number;
   /**
    * @property {number} [reconnect_limit] maximum number of reconnect attempts.
    * Applicable only when reconnect is true.
