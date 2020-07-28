@@ -588,6 +588,54 @@ describe('preset sender options', function() {
     });
 });
 
+describe('preset container sender options', function() {
+    var container: rhea.Container, listener: Server;
+    var client: rhea.Container;
+
+    beforeEach(function(done: Function) {
+        container = rhea.create_container();
+        client = rhea.create_container();
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    function connection_options_test(default_options: any, verification: any, open_options?: any) {
+        return function(done: Function) {
+            container.on('sender_open', function(context) {
+                context.sender.close();
+            });
+            var c = client.connect(listener.address() as any);
+            container.options.sender_options = default_options;
+            c.on('receiver_open', function(context) {
+                verification(context.receiver);
+            });
+            c.on('receiver_close', function(context) { context.connection.close(); });
+            c.on('connection_close', function(context) { done();});
+            c.open_receiver(open_options);
+        };
+    }
+
+    it('properties', connection_options_test({properties:{'foo':'bar'}}, function(receiver: rhea.Receiver) {
+        assert.equal(receiver.properties.foo, 'bar');
+    }));
+
+    it('offered capabilities', connection_options_test({offered_capabilities:['xyz']}, function(receiver: rhea.Receiver) {
+        assert.equal(receiver.offered_capabilities.length, 1);
+        assert.equal(receiver.offered_capabilities[0], 'xyz');
+    }));
+
+    it('desired capabilities', connection_options_test({desired_capabilities:['penguin']}, function(receiver: rhea.Receiver) {
+        assert.equal(receiver.desired_capabilities.length, 1);
+        assert.equal(receiver.desired_capabilities[0], 'penguin');
+    }));
+});
+
 describe('preset receiver options', function() {
     var container: rhea.Container, listener: Server;
 
@@ -630,6 +678,63 @@ describe('preset receiver options', function() {
         assert.equal(sender.properties.bing, 'bong');
         assert.equal(sender.properties.black, 'sheep');
     }, {properties:{'black':'sheep'}}));
+
+    it('offered capabilities', connection_options_test({offered_capabilities:['xyz']}, function(sender: rhea.Sender) {
+        assert.equal(sender.offered_capabilities.length, 1);
+        assert.equal(sender.offered_capabilities[0], 'xyz');
+    }));
+
+    it('desired capabilities', connection_options_test({desired_capabilities:['penguin']}, function(sender: rhea.Sender) {
+        assert.equal(sender.desired_capabilities.length, 1);
+        assert.equal(sender.desired_capabilities[0], 'penguin');
+    }));
+
+    it('max-message-size', connection_options_test({max_message_size:2048}, function(sender: rhea.Sender) {
+        assert.equal(sender.max_message_size, 2048);
+    }));
+
+});
+
+describe('preset container receiver options', function() {
+    var container: rhea.Container, listener: Server;
+    var client: rhea.Container;
+
+    beforeEach(function(done: Function) {
+        container = rhea.create_container();
+        client = rhea.create_container();
+        listener = container.listen({port:0});
+        listener.on('listening', function() {
+            done();
+        });
+    });
+
+    afterEach(function() {
+        listener.close();
+    });
+
+    function connection_options_test(default_options: any, verification: any, open_options?: any) {
+        return function(done: Function) {
+            container.on('receiver_open', function(context) {
+                context.receiver.close();
+            });
+            var c: rhea.Connection = client.connect(listener.address() as any);
+            container.options.receiver_options = default_options;
+            c.on('sender_open', function(context: rhea.EventContext) {
+                verification(context.sender);
+            });
+            c.on('sender_close', function(context) {
+                context.connection.close();
+            });
+            c.on('connection_close', function(context) {
+                done();
+            });
+            c.open_sender(open_options);
+        };
+    }
+
+    it('properties', connection_options_test({properties:{'foo':'bar'}}, function(sender: rhea.Sender) {
+        assert.equal(sender.properties.foo, 'bar');
+    }));
 
     it('offered capabilities', connection_options_test({offered_capabilities:['xyz']}, function(sender: rhea.Sender) {
         assert.equal(sender.offered_capabilities.length, 1);
