@@ -518,6 +518,20 @@ export interface MessageHeader {
 }
 
 /**
+ * Describes the footer section. It is used for details about the message or delivery
+ * which can only be calculated or evaluated once the whole bare message has been
+ * constructed or seen (for example message hashes, HMACs, signatures and encryption details).
+ * 
+ * @interface MessageFooter
+ */
+export interface MessageFooter {
+  /**
+   * @property {any} Any Supported footer section
+   */
+  [x: string]: any;
+}
+
+/**
  * Describes the AMQP message that is sent or received on the wire.
  * @interface Message
  * @extends MessageProperties, MessageHeader
@@ -542,6 +556,10 @@ export interface Message extends MessageProperties, MessageHeader {
    * non-standard properties at the head of the message.
    */
   delivery_annotations?: DeliveryAnnotations;
+  /**
+   * @property {MessageFooter} [footer] A dictionary used for the footer section of the message.
+   */
+  footer?: MessageFooter;
 }
 
 /**
