@@ -17,24 +17,25 @@
         "debug": "0.8.0 - 3.5.0"
     },
     "devDependencies": {
-        "@types/node": "^8.0.37",
         "@types/debug": "^0.0.30",
         "@types/mocha": "^5.2.0",
+        "@types/node": "^8.0.37",
         "browserify": "",
         "eslint": "^4.19.1",
-        "istanbul": "1.1.0-alpha.1",
         "minimist": "",
-        "mocha": "^3.0.0",
-        "uglify-js": "",
+        "mocha": "^8.2.1",
+        "nyc": "^15.1.0",
         "require-self": "^0.2.1",
-        "ws": "^6.0.0",
+        "ts-node": "^7.0.0",
         "typescript": "^3.0.1",
-        "ts-node": "^7.0.0"
+        "uglify-js": "",
+        "ws": "^6.0.0",
+        "wtfnode": "^0.8.4"
     },
     "scripts": {
         "lint": "eslint lib/*.js",
-        "test": "npm run lint && npm run tsc && mocha -r ts-node/register ./test/*.ts",
-        "coverage": "istanbul cover _mocha -- test/*.ts --compilers ts-node/register",
+        "test": "mocha --require ts-node/register ./test/*.ts",
+        "coverage": "nyc --reporter=json --reporter=lcov --reporter=text-summary npm run test",
         "browserify": "browserify -r .:rhea -o dist/rhea.js",
         "run-examples": "require-self && mocha examples/test_examples.js",
         "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",

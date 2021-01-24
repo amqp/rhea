@@ -78,7 +78,6 @@ describe('reconnect', function() {
         c.on('disconnected', function (context: rhea.EventContext) {
             disconnects++;
             if (!context.reconnecting) {
-                assert.equal(context.reconnecting, false);
                 assert.equal(disconnects, 4/*first disconnection + 3 failed reconnect attempts*/);
                 done();
             }
@@ -215,6 +214,7 @@ describe('reconnect', function() {
         setTimeout(() => {
             assert.equal(disconnects, 1);
             assert.equal(sender_opens, 1);
+            c.close();
             done();
         }, 1000);
     });
@@ -304,6 +304,7 @@ describe('non-fatal error', function() {
         });
     });
     it('reconnects successfully', function(done: Function) {
+        this.slow(1000);
         var container: rhea.Container = rhea.create_container();
         var count: number = 0;
         var disconnects: number = 0;
@@ -314,12 +315,15 @@ describe('non-fatal error', function() {
         c.on('connection_open', function (context) {
             count++;
             assert.equal(context.connection.remote.open.hostname, 'test' + count);
-            if (count === 1) {
-                socket.end();
-            } else {
+            if (count === 2) {
                 assert.equal(disconnects, 1);
                 context.connection.close();
-                done();
+                //wait before exiting to ensure no reconnect attempt is made
+                setTimeout(() => {
+                    assert.strictEqual(count, 2, 'closed connection shouldnt have reconnected');
+                    assert.strictEqual(disconnects, 1);
+                    done();
+                }, 500);
             }
         });
     });
