@@ -215,6 +215,7 @@ describe('reconnect', function() {
         setTimeout(() => {
             assert.equal(disconnects, 1);
             assert.equal(sender_opens, 1);
+            c.close();
             done();
         }, 1000);
     });
