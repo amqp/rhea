@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/amqp/rhea.svg?branch=master)](https://travis-ci.org/amqp/rhea)
+![Node.js CI](https://github.com/amqp/rhea/workflows/Node.js%20CI/badge.svg)
 
 # rhea
 
