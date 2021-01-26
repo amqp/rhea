@@ -44,6 +44,8 @@
     },
     "keywords": [
         "amqp",
+        "amqp10",
+        "amqp 1.0",
         "messaging"
     ],
     "main": "./lib/container.js",
