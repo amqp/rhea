@@ -486,7 +486,7 @@ describe('connect string port (\'amqps\')', function () {
         listener.on('listening', function () {
             filename = 'test-connect.json';
             process.env.MESSAGING_CONNECT_FILE = filename;
-            
+
             fs.writeFile(filename, JSON.stringify({port:'amqps'}), 'utf8', function () {
                 done();
             });
@@ -524,7 +524,7 @@ describe('connect string port (\'amqp\')', function () {
         listener.on('listening', function () {
             filename = 'test-connect.json';
             process.env.MESSAGING_CONNECT_FILE = filename;
-            
+
             fs.writeFile(filename, JSON.stringify({port:'amqp'}), 'utf8', function () {
                 done();
             });

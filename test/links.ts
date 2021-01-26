@@ -916,7 +916,7 @@ describe('miscellaneous', function() {
             }
         });
         server.on('sendable', function (context: rhea.EventContext) {
-            while (context.sender!.sendable && queue.length) {
+            while (context.sender!.sendable() && queue.length) {
                 context.sender!.send({body:queue.shift()});
             }
         });
@@ -965,7 +965,7 @@ describe('miscellaneous', function() {
             }
         });
         server.on('sendable', function (context: rhea.EventContext) {
-            while (context.sender!.sendable && queue.length) {
+            while (context.sender!.sendable() && queue.length) {
                 context.sender!.send({body:queue.shift()});
             }
         });
