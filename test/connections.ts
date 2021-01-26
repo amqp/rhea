@@ -163,6 +163,7 @@ describe('connection error handling', function () {
         var error_handler_called: boolean;
         var close_handler_called: boolean;
         container.on('connection_open', function (context: rhea.EventContext) {
+            assert.strictEqual(context.connection.error, undefined);
             context.connection.close({ condition: 'amqp:connection:forced', description: 'testing error on close' });
         });
         container.on('connection_close', function (context: rhea.EventContext) {
