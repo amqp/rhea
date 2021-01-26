@@ -14,20 +14,20 @@
         "tls": false
     },
     "dependencies": {
-        "debug": "0.8.0 - 3.5.0"
+        "debug": "^4.3.3"
     },
     "devDependencies": {
-        "@types/debug": "^0.0.30",
-        "@types/mocha": "^5.2.0",
-        "@types/node": "^8.0.37",
+        "@types/debug": "^4.1.7",
+        "@types/mocha": "^9.0.0",
+        "@types/node": "10 -",
         "browserify": "",
-        "eslint": "^4.19.1",
+        "eslint": "^7.32.0",
         "minimist": "",
-        "mocha": "^8.2.1",
+        "mocha": "^9.1.4",
         "nyc": "^15.1.0",
         "require-self": "^0.2.1",
-        "ts-node": "^7.0.0",
-        "typescript": "^3.0.1",
+        "ts-node": "^10.4.0",
+        "typescript": "^4.5.5",
         "uglify-js": "",
         "ws": "^6.0.0",
         "wtfnode": "^0.8.4"
