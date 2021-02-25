@@ -243,17 +243,29 @@ describe('message content', function() {
         assert.equal(message.correlation_id, 'correlate-me');
         assert.equal(message.content_type, 'text');
         assert.equal(message.content_encoding, 'ascii');
-        assert.equal(message.absolute_expiry_time, 123456789);
-        assert.equal(message.creation_time, 987654321);
+        assert.equal(asNumber(message.absolute_expiry_time), 123456789);
+        assert.equal(asNumber(message.creation_time), 987654321);
         assert.equal(message.group_id, 'my-group');
         assert.equal(message.group_sequence, 77);
         assert.equal(message.reply_to_group_id, 'still-my-group');
         assert.equal(message.durable, true);
         assert.equal(message.priority, 3);
-        assert.equal(message.ttl, 123456789);
+        assert.equal(asNumber(message.ttl), 123456789);
         assert.equal(message.first_acquirer, false);
         assert.equal(message.delivery_count, 8);
     }));
+
+    function asNumber(timestamp: number | Date | undefined): number {
+        if (timestamp == null) {
+            return 0;
+        } else if (typeof timestamp === "number") {
+            return timestamp;
+        } else {
+            return timestamp.getTime();
+        }
+    }
+
+
     it('set header and properties directly', transfer_test({
         message_id:'my-id',
         user_id:'my-user',
@@ -282,14 +294,14 @@ describe('message content', function() {
         assert.equal(message.correlation_id, 'correlate-me');
         assert.equal(message.content_type, 'text');
         assert.equal(message.content_encoding, 'ascii');
-        assert.equal(message.absolute_expiry_time, 123456789);
-        assert.equal(message.creation_time, 987654321);
+        assert.equal(asNumber(message.absolute_expiry_time), 123456789);
+        assert.equal(asNumber(message.creation_time), 987654321);
         assert.equal(message.group_id, 'my-group');
         assert.equal(message.group_sequence, 77);
         assert.equal(message.reply_to_group_id, 'still-my-group');
         assert.equal(message.durable, true);
         assert.equal(message.priority, 3);
-        assert.equal(message.ttl, 123456789);
+        assert.equal(asNumber(message.ttl), 123456789);
         assert.equal(message.first_acquirer, false);
         assert.equal(message.delivery_count, 8);
     }));
