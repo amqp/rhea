@@ -250,7 +250,7 @@ describe('message content', function() {
         assert.equal(message.reply_to_group_id, 'still-my-group');
         assert.equal(message.durable, true);
         assert.equal(message.priority, 3);
-        assert.equal(asNumber(message.ttl), 123456789);
+        assert.equal(message.ttl, 123456789);
         assert.equal(message.first_acquirer, false);
         assert.equal(message.delivery_count, 8);
     }));
@@ -301,7 +301,7 @@ describe('message content', function() {
         assert.equal(message.reply_to_group_id, 'still-my-group');
         assert.equal(message.durable, true);
         assert.equal(message.priority, 3);
-        assert.equal(asNumber(message.ttl), 123456789);
+        assert.equal(message.ttl, 123456789);
         assert.equal(message.first_acquirer, false);
         assert.equal(message.delivery_count, 8);
     }));
