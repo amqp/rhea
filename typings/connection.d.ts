@@ -505,7 +505,7 @@ export interface MessageHeader {
   /**
    * @property {number} [ttl] time to live in ms.
    */
-  ttl?: number | Date;
+  ttl?: number;
   /**
    * @property {boolean} [durable] Specifies durability requirements.
    */
