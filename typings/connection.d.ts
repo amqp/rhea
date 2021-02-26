@@ -459,11 +459,11 @@ export interface MessageProperties {
   /**
    * @property {number} [absolute_expiry_time] The time when this message is considered expired.
    */
-  absolute_expiry_time?: number | Date;
+  absolute_expiry_time?: Date;
   /**
    * @property {number} [creation_time] The time this message was created.
    */
-  creation_time?: number | Date;
+  creation_time?: Date;
   /**
    * @property {string} [group_id] The group this message belongs to.
    */
