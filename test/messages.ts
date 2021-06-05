@@ -34,13 +34,13 @@ describe('message content', function() {
 
     });
 
-    function transfer_test(message: any, verification: Function) {
+    function transfer_test(message: Partial<rhea.Message>, verification: Function) {
         return function(done: Function) {
             container.on('message', function(context) {
                 verification(context.message);
                 done();
             });
-            sender.send(message);
+            sender.send(message as any);
         };
     }
 
@@ -224,8 +224,8 @@ describe('message content', function() {
         correlation_id:'correlate-me',
         content_type:'text',
         content_encoding:'ascii',
-        absolute_expiry_time:123456789,
-        creation_time:987654321,
+        absolute_expiry_time: new Date(123456789),
+        creation_time: new Date(987654321),
         group_id:'my-group',
         group_sequence:77,
         reply_to_group_id:'still-my-group',
@@ -275,8 +275,8 @@ describe('message content', function() {
         correlation_id:'correlate-me',
         content_type:'text',
         content_encoding:'ascii',
-        absolute_expiry_time:123456789,
-        creation_time:987654321,
+        absolute_expiry_time: new Date(123456789),
+        creation_time: new Date(987654321),
         group_id:'my-group',
         group_sequence:77,
         reply_to_group_id:'still-my-group',
