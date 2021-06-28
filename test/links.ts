@@ -946,4 +946,54 @@ describe('miscellaneous', function() {
         });
     });
 
+    it('drain_credit()', function(done: Function) {
+        var queue = [] as any;
+        var sender: any;
+        server.on('sender_open', function (context: rhea.EventContext) {
+            sender = context.sender!;
+        });
+        server.on('sender_draining', function (context: rhea.EventContext) {
+            context.sender!.set_drained(queue.length === 0);
+        });
+        server.on('receiver_open', function (context: rhea.EventContext) {
+            context.receiver!.add_credit(100);
+        });
+        server.on('message', function (context: rhea.EventContext) {
+            queue.push(context.message!.body);
+            while (sender.sendable && queue.length) {
+                sender.send({body:queue.shift()});
+            }
+        });
+        server.on('sendable', function (context: rhea.EventContext) {
+            while (context.sender!.sendable && queue.length) {
+                context.sender!.send({body:queue.shift()});
+            }
+        });
+        var conn = client.connect(listener.address() as any);
+        var received: string;
+        var r = conn.open_receiver({credit_window:0}) as any;
+        var s = conn.open_sender() as any;
+        r.on('message', function (context: rhea.EventContext) {
+            received = context.message!.body;
+            r.close();
+        });
+        r.once('receiver_drained', function () {
+            s.send({body:'post-drain'});
+        });
+
+        r.add_credit(1);
+        r.drain_credit();
+
+        s.on('accepted', function () {
+            r.add_credit(1);
+            r.drain_credit();
+        });
+        client.on('receiver_close', function (context: rhea.EventContext) {
+            context.connection.close();
+        });
+        client.on('connection_close', function (context: rhea.EventContext) {
+            assert.deepEqual(received, 'post-drain');
+            done();
+        });
+    });
 });
