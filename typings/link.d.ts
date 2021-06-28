@@ -82,6 +82,7 @@ export declare interface Sender extends link {
 export declare interface Receiver extends link {
   drain: boolean;
   add_credit(credit: number): void;
+  drain_credit(): void;
   set_credit_window(credit_window: number): void;
 }
 
