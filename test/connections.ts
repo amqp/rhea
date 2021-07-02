@@ -163,6 +163,7 @@ describe('connection error handling', function () {
         var error_handler_called: boolean;
         var close_handler_called: boolean;
         container.on('connection_open', function (context: rhea.EventContext) {
+            assert.strictEqual(context.connection.error, undefined);
             context.connection.close({ condition: 'amqp:connection:forced', description: 'testing error on close' });
         });
         container.on('connection_close', function (context: rhea.EventContext) {
@@ -486,7 +487,7 @@ describe('connect string port (\'amqps\')', function () {
         listener.on('listening', function () {
             filename = 'test-connect.json';
             process.env.MESSAGING_CONNECT_FILE = filename;
-            
+
             fs.writeFile(filename, JSON.stringify({port:'amqps'}), 'utf8', function () {
                 done();
             });
@@ -524,7 +525,7 @@ describe('connect string port (\'amqp\')', function () {
         listener.on('listening', function () {
             filename = 'test-connect.json';
             process.env.MESSAGING_CONNECT_FILE = filename;
-            
+
             fs.writeFile(filename, JSON.stringify({port:'amqp'}), 'utf8', function () {
                 done();
             });
@@ -548,6 +549,129 @@ describe('connect string port (\'amqp\')', function () {
         conn.on('connection_close', function () {
             assert(opened);
             done();
+        });
+    });
+});
+
+describe('idle', function () {
+    this.slow(1500);
+    var listener: any;
+
+    afterEach(function () {
+        if (listener) listener.close();
+    });
+
+    // There are setups where server detects idle due to suspend while
+    // networking and all is well.
+    it('server detects idle client', function (done: Function) {
+        var server: rhea.Container = rhea.create_container();
+        var server_opens = 0;
+        var server_closes = 0;
+        var server_disconnects = 0;
+        server.on('connection_open', function (context: rhea.EventContext) {
+            server_opens++;
+            assert.strictEqual(server_opens, 1);
+        });
+        server.on('connection_error', function (context: rhea.EventContext) {
+            assert.fail('server must not receive error');
+        });
+        server.on('connection_close', function (context: rhea.EventContext) {
+            server_closes++;
+            assert.strictEqual(server_closes, 1);
+        });
+        server.on('disconnected', function (context: rhea.EventContext) {
+            server_disconnects++;
+            assert.strictEqual(context.reconnecting, undefined);
+            assert.strictEqual(server_disconnects, 1);
+            // Wait to ensure no reconnects occur
+            setTimeout(() => {
+                done();
+            }, 1100);
+        });
+        listener = server.listen({ port: 0, idle_time_out: 500 });
+
+        var client: rhea.Container = rhea.create_container();
+        var conn = client.connect(listener.address());
+        var client_opens = 0;
+        var client_errors = 0;
+        conn.on('connection_open', function (context: rhea.EventContext) {
+            client_opens++;
+            const connection = context.connection;
+            assert.strictEqual(client_opens, 1);
+            assert.strictEqual(connection.remote.open.idle_time_out, 500);
+            // Disable idle timer
+            connection.remote.open.idle_time_out = 0;
+            if (connection.heartbeat_out) clearTimeout(connection.heartbeat_out);
+        });
+        conn.on('connection_error', function (context: rhea.EventContext) {
+            client_errors++;
+            assert.strictEqual(client_errors, 1);
+            var error = context.connection.error;
+            assert.strictEqual((error as any).condition, 'amqp:resource-limit-exceeded');
+            assert.strictEqual((error as any).description, 'max idle time exceeded');
+        });
+        conn.on('disconnected', function (context: rhea.EventContext) {
+            assert.fail('disconnected shouldnt have been called');
+        });
+    });
+
+    it('client detects server idle', function (done: Function) {
+        var server: rhea.Container = rhea.create_container();
+        var server_opens = 0;
+        var server_errors = 0;
+        server.on('connection_open', function (context: rhea.EventContext) {
+            server_opens++;
+            const connection = context.connection;
+            assert.strictEqual(connection.remote.open.idle_time_out, 500);
+            // Disable idle timer
+            connection.remote.open.idle_time_out = 0;
+            if (connection.heartbeat_out) clearTimeout(connection.heartbeat_out);
+        });
+        server.on('connection_error', function (context: rhea.EventContext) {
+            server_errors++;
+            assert.strictEqual(server_errors, 1);
+            var error = context.connection.error;
+            assert.strictEqual((error as any).condition, 'amqp:resource-limit-exceeded');
+            assert.strictEqual((error as any).description, 'max idle time exceeded');
+        });
+        server.on('disconnected', function (context: rhea.EventContext) {
+            assert.fail('disconnected shouldnt have been called');
+        });
+        listener = server.listen({ port: 0 });
+
+        var client: rhea.Container = rhea.create_container();
+        var conn = client.connect({
+            port: listener.address().port,
+            idle_time_out: 500
+        });
+        var client_opens = 0;
+        var client_closes = 0;
+        var client_disconnects = 0;
+        conn.on('connection_open', function (context: rhea.EventContext) {
+            client_opens++;
+            assert.strictEqual(client_opens, server_opens);
+            if (client_opens === 2) {
+                conn.close();
+            }
+        });
+        conn.on('connection_error', function (context: rhea.EventContext) {
+            assert.fail('client must not receive error');
+        });
+        conn.on('connection_close', function (context: rhea.EventContext) {
+            client_closes++;
+            assert.strictEqual(client_closes, 1);
+            assert.strictEqual(server_opens, 2);
+            assert.strictEqual(client_opens, 2);
+            // Wait to ensure no reconnects occur
+            setTimeout(() => {
+                done();
+            }, 1100);
+        });
+        conn.on('disconnected', function (context: rhea.EventContext) {
+            client_disconnects++;
+            assert.strictEqual(client_disconnects, 1);
+            assert.strictEqual(server_opens, 1);
+            assert.strictEqual(context.reconnecting, true);
         });
     });
 });

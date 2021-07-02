@@ -1,14 +1,12 @@
 /// <reference types="node" />
 
-import { EndpointState } from "./endpoint";
 import { Session, Delivery } from "./session";
-import { Transport } from "./transport";
 import { Sender, Receiver, link } from "./link";
-import { Socket } from "net";
+import { IpcNetConnectOpts, ListenOptions, Socket, TcpNetConnectOpts } from "net";
 import { frames } from "./frames";
 import { EventEmitter } from "events";
 import { Container } from "./container";
-import { PeerCertificate } from "tls";
+import { ConnectionOptions as TlsConnectionOptions, PeerCertificate, TlsOptions } from "tls";
 import { ConnectionError } from "./errors";
 
 /**
@@ -61,47 +59,14 @@ export interface ConnectionDetails {
   transport?: "tls" | "ssl" | "tcp";
 }
 
-/**
- * Defines the options that can be provided while creating a connection.
- * @interface ConnectionOptions
- * @extends EndpointOptions
- */
-export interface ConnectionOptions extends EndpointOptions {
-  /**
-   * @property {string} [username] - The username.
-   */
-  username?: string;
-  /**
-   * @property {string} [host] - The host to connect to.
-   */
-  host?: string;
-  /**
-   * @property {string} [hostname] - The hostname to connect to.
-   */
-  hostname?: string;
-  /**
-   * @property {string} [servername] - The name of the server.
-   */
-  servername?: string;
-  /**
-   * @property {string} [sasl_init_hostname] - The hostname for initialising sasl.
-   */
-  sasl_init_hostname?: string;
-  /**
-   * @property {number} [port] - The port number (5671 or 5672) at which to connect to.
-   */
-  port?: number;
-  /**
-   * @property {string} [transport] - The transport option. This is ignored if connection_details is set.
-   */
-  transport?: "tls" | "ssl" | "tcp";
+interface CommonConnectionOptions extends EndpointOptions {
   /**
    * @property {string} [container_id] The id of the source container. If not provided then
    * this will be the id (a guid string) of the assocaited container object. When this property is
    * provided, it will be used in the `open` frame to let the peer know about the container id.
    * However, the associated container object would still be the same container object from
    * which the connection is being created.
-   * 
+   *
    * The `"container_id"` is how the peer will identify the 'container' the connection is being
    * established from. The container in AMQP terminology is roughly analogous to a process.
    * Using a different container id on connections from the same process would cause the peer to
@@ -109,10 +74,81 @@ export interface ConnectionOptions extends EndpointOptions {
    */
   container_id?: string;
   /**
+   * @property {string} [hostname] - The hostname presented in `open` frame, defaults to host.
+   */
+  hostname?: string;
+  /**
+   * @property {number} [max_frame_size] The largest frame size that the sending peer
+   * is able to accept on this connection. Default: 4294967295
+   */
+  max_frame_size?: number;
+  /**
+   * @property {number} [channel_max] The highest channel number that can be used on the connection.
+   */
+  channel_max?: number;
+  /**
+   * @property {number} [idle_time_out] The maximum period in milliseconds between activity
+   * (frames) on the connection that is desired from the peer. The open frame carries the
+   * idle-time-out field for this purpose. To avoid spurious timeouts, the value in idle_time_out
+   * is set to be half of the peer’s actual timeout threshold.
+   */
+  idle_time_out?: number;
+  /**
+   * @property {string[]} [outgoing_locales] A list of the locales that the peer supports
+   * for sending informational text.
+   */
+  outgoing_locales?: string[];
+  /**
+   * @property {string[]} [incoming_locales] A list of locales that the sending peer
+   * permits for incoming informational text. This list is ordered in decreasing level of preference.
+   */
+  incoming_locales?: string[];
+  /**
    * @property {string} [id] A unqiue name for the connection. If not provided then this will be
    * a string in the following format: "connection-<counter>".
    */
   id?: string;
+  /**
+   * @property {string} [transport] - The transport option. This is ignored if connection_details is set.
+   */
+  transport?: "tls" | "ssl" | "tcp";
+  /**
+   * @property {SenderOptions} [sender_options] Default options that can be provided while creating any
+   * sender link on this connection. These options will be overridden by the specific sender options
+   * that will be provided while creating a sender.
+   */
+  sender_options?: SenderOptions;
+  /**
+   * @property {ReceiverOptions} [receiver_options] Default options that can be provided while creating any
+   * receiver link on this connection. These options will be overridden by the specific receiver options
+   * that will be provided while creating a sender.
+   */
+  receiver_options?: ReceiverOptions;
+}
+
+/**
+ * Defines the common options that can be provided for client and server connections.
+ * @interface CommonClientConnectionOptions
+ * @extends CommonConnectionOptions
+ */
+export interface CommonClientConnectionOptions extends CommonConnectionOptions {
+  /**
+   * @property {Function} [connection_details] A function which if specified will be invoked to get the options
+   * to use (e.g. this can be used to alternate between a set of different host/port combinations)
+   */
+  connection_details?: (conn_established_counter: number) => ConnectionDetails;
+  /**
+   * @property {string} [username] - The username.
+   */
+  username?: string;
+  /**
+   * @property {string} [password] - The secret key to be used while establishing the connection.
+   */
+  password?: string;
+  /**
+   * @property {string} [sasl_init_hostname] - The hostname for initialising sasl.
+   */
+  sasl_init_hostname?: string;
   /**
    * @property {boolean} [reconnect] if true (default), the library will automatically attempt to
    * reconnect if disconnected.
@@ -138,79 +174,26 @@ export interface ConnectionOptions extends EndpointOptions {
    */
   max_reconnect_delay?: number;
   /**
-   * @property {string} [password] - The secret key to be used while establishing the connection.
-   */
-  password?: string;
-  /**
-   * @property {number} [max_frame_size] The largest frame size that the sending peer
-   * is able to accept on this connection. Default: 4294967295
-   */
-  max_frame_size?: number;
-  /**
-   * @property {number} [idle_time_out] The maximum period in milliseconds between activity
-   * (frames) on the connection that is desired from the peer. The open frame carries the
-   * idle-time-out field for this purpose. To avoid spurious timeouts, the value in idle_time_out
-   * is set to be half of the peer’s actual timeout threshold.
-   */
-  idle_time_out?: number;
-  /**
-   * @property {number} [channel_max] The highest channel number that can be used on the connection.
-   */
-  channel_max?: number;
-  /**
-   * @property {string[]} [outgoing_locales] A list of the locales that the peer supports
-   * for sending informational text.
-   */
-  outgoing_locales?: string[];
-  /**
-   * @property {string[]} [incoming_locales] A list of locales that the sending peer
-   * permits for incoming informational text. This list is ordered in decreasing level of preference.
-   */
-  incoming_locales?: string[];
-  /**
-   * @property {SenderOptions} [sender_options] Default options that can be provided while creating any
-   * sender link on this connection. These options will be overridden by the specific sender options
-   * that will be provided while creating a sender.
-   */
-  sender_options?: SenderOptions;
-  /**
-   * @property {ReceiverOptions} [receiver_options] Default options that can be provided while creating any
-   * receiver link on this connection. These options will be overridden by the specific receiver options
-   * that will be provided while creating a sender.
-   */
-  receiver_options?: ReceiverOptions;
-  /**
-   * @property {Function} [connection_details] A function which if specified will be invoked to get the options
-   * to use (e.g. this can be used to alternate between a set of different host/port combinations)
-   */
-  connection_details?: (options: ConnectionOptions | number) => ConnectionDetails;
-  /**
    * @property {string[]} [non_fatal_errors] An array of error conditions which if received on connection close
    * from peer should not prevent reconnect (by default this only includes `"amqp:connection:forced"`).
    */
   non_fatal_errors?: string[];
-  /**
-   * @property {string} [key] The private key of the certificate to be used with tls connection option
-   */
-  key?: string,
-  /**
-   * @property {string} [cert] The certificate to be used with tls connection option
-   */
-  cert?: string,
-  /**
-   * @property {string} [ca] The CA certificate used for signing certificate to be used with tls connection option
-   */
-  ca?: string,
-  /**
-   * @property {boolean} [requestCert] Flag to indicate client authentication to be used with tls connection option
-   * This is used in opening socket by nodejs
-   */
-  requestCert?: boolean,
-  /**
-   * @property {boolean} [rejectUnauthorized] Flag to indicate if certificate is self signed to be used with tls connection option
-   * This is used in opening socket by nodejs
-   */
-  rejectUnauthorized?: boolean
+}
+
+export interface TcpClientConnectionOptions extends CommonClientConnectionOptions, TcpNetConnectOpts {}
+export interface IpcClientConnectionOptions extends CommonClientConnectionOptions, IpcNetConnectOpts {}
+export interface TlsClientConnectionOptions extends CommonClientConnectionOptions, TlsConnectionOptions {}
+export type ClientConnectionOptions = TcpClientConnectionOptions | IpcClientConnectionOptions | TlsClientConnectionOptions;
+export type ConnectionOptions = ClientConnectionOptions;
+
+/**
+ * Defines the options that can be provided while creating a connection.
+ * @interface ServerConnectionOptions
+ * @extends TlsOptions
+ * @extends ListenOptions
+ * @extends CommonConnectionOptions
+ */
+export interface ServerConnectionOptions extends CommonConnectionOptions, ListenOptions, TlsOptions {
 }
 
 /**
@@ -283,6 +266,7 @@ export interface BaseTerminusOptions {
 /**
  * Defines the options that can be provided while creating the source for a Sender or Receiver (link).
  * @interface TerminusOptions
+ * @extends BaseTerminusOptions
  */
 export interface TerminusOptions extends BaseTerminusOptions {
   /**
@@ -294,6 +278,7 @@ export interface TerminusOptions extends BaseTerminusOptions {
 /**
  * Defines the options that can be provided while creating the target for a Sender or Receiver (link).
  * @interface TargetTerminusOptions
+ * @extends BaseTerminusOptions
  */
 export interface TargetTerminusOptions extends BaseTerminusOptions {
   /**
@@ -305,6 +290,7 @@ export interface TargetTerminusOptions extends BaseTerminusOptions {
 /**
  * Describes the source.
  * @interface Source
+ * @extends TerminusOptions
  */
 export interface Source extends TerminusOptions {
   /**
@@ -376,7 +362,7 @@ export interface SenderOptions extends LinkOptions {
   autosettle?: boolean;
   /**
    * @property {object} target  - The target to which messages are sent.
-   * 
+   *
    * If the target is set to `{}` no target address will be associated with the sender; the peer
    * may use the `to` field on each individual message to handle it correctly in that case.
    * This is useful where maintaining or setting up a sender for each target address is
@@ -413,7 +399,7 @@ export interface MessageAnnotations {
  * Describes the delivery annotations. It is used for delivery-specific non-standard
  * properties at the head of the message. It conveys information from the sending
  * peer to the receiving peer. This is the base interface for Delivery Annotations.
- * 
+ *
  * @interface DeliveryAnnotations
  */
 export interface DeliveryAnnotations {
@@ -521,7 +507,7 @@ export interface MessageHeader {
  * Describes the footer section. It is used for details about the message or delivery
  * which can only be calculated or evaluated once the whole bare message has been
  * constructed or seen (for example message hashes, HMACs, signatures and encryption details).
- * 
+ *
  * @interface MessageFooter
  */
 export interface MessageFooter {
@@ -534,7 +520,8 @@ export interface MessageFooter {
 /**
  * Describes the AMQP message that is sent or received on the wire.
  * @interface Message
- * @extends MessageProperties, MessageHeader
+ * @extends MessageProperties
+ * @extends MessageHeader
  */
 export interface Message extends MessageProperties, MessageHeader {
   /**

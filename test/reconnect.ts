@@ -87,7 +87,7 @@ describe('reconnect', function() {
         var container: rhea.Container = rhea.create_container();
         var count: number = 0;
         var disconnects: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         c.open_sender('my-sender');
         c.on('disconnected', function (context) {
             disconnects++;
@@ -109,7 +109,7 @@ describe('reconnect', function() {
         var receiver_opens: number = 0;
         var sender_opens: number= 0;
         var disconnects: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         var r: rhea.Receiver = c.open_receiver('my-receiver');
         var s: rhea.Sender = c.open_sender('my-sender');
         c.on('disconnected', function (context) {
@@ -138,7 +138,7 @@ describe('reconnect', function() {
         var count: number = 0;
         var disconnects: number = 0;
         var protocol_errors: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         c.on('protocol_error', function (context) {
             protocol_errors++;
             assert.equal(protocol_errors, 1);
@@ -166,7 +166,7 @@ describe('reconnect', function() {
         var sender_opens: number = 0;
         var extra_session_opens: number = 0;
         var disconnects: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         var extra_session: rhea.Session = c.create_session();
         var s: rhea.Sender = c.open_sender('my-sender');
         extra_session.begin();
@@ -196,7 +196,7 @@ describe('reconnect', function() {
         var container: rhea.Container = rhea.create_container();
         var sender_opens: number = 0;
         var disconnects: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         var s: rhea.Sender = c.open_sender('my-sender');
         c.on('disconnected', function (context) {
             disconnects++;
@@ -308,7 +308,7 @@ describe('non-fatal error', function() {
         var container: rhea.Container = rhea.create_container();
         var count: number = 0;
         var disconnects: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         c.on('disconnected', function (context) {
             disconnects++;
         });
@@ -356,11 +356,11 @@ describe('remote close with fatal error', function() {
         var sender_opens: number = 0;
         var connection_closes: number = 0;
         var connection_errors: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         var receiver: rhea.Receiver = c.open_receiver('foo');
         var sender: rhea.Sender = c.open_sender('foo');
         c.on('disconnected', function (context) {
-            assert.fail('disconnected shouldnt have been called')
+            assert.fail('disconnected shouldnt have been called');
         });
         c.on('connection_error', function (context) {
             connection_errors++;
@@ -411,7 +411,7 @@ describe('remote close without error', function() {
         var container: rhea.Container = rhea.create_container();
         var sender_opens: number = 0;
         var connection_closes: number = 0;
-        var c: rhea.Connection = container.connect(listener.address());
+        var c: rhea.Connection = container.connect(listener.address() as any);
         var receiver: rhea.Receiver = c.open_receiver('foo');
         var sender: rhea.Sender = c.open_sender('foo');
         c.on('disconnected', function (context) {
