@@ -682,7 +682,7 @@ A message is an object that may contain the following fields:
     annotations sent to link recipient peer that should be negotiated
     at link attach
   * message_annotations, an object/map of non-standard delivery
-    annotations propagated accross all steps that should be negotiated
+    annotations propagated across all steps that should be negotiated
     at link attach
   * message_id
   * user_id
