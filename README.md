@@ -210,6 +210,7 @@ following fields:
   * non_fatal_errors - an array of error conditions which if received
     on connection close from peer should not prevent reconnect (by
     default this only includes amqp:connection:forced)
+  * all_errors_non_fatal - a boolean which determines if rhea's auto-reconnect should attempt reconnection on all fatal errors
 
 If the transport is TLS, the options may additionally specify a
 'servername' property. This allows the SNI to be controlled separately
