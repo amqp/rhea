@@ -101,7 +101,7 @@ export interface ConnectionOptions extends EndpointOptions {
    * provided, it will be used in the `open` frame to let the peer know about the container id.
    * However, the associated container object would still be the same container object from
    * which the connection is being created.
-   * 
+   *
    * The `"container_id"` is how the peer will identify the 'container' the connection is being
    * established from. The container in AMQP terminology is roughly analogous to a process.
    * Using a different container id on connections from the same process would cause the peer to
@@ -189,6 +189,10 @@ export interface ConnectionOptions extends EndpointOptions {
    * from peer should not prevent reconnect (by default this only includes `"amqp:connection:forced"`).
    */
   non_fatal_errors?: string[];
+  /**
+   * @property {boolean} [all_errors_non_fatal] Determines if rhea's auto-reconnect should attempt reconnection on all fatal errors
+   */
+   all_errors_non_fatal?: boolean,
   /**
    * @property {string} [key] The private key of the certificate to be used with tls connection option
    */
@@ -376,7 +380,7 @@ export interface SenderOptions extends LinkOptions {
   autosettle?: boolean;
   /**
    * @property {object} target  - The target to which messages are sent.
-   * 
+   *
    * If the target is set to `{}` no target address will be associated with the sender; the peer
    * may use the `to` field on each individual message to handle it correctly in that case.
    * This is useful where maintaining or setting up a sender for each target address is
@@ -413,7 +417,7 @@ export interface MessageAnnotations {
  * Describes the delivery annotations. It is used for delivery-specific non-standard
  * properties at the head of the message. It conveys information from the sending
  * peer to the receiving peer. This is the base interface for Delivery Annotations.
- * 
+ *
  * @interface DeliveryAnnotations
  */
 export interface DeliveryAnnotations {
@@ -521,7 +525,7 @@ export interface MessageHeader {
  * Describes the footer section. It is used for details about the message or delivery
  * which can only be calculated or evaluated once the whole bare message has been
  * constructed or seen (for example message hashes, HMACs, signatures and encryption details).
- * 
+ *
  * @interface MessageFooter
  */
 export interface MessageFooter {
