@@ -453,8 +453,13 @@ Connection.prototype.sasl_failed = function (text, condition) {
 };
 
 Connection.prototype._is_fatal = function (error_condition) {
-    var non_fatal = this.get_option('non_fatal_errors', ['amqp:connection:forced']);
-    return non_fatal.indexOf(error_condition) < 0;
+    var all_errors_non_fatal = this.get_option('all_errors_non_fatal', false);
+    if (all_errors_non_fatal) {
+        return false;
+    } else {
+        var non_fatal = this.get_option('non_fatal_errors', ['amqp:connection:forced']);
+        return non_fatal.indexOf(error_condition) < 0;
+    }
 };
 
 Connection.prototype._handle_error = function () {
@@ -4270,19 +4275,22 @@ types.Reader.prototype.read = function () {
     return constructor.descriptor ? types.described_nc(constructor.descriptor, value) : value;
 };
 
-types.Reader.prototype.read_constructor = function () {
+types.Reader.prototype.read_constructor = function (descriptors) {
     var code = this.read_typecode();
     if (code === 0x00) {
-        var d = [];
-        d.push(this.read());
-        var c = this.read_constructor();
-        while (c.descriptor) {
-            d.push(c.descriptor);
-            c = this.read_constructor();
+        if (descriptors === undefined) {
+            descriptors = [];
         }
-        return {'typecode': c.typecode, 'descriptor':  d.length === 1 ? d[0] : d};
+        descriptors.push(this.read());
+        return this.read_constructor(descriptors);
     } else {
-        return {'typecode': code};
+        if (descriptors === undefined) {
+            return {'typecode': code};
+        } else if (descriptors.length === 1) {
+            return {'typecode': code, 'descriptor':  descriptors[0]};
+        } else {
+            return {'typecode': code, 'descriptor':  descriptors[0], 'descriptors': descriptors};
+        }
     }
 };
 
