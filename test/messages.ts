@@ -215,6 +215,23 @@ describe('message content', function() {
         }
 
     }));
+    it('sends Map and receives object with string keys', transfer_test({body: new Map(Object.entries({ a: 1, b: "c" }))}, function(message: rhea.Message) {
+        assert.equal(message.body.a, 1);
+        assert.equal(message.body.b, "c");
+    }));
+    it('sends Map and receives object with string and number keys', transfer_test({body: new Map<any, any>([["a", 1], [2, "c"]])}, function(message: rhea.Message) {
+        assert.equal(message.body.a, 1);
+        assert.equal(message.body[2], "c");
+    }));
+    it('sends Map and receives object with uuid keys', transfer_test({body: new Map<any, any>([[amqp_types.wrap_uuid(Buffer.alloc(16)), 1]])}, function(message: rhea.Message) {
+
+        assert.equal(message.body[Buffer.alloc(16).toString()], 1);
+    }));
+    it('sends Set and receives Array', transfer_test({body: new Set([1, "a", Buffer.alloc(16)])}, function(message: rhea.Message) {
+        assert.equal(message.body[0], 1);
+        assert.equal(message.body[1], "a");
+        assert(Buffer.alloc(16).equals(message.body[2]), `Buffer ${message.body[2]} == Buffer.alloc(16)`);
+    }));
     it('get header and properties directly', transfer_test({
         message_id:'my-id',
         user_id:'my-user',
