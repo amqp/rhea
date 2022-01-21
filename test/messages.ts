@@ -355,6 +355,17 @@ describe('message content', function() {
         });
         sender.send(message, undefined, 1111);
     });
+
+    var customMessage = {
+        a: 1,
+        toRheaTyped() {
+            return amqp_types.wrap_map({b: 2})
+        }
+    }
+    it('message has a custom type', transfer_test({body:customMessage}, function(message: rhea.Message) {
+        assert.equal(message.body.b, 2)
+        assert.equal(Object.keys(message.body).length, 1)
+    }));
 });
 
 describe('acknowledgement', function() {
