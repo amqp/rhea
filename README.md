@@ -171,19 +171,28 @@ accepting any connections.
 Connects to the server specified by the host and port supplied in the
 options and returns a <a href="#connection">Connection</a>.
 
-The options argument is an object that may contain node library
-[socket.connect](https://nodejs.org/api/net.html#socketconnectoptions-connectlistener)
-and
-[tls.connect](https://nodejs.org/api/tls.html#tlsconnectoptions-callback)
-options and any of the following fields:
+The options argument is an object that may contain any of the
+following fields:
 
-  * host - `socket.connect` option, defaults to localhost
-  * port - `socket.connect` option, defaults to 5672
-  * transport - undefined, 'tcp' or 'tls', determines if
-    `socket.connect` or `tls.connect` options are accepted
+  * host
+  * port
   * username
   * password
+  * container_id (overrides the container identifier)
+  * hostname
+  * ca (if using tls)
+  * servername (if using tls)
+  * key (if using tls with client auth)
+  * cert (if using tls with client auth)
+  * transport
   * sasl_init_hostname
+  * idle_time_out
+  * channel_max
+  * max_frame_size
+  * outgoing_locales
+  * incoming_locales
+  * sender_options
+  * receiver_options
   * reconnect
     * if true (the default), the library will automatically attempt to
       reconnect if disconnected
@@ -198,26 +207,17 @@ options and any of the following fields:
   * connection_details - a function which if specified will be invoked
     to get the options to use (e.g. this can be used to alternate
     between a set of different host/port combinations)
-
-As well as Container options common for both client and server:
-
-  * id - connection name
-  * container_id - (overrides the container identifier)
-  * hostname - to present to remote in the open frame (defaults to host)
-  * max_frame_size
-  * channel_max
-  * idle_time_out
-  * outgoing_locales - in open frame
-  * incoming_locales - in open frame
-  * offered_capabilities - in open frame
-  * desired_capabilities - in open frame
-  * properties - in open frame
-  * sender_options - defaults for open_sender
-  * receiver_options - defaults for open_receiver
   * non_fatal_errors - an array of error conditions which if received
     on connection close from peer should not prevent reconnect (by
     default this only includes amqp:connection:forced)
   * all_errors_non_fatal - a boolean which determines if rhea's auto-reconnect should attempt reconnection on all fatal errors
+
+If the transport is TLS, the options may additionally specify a
+'servername' property. This allows the SNI to be controlled separately
+from the host option. If servername is not specified, the SNI will
+default to the host. If using TLS options for 'ca', 'cert' and 'key'
+may also be specified (see
+https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options)
 
 If options is undefined, the client will attempt to obtain default
 options from a JSON config file. This file is of similar structure to
@@ -232,11 +232,11 @@ The config file offers only limited configurability, specifically:
   * scheme
   * host
   * port
-  * user - (note not username)
+  * user (note not username)
   * password
-  * sasl - (a nested object with field enabled)
+  * sasl (a nested object with field enabled)
   * sasl_mechanisms
-  * tls - (a nested object with fields key, cert, ca for paths to
+  * tls (a nested object with fields key, cert, ca for paths to
     correspoding files)
   * verify
 
@@ -245,21 +245,9 @@ The config file offers only limited configurability, specifically:
 Starts a server socket listening for incoming connections on the port
 (and optionally interface) specified in the options.
 
-The options argument is an object that may contain node library
-[net.createServer](https://nodejs.org/api/net.html#netcreateserveroptions-connectionlistener)
-and its
-[server.listen](https://nodejs.org/api/net.html#serverlistenoptions-callback)
-or
-[tls.createServer](https://nodejs.org/api/tls.html#tlscreateserveroptions-secureconnectionlistener)
-and its [server.listen](https://nodejs.org/api/tls.html#serverlisten)
-options, most AMQP Container fields listed for `connect` and any of the
-following fields:
-
 The options argument is an object that may contain any of the
 following fields:
 
-  * transport - undefined, 'tcp' or 'tls', determines if
-    `net.createServer` or `tls.createServer` options are accepted
   * host
   * port
 
@@ -332,16 +320,6 @@ object that may contain any of the following fields:
   * autosettle - Whether received messages should be automatically
     settled once the remote settles them. Defaults to true.
 
-And attach frame fields:
-
-  * snd_settle_mode
-  * rcv_settle_mode
-  * unsettled
-  * max_message_size
-  * offered_capabilities
-  * desired_capabilities
-  * properties
-
 Note: If the link doesn't specify a value for the credit_window and
 autoaccept options, the connection options are consulted followed by
 the container options. The default is used only if an option is not
@@ -371,8 +349,6 @@ object that may contain any of the following fields:
     container. If not specified a unqiue name is generated.
   * autosettle - Whether sent messages should be automatically
     settled once the peer settles them. Defaults to true.
-
-And attach frame fields as for `open_receiver`.
 
 Note: If the link doesn't specify a value for the autosettle option,
 the connection options are consulted followed by the container

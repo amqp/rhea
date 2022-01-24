@@ -1,12 +1,14 @@
 /// <reference types="node" />
 
+import { EndpointState } from "./endpoint";
 import { Session, Delivery } from "./session";
+import { Transport } from "./transport";
 import { Sender, Receiver, link } from "./link";
-import { NetConnectOpts, ListenOptions, Socket } from "net";
+import { Socket } from "net";
 import { frames } from "./frames";
 import { EventEmitter } from "events";
 import { Container } from "./container";
-import { ConnectionOptions as TlsConnectionOptions, PeerCertificate, TlsOptions } from "tls";
+import { PeerCertificate } from "tls";
 import { ConnectionError } from "./errors";
 
 /**
@@ -60,15 +62,39 @@ export interface ConnectionDetails {
 }
 
 /**
- * Defines the common options that can be provided for client and server connections.
- * @interface CommonConnectionOptions
+ * Defines the options that can be provided while creating a connection.
+ * @interface ConnectionOptions
  * @extends EndpointOptions
  */
-interface CommonConnectionOptions extends EndpointOptions {
+export interface ConnectionOptions extends EndpointOptions {
   /**
-   * @property {string} [hostname] - The hostname presented in `open` frame, defaults to host.
+   * @property {string} [username] - The username.
+   */
+  username?: string;
+  /**
+   * @property {string} [host] - The host to connect to.
+   */
+  host?: string;
+  /**
+   * @property {string} [hostname] - The hostname to connect to.
    */
   hostname?: string;
+  /**
+   * @property {string} [servername] - The name of the server.
+   */
+  servername?: string;
+  /**
+   * @property {string} [sasl_init_hostname] - The hostname for initialising sasl.
+   */
+  sasl_init_hostname?: string;
+  /**
+   * @property {number} [port] - The port number (5671 or 5672) at which to connect to.
+   */
+  port?: number;
+  /**
+   * @property {string} [transport] - The transport option. This is ignored if connection_details is set.
+   */
+  transport?: "tls" | "ssl" | "tcp";
   /**
    * @property {string} [container_id] The id of the source container. If not provided then
    * this will be the id (a guid string) of the assocaited container object. When this property is
@@ -83,10 +109,38 @@ interface CommonConnectionOptions extends EndpointOptions {
    */
   container_id?: string;
   /**
-   * @property {string} [id] A unique name for the connection. If not provided then this will be
+   * @property {string} [id] A unqiue name for the connection. If not provided then this will be
    * a string in the following format: "connection-<counter>".
    */
   id?: string;
+  /**
+   * @property {boolean} [reconnect] if true (default), the library will automatically attempt to
+   * reconnect if disconnected.
+   * - if false, automatic reconnect will be disabled
+   * - if it is a numeric value, it is interpreted as the delay between
+   * reconnect attempts (in milliseconds)
+   */
+  reconnect?: boolean | number;
+  /**
+   * @property {number} [reconnect_limit] maximum number of reconnect attempts.
+   * Applicable only when reconnect is true.
+   */
+  reconnect_limit?: number;
+  /**
+   * @property {number} [initial_reconnect_delay] - Time to wait in milliseconds before
+   * attempting to reconnect. Applicable only when reconnect is true or a number is
+   * provided for reconnect.
+   */
+  initial_reconnect_delay?: number;
+  /**
+   * @property {number} [max_reconnect_delay] - Maximum reconnect delay in milliseconds
+   * before attempting to reconnect. Applicable only when reconnect is true.
+   */
+  max_reconnect_delay?: number;
+  /**
+   * @property {string} [password] - The secret key to be used while establishing the connection.
+   */
+  password?: string;
   /**
    * @property {number} [max_frame_size] The largest frame size that the sending peer
    * is able to accept on this connection. Default: 4294967295
@@ -125,77 +179,11 @@ interface CommonConnectionOptions extends EndpointOptions {
    * that will be provided while creating a sender.
    */
   receiver_options?: ReceiverOptions;
-}
-
-/**
- * Defines the common options that can be provided for client connections.
- * @interface TcpTransportOptions
- */
-interface NetTransportOptions {
-  /**
-   * @property {string} [transport] - The transport option. This is ignored if connection_details is set.
-   */
-   transport?: "tcp";
- }
-
-/**
- * Defines the common options that can be provided for TLS client connections.
- * @interface TlsTransportOptions
- */
-interface TlsTransportOptions {
-  /**
-   * @property {string} transport - The transport option to request TLS connection. This is ignored if connection_details is set.
-   */
-   transport: "tls" | "ssl";
-}
-
-/**
- * Defines the common options that can be provided for client connections.
- * @interface ClientConnectionOptions
- * @extends CommonConnectionOptions
- */
-interface ClientConnectionOptions extends CommonConnectionOptions {
-  /**
-   * @property {string} [username] - The username.
-   */
-  username?: string;
-  /**
-   * @property {string} [sasl_init_hostname] - The hostname for initialising sasl.
-   */
-  sasl_init_hostname?: string;
-  /**
-   * @property {boolean} [reconnect] if true (default), the library will automatically attempt to
-   * reconnect if disconnected.
-   * - if false, automatic reconnect will be disabled
-   * - if it is a numeric value, it is interpreted as the delay between
-   * reconnect attempts (in milliseconds)
-   */
-  reconnect?: boolean | number;
-  /**
-   * @property {number} [reconnect_limit] maximum number of reconnect attempts.
-   * Applicable only when reconnect is true.
-   */
-  reconnect_limit?: number;
-  /**
-   * @property {number} [initial_reconnect_delay] - Time to wait in milliseconds before
-   * attempting to reconnect. Applicable only when reconnect is true or a number is
-   * provided for reconnect.
-   */
-  initial_reconnect_delay?: number;
-  /**
-   * @property {number} [max_reconnect_delay] - Maximum reconnect delay in milliseconds
-   * before attempting to reconnect. Applicable only when reconnect is true.
-   */
-  max_reconnect_delay?: number;
-  /**
-   * @property {string} [password] - The secret key to be used while establishing the connection.
-   */
-  password?: string;
   /**
    * @property {Function} [connection_details] A function which if specified will be invoked to get the options
    * to use (e.g. this can be used to alternate between a set of different host/port combinations)
    */
-  connection_details?: (conn_established_counter: number) => ConnectionDetails;
+  connection_details?: (options: ConnectionOptions | number) => ConnectionDetails;
   /**
    * @property {string[]} [non_fatal_errors] An array of error conditions which if received on connection close
    * from peer should not prevent reconnect (by default this only includes `"amqp:connection:forced"`).
@@ -204,29 +192,30 @@ interface ClientConnectionOptions extends CommonConnectionOptions {
   /**
    * @property {boolean} [all_errors_non_fatal] Determines if rhea's auto-reconnect should attempt reconnection on all fatal errors
    */
-  all_errors_non_fatal?: boolean;
+   all_errors_non_fatal?: boolean,
+  /**
+   * @property {string} [key] The private key of the certificate to be used with tls connection option
+   */
+  key?: string,
+  /**
+   * @property {string} [cert] The certificate to be used with tls connection option
+   */
+  cert?: string,
+  /**
+   * @property {string} [ca] The CA certificate used for signing certificate to be used with tls connection option
+   */
+  ca?: string,
+  /**
+   * @property {boolean} [requestCert] Flag to indicate client authentication to be used with tls connection option
+   * This is used in opening socket by nodejs
+   */
+  requestCert?: boolean,
+  /**
+   * @property {boolean} [rejectUnauthorized] Flag to indicate if certificate is self signed to be used with tls connection option
+   * This is used in opening socket by nodejs
+   */
+  rejectUnauthorized?: boolean
 }
-
-type NetClientConnectionOptions = NetTransportOptions & ClientConnectionOptions & NetConnectOpts
-type TlsClientConnectionOptions = TlsTransportOptions & ClientConnectionOptions & TlsConnectionOptions
-
-export type ConnectionOptions = NetClientConnectionOptions | TlsClientConnectionOptions;
-
-/** `net.createServer` options that have no own type in @types/node@10.17.60 */
-type NetOptions = { allowHalfOpen?: boolean, pauseOnConnect?: boolean }
-/**
- * Defines the options that can be provided while creating a server connection.
- */
-type NetServerConnectionOptions = NetTransportOptions & CommonConnectionOptions & ListenOptions & NetOptions
-/**
- * Defines the options that can be provided while creating a TLS server connection.
- */
-type TlsServerConnectionOptions = TlsTransportOptions & CommonConnectionOptions & ListenOptions & TlsOptions
-
-/**
- * Defines the options that can be provided while creating a server connection.
- */
-export type ServerConnectionOptions = NetServerConnectionOptions | TlsServerConnectionOptions
 
 /**
  * Defines the common set of options that can be provided while creating a link (sender, receiver).
@@ -298,7 +287,6 @@ export interface BaseTerminusOptions {
 /**
  * Defines the options that can be provided while creating the source for a Sender or Receiver (link).
  * @interface TerminusOptions
- * @extends BaseTerminusOptions
  */
 export interface TerminusOptions extends BaseTerminusOptions {
   /**
@@ -310,7 +298,6 @@ export interface TerminusOptions extends BaseTerminusOptions {
 /**
  * Defines the options that can be provided while creating the target for a Sender or Receiver (link).
  * @interface TargetTerminusOptions
- * @extends BaseTerminusOptions
  */
 export interface TargetTerminusOptions extends BaseTerminusOptions {
   /**
@@ -322,7 +309,6 @@ export interface TargetTerminusOptions extends BaseTerminusOptions {
 /**
  * Describes the source.
  * @interface Source
- * @extends TerminusOptions
  */
 export interface Source extends TerminusOptions {
   /**
@@ -552,8 +538,7 @@ export interface MessageFooter {
 /**
  * Describes the AMQP message that is sent or received on the wire.
  * @interface Message
- * @extends MessageProperties
- * @extends MessageHeader
+ * @extends MessageProperties, MessageHeader
  */
 export interface Message extends MessageProperties, MessageHeader {
   /**

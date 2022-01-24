@@ -4,8 +4,8 @@ export {
   AmqpError, Message, MessageAnnotations, MessageProperties,
   Connection, ConnectionOptions, EventContext, DeliveryAnnotations, Dictionary,
   EndpointOptions, LinkOptions, ReceiverOptions, SenderOptions, TerminusOptions,
-  ConnectionEvents, MessageHeader, OnAmqpEvent, ServerConnectionOptions, Source,
-  TargetTerminusOptions, ConnectionDetails
+  ConnectionEvents, MessageHeader, OnAmqpEvent, Source, TargetTerminusOptions,
+  ConnectionDetails
 } from "./connection";
 export { ConnectionError, ProtocolError, TypeError, SimpleError } from "./errors";
 export { Delivery, Session, SessionEvents } from "./session";

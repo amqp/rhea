@@ -297,7 +297,7 @@ describe('user-provided sasl mechanism', function () {
                     });
                 },
                 step: function () {
-                    return new Promise<void>(resolve => {
+                    return new Promise(resolve => {
                         process.nextTick(() => {
                             stepCalled = true;
                             this.outcome = <any>true;

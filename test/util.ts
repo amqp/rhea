@@ -16,7 +16,7 @@
 
 import * as assert from "assert";
 const util = require("../lib/util");
-import * as rhea from "../";
+import * as rhea from "../"
 
 describe('uuid', function() {
     it('converts uuid string to buffer', function(done) {
@@ -50,7 +50,7 @@ describe('uuid', function() {
                 failed = false;
             } catch(e) {
                 failed = true;
-                assert.equal((e as TypeError).name, 'TypeError');
+                assert.equal(e.name, 'TypeError');
             }
             if (!failed) assert.fail('did not reject invalid uuid: ' + s);
         });

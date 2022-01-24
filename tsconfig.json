@@ -3,14 +3,14 @@
     "module": "commonjs",
     "preserveConstEnums": true,
     "newLine": "LF",
-    "target": "es2018",
+    "target": "es5",
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "strict": true,
     "declaration": true,
     "declarationDir": "./typings",
     "lib": [
-      "es2018"
+      "es2015"
     ]
   },
   "compileOnSave": true,
