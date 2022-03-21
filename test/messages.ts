@@ -540,9 +540,11 @@ describe('fragmentation', function() {
                     done();
                 }
             });
-            for (var i = 0; i < n; i++) {
-                sender.send(message);
-            }
+            sender.on('sender_open', function() {
+                for (var i = 0; i < n; i++) {
+                    sender.send(message);
+                }
+            });
         };
     }
 
