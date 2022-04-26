@@ -35,7 +35,7 @@
         "lint": "eslint lib/*.js",
         "test": "mocha --require ts-node/register ./test/*.ts",
         "coverage": "nyc --reporter=json --reporter=lcov --reporter=text-summary npm run test",
-        "browserify": "browserify -r .:rhea -o dist/rhea.js",
+        "browserify": "browserify -r .:rhea -o dist/rhea.js && browserify -r .:rhea --standalone rhea-umd > dist/rhea-umd.js",
         "run-examples": "require-self && mocha examples/test_examples.js",
         "uglify": "uglifyjs --source-map --output dist/rhea.min.js dist/rhea.js",
         "prepare": "npm run lint && npm run tsc",
