@@ -154,6 +154,9 @@ describe('message content', function() {
     it('sends and receives body of 50k', transfer_test({body:new Array(1024*50+1).join('z')}, function(message: rhea.Message) {
         assert.equal(message.body, new Array(1024*50+1).join('z'));
     }));
+    it('sends and receives body of 50M', transfer_test({body:new Array(1024*1024*50+1).join('z')}, function(message: rhea.Message) {
+        assert.equal(message.body, new Array(1024*1024*50+1).join('z'));
+    }));
     it('sends and receives map body', transfer_test({body:{colour:'green',age:8,happy:true, sad:false}}, function(message: rhea.Message) {
         assert.equal(message.body.colour, 'green');
         assert.equal(message.body.age, 8);
