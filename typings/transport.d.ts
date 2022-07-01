@@ -16,5 +16,6 @@ export declare interface Transport {
   has_writes_pending(): boolean;
   encode(frame: frames): void;
   write(socket: Socket): void;
+  peek_size(buffer: Buffer): number | undefined;
   read(buffer: Buffer): number;
 }

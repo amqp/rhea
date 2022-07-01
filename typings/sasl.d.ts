@@ -69,6 +69,7 @@ declare class SaslServer {
   on_sasl_response(frame: frames): void;
   has_writes_pending(): boolean;
   write(socket: Socket): void;
+  peek_size(buffer: Buffer): number | undefined;
   read(buffer: Buffer): number;
 }
 
@@ -87,6 +88,7 @@ declare class SaslClient {
   on_sasl_outcome(frame: frames): void;
   has_writes_pending(): boolean;
   write(socket: Socket): void;
+  peek_size(buffer: Buffer): number | undefined;
   read(buffer: Buffer): number;
 }
 
@@ -100,6 +102,7 @@ declare class SelectiveServer {
   constructor(connection: Connection, mechanisms: Mechanisms);
   has_writes_pending(): boolean;
   write(socket: Socket): void | number;
+  peek_size(buffer: Buffer): number | undefined;
   read(buffer: Buffer): number;
 }
 
