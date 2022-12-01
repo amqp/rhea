@@ -291,7 +291,7 @@ that in the node module 'ws'.
 
 Used to start handling an incoming websocket connection as an AMQP
 connection. See the [websocket echo server
-example](example/websocket/echo.js) for how to use it.
+example](examples/websockets/echo.js) for how to use it.
 
 ---------------------------------------------------------------------
 ### Connection
