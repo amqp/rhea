@@ -92,6 +92,12 @@ interface CommonConnectionOptions extends EndpointOptions {
    * is able to accept on this connection. Default: 4294967295
    */
   max_frame_size?: number;
+
+  /**
+   * @property {number} [bufferSize] The connnection sessions outgoing and incoming CircularBuffer size.
+   * Default: 2048
+   */
+  bufferSize: number;
   /**
    * @property {number} [idle_time_out] The maximum period in milliseconds between activity
    * (frames) on the connection that is desired from the peer. The open frame carries the
