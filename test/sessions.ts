@@ -65,6 +65,82 @@ describe('session error handling', function () {
             context.connection.close();
         });
     });
+    it('session buffer size [default]', function(done) {
+        container.on('session_open', function (context: rhea.EventContext) {
+            assert.equal((s as any).incoming.deliveries.capacity, 2048);
+            assert.equal((s as any).outgoing.deliveries.capacity, 2048);
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+        });
+        container.on('session_close', function (context) {
+            assert.equal(context.session.is_closed(), true);
+        });
+        var c: rhea.Connection = container.connect(listener.address());
+        c.on('connection_close', function () {
+            done();
+        });
+        var s = c.create_session();
+        s.begin();
+        s.on('session_close', function (context: rhea.EventContext) {
+            context.connection.close();
+        });
+    });
+    it('session buffer size [number]', function(done) {
+        container.on('session_open', function (context: rhea.EventContext) {
+            assert.equal((s as any).incoming.deliveries.capacity, 4096);
+            assert.equal((s as any).outgoing.deliveries.capacity, 4096);
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+        });
+        container.on('session_close', function (context) {
+            assert.equal(context.session.is_closed(), true);
+        });
+        var c: rhea.Connection = container.connect(listener.address());
+        c.on('connection_close', function () {
+            done();
+        });
+        var s = c.create_session(4096);
+        s.begin();
+        s.on('session_close', function (context: rhea.EventContext) {
+            context.connection.close();
+        });
+    });
+    it('session buffer size [object]', function(done) {
+        container.on('session_open', function (context: rhea.EventContext) {
+            assert.equal((s as any).incoming.deliveries.capacity, 2048);
+            assert.equal((s as any).outgoing.deliveries.capacity, 4096);
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+        });
+        container.on('session_close', function (context) {
+            assert.equal(context.session.is_closed(), true);
+        });
+        var c: rhea.Connection = container.connect(listener.address());
+        c.on('connection_close', function () {
+            done();
+        });
+        var s = c.create_session({ incoming: 2048, outgoing: 4096 });
+        s.begin();
+        s.on('session_close', function (context: rhea.EventContext) {
+            context.connection.close();
+        });
+    });
+    it('session buffer size [invalid]', function(done) {
+        container.on('session_open', function (context: rhea.EventContext) {
+            assert.equal((s as any).incoming.deliveries.capacity, 2048);
+            assert.equal((s as any).outgoing.deliveries.capacity, 2048);
+            context.session!.close({ condition: 'amqp:internal-error', description: 'testing error on close' });
+        });
+        container.on('session_close', function (context) {
+            assert.equal(context.session.is_closed(), true);
+        });
+        var c: rhea.Connection = container.connect(listener.address());
+        c.on('connection_close', function () {
+            done();
+        });
+        var s = c.create_session('invalid' as unknown as number);
+        s.begin();
+        s.on('session_close', function (context: rhea.EventContext) {
+            context.connection.close();
+        });
+    });
     it('error handled', function (done: Function) {
         var error_handler_called: boolean;
         container.on('session_open', function (context: rhea.EventContext) {

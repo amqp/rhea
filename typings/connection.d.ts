@@ -696,7 +696,7 @@ export declare interface Connection extends EventEmitter {
    * @returns {boolean} `true` - closed, `false` otherwise.
    */
   is_closed(): boolean;
-  create_session(): Session;
+  create_session(session_buffer_size?: number | { incoming?: number, outgoing?: number }): Session;
   find_sender(filter: Function): Sender | undefined;
   find_receiver(filter: Function): Receiver | undefined;
   find_link(filter: Function): link | undefined;
