@@ -227,7 +227,7 @@ describe('user-provided sasl mechanism', function () {
                 },
                 step: function () {
                     stepCalled = true;
-                    this.outcome = <any>true;
+                    this.outcome = true as any;
                     return;
                 }
             };
@@ -260,7 +260,7 @@ describe('user-provided sasl mechanism', function () {
                 },
                 step: function () {
                     stepCalled = true;
-                    this.outcome = <any>false;
+                    this.outcome = false as any;
                     return;
                 }
             };
@@ -300,7 +300,7 @@ describe('user-provided sasl mechanism', function () {
                     return new Promise<void>(resolve => {
                         process.nextTick(() => {
                             stepCalled = true;
-                            this.outcome = <any>true;
+                            this.outcome = true as any;
                             resolve();
                         });
                     });
