@@ -1,7 +1,7 @@
 /*
  * AMQP 1.0 sender example for RabbitMQ
  */
-var container = require('rhea');
+var container = require('../../lib/container.js'); // local rhea version
 
 var args = require('./options.js')
     .options({
@@ -55,12 +55,12 @@ var connection_options = {
 };
 
 console.log('Connecting to RabbitMQ at %s:%s...', args.host, args.port);
-var connection = container.connect(connection_options);
+// Connect but don't store the returned object since we're not using it directly
+container.connect(connection_options);
 
 var sent = 0;
 var confirmed = 0;
 var total = args.count;
-var sender;
 
 // When the connection is established
 container.on('connection_open', function (context) {
@@ -74,7 +74,7 @@ container.on('connection_open', function (context) {
             address: args.node,
             capabilities: ['topic'],
         };
-        sender = context.connection.open_sender({
+        context.connection.open_sender({
             target: target,
             properties: {
                 'routing-key': args.address,
@@ -86,7 +86,7 @@ container.on('connection_open', function (context) {
         target = {
             address: args.node,
         };
-        sender = context.connection.open_sender({
+        context.connection.open_sender({
             target: target,
         });
     }
@@ -156,7 +156,8 @@ container.on('disconnected', function (context) {
         console.log('Attempting to reconnect...');
     } else {
         console.log('Exiting');
-        process.exit(0);
+        // Instead of process.exit(0), throw an error that can be caught
+        throw new Error('Disconnected and not reconnecting');
     }
 });
 
@@ -187,3 +188,16 @@ function send_message(sender) {
         body: message_body,
     });
 }
+
+// Main error handling
+process.on('uncaughtException', function(err) {
+    // Handle the disconnection error gracefully
+    if (err.message === 'Disconnected and not reconnecting') {
+        // eslint-disable-next-line no-process-exit
+        process.exit(0);
+    } else {
+        console.error('Uncaught exception:', err);
+        // eslint-disable-next-line no-process-exit
+        process.exit(1);
+    }
+});

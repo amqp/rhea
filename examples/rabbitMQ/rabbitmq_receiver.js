@@ -1,7 +1,9 @@
 /*
  * AMQP 1.0 receiver example for RabbitMQ
  */
-var container = require('rhea');
+
+// var container = require('rhea');
+var container = require('../../lib/container.js'); // local rhea version
 
 var args = require('./options.js')
     .options({
@@ -59,7 +61,7 @@ var received = 0;
 var expected = args.count;
 
 console.log('Connecting to RabbitMQ at %s:%s...', args.host, args.port);
-var connection = container.connect(connection_options);
+container.connect(connection_options);
 
 // When the connection is established
 container.on('connection_open', function (context) {
@@ -69,7 +71,7 @@ container.on('connection_open', function (context) {
     var source = {
         address: args.node,
     };
-    var receiver = context.connection.open_receiver({
+    context.connection.open_receiver({
         source: source,
         credit_window: args.prefetch,
         autoaccept: args.auto_ack,
@@ -79,7 +81,7 @@ container.on('connection_open', function (context) {
 });
 
 // When the receiver link is opened
-container.on('receiver_open', function (context) {
+container.on('receiver_open', function () {
     console.log('Receiver link established');
     console.log('Waiting for messages...');
 });
@@ -142,9 +144,8 @@ container.on('disconnected', function (context) {
             received,
             expected
         );
-        process.exit(1);
+        throw new Error('Incomplete message reception');
     } else {
         console.log('Exiting');
-        process.exit(0);
     }
 });
