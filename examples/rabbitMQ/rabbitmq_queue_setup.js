@@ -2,7 +2,6 @@
  * Script for RabbitMQ queue configuration
  */
 const http = require("http");
-const querystring = require("querystring");
 
 var args = require("./options.js")
   .options({

@@ -32,9 +32,7 @@ This guide will help you set up and use AMQP 1.0 with RabbitMQ, using the includ
 
 3. **Install Node.js dependencies**:
 
-   ```bash
-   npm install rhea minimist
-   ```
+- remember to run npm install from the root
 
 4. **Clone or download the example scripts** to your working directory.
 
