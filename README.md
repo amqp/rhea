@@ -37,6 +37,12 @@ Hello World!
   term. To enable set e.g. DEBUG=rhea* or DEBUG=rhea:events for more
   qualified debugging)
 
+## In Depth
+
+Valerio Bartolini (@bartoval) wrote an excellent in-depth article on this library that he has kindly permitted us to link to here:
+
+[Rhea: AMQP for Node.js](https://www.reinventing-the-wheel.dev/article/rhea/index)
+
 ## Examples
 
 There are some examples of using the library under the examples
