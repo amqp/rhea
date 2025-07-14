@@ -385,6 +385,7 @@ describe('acknowledgement', function() {
             outcome.state = 'released';
             outcome.delivery_failed = context.delivery!.remote_state!.delivery_failed;
             outcome.undeliverable_here = context.delivery!.remote_state!.undeliverable_here;
+            outcome.message_annotations = context.delivery!.remote_state!.message_annotations;
         });
         server.on('rejected', function (context: rhea.EventContext) {
             outcome.state = 'rejected';
@@ -492,6 +493,32 @@ describe('acknowledgement', function() {
         });
         client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
+    it('explicit modify with annotations', function(done: Function) {
+        server.options.treat_modified_as_released = false;
+        server.on('modified', function (context: rhea.EventContext) {
+            assert.equal(outcome.state, undefined);
+            outcome.state = 'modified';
+            outcome.delivery_failed = context.delivery!.remote_state!.delivery_failed;
+            outcome.undeliverable_here = context.delivery!.remote_state!.undeliverable_here;
+            outcome.message_annotations = context.delivery!.remote_state!.message_annotations;
+        });
+        server.once('sendable', function (context: rhea.EventContext) {
+            context.sender!.send({body:'modify-me'});
+        });
+        client.on('message', function(context: rhea.EventContext) {
+            assert.equal(context!.message!.body, 'modify-me');
+            (context as any).delivery!.modified({delivery_failed:true, undeliverable_here: true, message_annotations: {"x-opt-annotation": "annotation-value"}});
+        });
+        client.on('connection_close', function (context: rhea.EventContext) {
+            assert.equal(outcome.state, 'modified');
+            assert.equal(outcome.delivery_failed, true);
+            assert.equal(outcome.undeliverable_here, true);
+            assert.deepStrictEqual(outcome.message_annotations, {"x-opt-annotation": "annotation-value"})
+            context.connection.close();
+            done();
+        });
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
+    });
     it('modified as released', function(done: Function) {
         server.once('sendable', function (context) {
             context.sender!.send({body:'try-again'});
@@ -509,6 +536,25 @@ describe('acknowledgement', function() {
         });
         client.connect(listener.address() as any).attach_receiver({autoaccept: false});
     });
+    it('modified as released with annotations', function(done: Function) {
+        server.once('sendable', function (context) {
+            context.sender!.send({body:'try-again'});
+        });
+        client.on('message', function(context: rhea.EventContext) {
+            assert.equal(context.message!.body, 'try-again');
+            context.delivery!.release({delivery_failed:true, undeliverable_here: true, message_annotations: {"x-opt-annotation": "annotation-value"}});
+        });
+        client.on('connection_close', function (context: rhea.EventContext) {
+            assert.equal(outcome.state, 'released');
+            assert.equal(outcome.delivery_failed, true);
+            assert.equal(outcome.undeliverable_here, true);
+            assert.deepStrictEqual(outcome.message_annotations, {"x-opt-annotation": "annotation-value"})
+            context.connection.close();
+            done();
+        });
+        client.connect(listener.address() as any).attach_receiver({autoaccept: false});
+    });
+
 });
 
 describe('fragmentation', function() {
