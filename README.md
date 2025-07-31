@@ -405,7 +405,8 @@ closed.
 
 ##### create_session()
 
-Creates a new session if you want to manage sessions by yourself.
+Creates a new session if you want to manage sessions by yourself. Note
+that you must call `begin()` on the object returned.
 
 #### events:
 
