@@ -1,5 +1,5 @@
-/// <reference types="node" />
 
+import type { Buffer } from "buffer";
 import { Connection, EventContext } from "./connection";
 import { EndpointState } from "./endpoint";
 import { EventEmitter } from "events";

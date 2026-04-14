@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export { link, LinkError, Receiver, Sender, ReceiverEvents, SenderEvents } from "./link";
 export {
   AmqpError, Message, MessageAnnotations, MessageProperties,

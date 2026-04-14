@@ -1,4 +1,3 @@
-/// <reference types="node" />
 
 import { sasl } from "./sasl";
 import { generate_uuid, string_to_uuid, uuid_to_string } from "./util";

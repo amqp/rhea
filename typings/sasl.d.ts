@@ -1,5 +1,5 @@
-/// <reference types="node" />
 
+import type { Buffer } from "buffer";
 import { Connection } from "./connection";
 import { Transport } from "./transport";
 import { Socket } from "net";

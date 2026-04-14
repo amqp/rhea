@@ -1,5 +1,5 @@
-/// <reference types="node" />
 
+import type { Buffer } from "buffer";
 import { header, frames } from "./frames";
 import { Socket } from "net";
 

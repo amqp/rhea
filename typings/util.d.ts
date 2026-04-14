@@ -1,4 +1,5 @@
-/// <reference types="node" />
+import type { Buffer } from "buffer";
+
 export type generate_uuid = () => string;
 export type uuid4 = () => Buffer;
 export type uuid_to_string = (buffer: Buffer) => string;

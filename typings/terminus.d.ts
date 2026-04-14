@@ -1,4 +1,3 @@
-/// <reference types="node" />
 
 declare let terminus: any;
 export function unwrap(field: any): any | null;
