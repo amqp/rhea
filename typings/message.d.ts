@@ -1,4 +1,5 @@
-/// <reference types="node" />
+import type { Buffer } from "buffer";
+
 
 export declare interface Message {
   [x: string]: any;

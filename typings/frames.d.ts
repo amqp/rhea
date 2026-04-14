@@ -1,4 +1,5 @@
-/// <reference types="node" />
+import type { Buffer } from "buffer";
+
 
 export interface header {
   [x: string]: any;

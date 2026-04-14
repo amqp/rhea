@@ -1,5 +1,5 @@
-/// <reference types="node" />
 
+import type { Buffer } from "buffer";
 import { frames } from "./frames";
 
 export interface ICompositeType {

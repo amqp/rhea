@@ -1,4 +1,3 @@
-/// <reference types="node" />
 
 /**
  * Describes the required shape of WebSocket instances.

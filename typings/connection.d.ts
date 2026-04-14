@@ -1,5 +1,5 @@
-/// <reference types="node" />
 
+import type { Buffer } from "buffer";
 import { Session, Delivery } from "./session";
 import { Sender, Receiver, link } from "./link";
 import { NetConnectOpts, ListenOptions, Socket } from "net";

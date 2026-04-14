@@ -1,4 +1,3 @@
-/// <reference types="node" />
 
 export declare interface EndpointState {
   local_open: boolean;

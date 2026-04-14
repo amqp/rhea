@@ -1,4 +1,3 @@
-/// <reference types="node" />
 
 export declare interface ProtocolError extends Error {
     message: string;
