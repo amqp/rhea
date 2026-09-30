@@ -64,3 +64,49 @@ describe('compound decode bounds', function () {
         assert.throws(function () { reader.read_size_count(4); }, /65536/);
     });
 });
+
+describe('nesting depth bounds', function () {
+    function nested_list(levels: number): Buffer {
+        // `levels` nested list8 values, each holding one element; innermost null.
+        var parts: number[] = [];
+        for (var i = 0; i < levels; i++) parts.push(0xc0, 0x02, 0x01);
+        parts.push(0x40);
+        return Buffer.from(parts);
+    }
+    function nested_described(levels: number): Buffer {
+        // `levels` nested described types (smallulong descriptor 0); innermost null.
+        var parts: number[] = [];
+        for (var i = 0; i < levels; i++) parts.push(0x00, 0x53, 0x00);
+        parts.push(0x40);
+        return Buffer.from(parts);
+    }
+    function nested_map(levels: number): Buffer {
+        // `levels` nested map8 values (null key, nested value); innermost null.
+        var parts: number[] = [];
+        for (var i = 0; i < levels; i++) parts.push(0xc1, 0x03, 0x02, 0x40);
+        parts.push(0x40);
+        return Buffer.from(parts);
+    }
+
+    it('rejects deeply nested lists', function () {
+        assert.throws(function () { new types.Reader(nested_list(20000)).read(); }, /maximum depth/);
+    });
+    it('rejects deeply nested described types', function () {
+        assert.throws(function () { new types.Reader(nested_described(20000)).read(); }, /maximum depth/);
+    });
+    it('rejects deeply nested maps', function () {
+        assert.throws(function () { new types.Reader(nested_map(20000)).read(); }, /maximum depth/);
+    });
+    it('raises a bounded decode error, not a RangeError, on deep nesting', function () {
+        try {
+            new types.Reader(nested_list(100000)).read();
+            assert.fail('expected a depth error');
+        } catch (e) {
+            assert.ok(!(e instanceof RangeError), 'should be a bounded decode error, not a stack overflow');
+        }
+    });
+    it('accepts nesting below the limit', function () {
+        var value = new types.Reader(nested_list(2)).read();
+        assert.strictEqual(JSON.stringify(value), '[[null]]');
+    });
+});
